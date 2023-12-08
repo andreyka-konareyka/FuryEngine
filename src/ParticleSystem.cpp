@@ -85,7 +85,7 @@ void ParticleSystem::Draw(Camera& camera, int& width, int& height) {
 
     QList<QPair<float, Particle*>> sorted;
     for (unsigned int i = 0; i < m_particles.size(); i++){
-        float distance = glm::length(camera.Position - m_particles[i].position);
+        float distance = glm::length(camera.Position - m_particles[i].m_position);
         sorted.append(qMakePair(distance, &(m_particles[i])));
     }
 

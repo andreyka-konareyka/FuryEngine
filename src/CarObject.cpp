@@ -6,33 +6,33 @@
 
 
 CarObject::CarObject(const glm::vec3& _position) :
-    Object(_position),
+    FuryObject(_position),
     m_objectBody(nullptr),
     m_objectSalon(nullptr),
-    m_cameraLocalViewPoint(0, 2, 0),
-    m_cameraLocalPosition(-6, 3, 0),
     m_springLenght(1),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
+    m_cameraLocalViewPoint(0, 2, 0),
+    m_cameraLocalPosition(-6, 3, 0),
     m_forward(0),
     m_right(0)
 {
-    m_objectBody = new BoxObject(_position, 5, 0.85, 2.5);
-    m_objectSalon = new BoxObject(_position + glm::vec3(-0.5, 0.85, 0), 2.5, 0.85, 2.5);
+    m_objectBody = new FuryBoxObject(_position, 5, 0.85, 2.5);
+    m_objectSalon = new FuryBoxObject(_position + glm::vec3(-0.5, 0.85, 0), 2.5, 0.85, 2.5);
     m_objectsForDraw.push_back(m_objectBody);
     m_objectsForDraw.push_back(m_objectSalon);
 
-    m_objectWheels.push_back(new SphereObject(_position + glm::vec3(2, -0.5, 1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), 0.25));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new SphereObject(_position + glm::vec3(2, -0.5, -1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, -1), 0.25));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new SphereObject(_position + glm::vec3(-2, -0.5, 1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, 1), 0.25));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new SphereObject(_position + glm::vec3(-2, -0.5, -1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, -1), 0.25));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
 
     for (int i = 0; i < 100; ++i)
     {
-        m_objectsDebugRays.push_back(new SphereObject(_position + glm::vec3(30, 0, 0), 0.25));
+        m_objectsDebugRays.push_back(new FurySphereObject(_position + glm::vec3(30, 0, 0), 0.25));
         m_objectsForDraw.push_back(m_objectsDebugRays.last());
     }
 }
@@ -70,7 +70,7 @@ CarObject::~CarObject()
     }
 }
 
-void CarObject::Tick(double _dt)
+void CarObject::tick(double _dt)
 {
     // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 17, rp3d::Vector3(2, -0.5, 1));
     // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 20, rp3d::Vector3(2, -0.5, -1));
@@ -159,10 +159,9 @@ void CarObject::Tick(double _dt)
     }
 
     int rayCount = 100;
+    float rayLenght = 30;
     for (int i = 0; i < rayCount; ++i)
     {
-        float rayLenght = 30;
-
         float x = std::cos(2 * 3.14 / rayCount * i);
         float z = std::sin(2 * 3.14 / rayCount * i);
 
@@ -262,8 +261,7 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
         jointInfo.isCollisionEnabled = false;
 
         // Create the hinge joint in the physics world
-        reactphysics3d::FixedJoint* joint = nullptr;
-        joint = static_cast<reactphysics3d::FixedJoint*>(phys_world->createJoint(jointInfo));
+        phys_world->createJoint(jointInfo);
     }
 
     {
@@ -278,8 +276,7 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
         jointInfo.isCollisionEnabled = false;
 
         // Create the hinge joint in the physics world
-        reactphysics3d::FixedJoint* joint = nullptr;
-        joint = static_cast<reactphysics3d::FixedJoint*>(phys_world->createJoint(jointInfo));
+        phys_world->createJoint(jointInfo);
     }
 }
 

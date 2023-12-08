@@ -3,9 +3,9 @@
 
 
 
-#include "Object.h"
-#include "BoxObject.h"
-#include "SphereObject.h"
+#include "FuryObject.h"
+#include "FuryBoxObject.h"
+#include "FurySphereObject.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <vector>
@@ -13,13 +13,13 @@
 #include <QVector>
 
 
-class CarObject : public Object
+class CarObject : public FuryObject
 {
 public:
     CarObject(const glm::vec3& _position);
     ~CarObject();
 
-    void Tick(double dt) override;
+    void tick(double dt) override;
 
     void keyPressEvent(int _keyCode) override;
     void keyReleaseEvent(int _keyCode) override;
@@ -29,7 +29,7 @@ public:
 
     void Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactphysics3d::PhysicsWorld* phys_world, reactphysics3d::BodyType type);
 
-    inline const QVector<Object*>& objectsForDraw() const
+    inline const QVector<FuryObject*>& objectsForDraw() const
     { return m_objectsForDraw; }
 
     /*!
@@ -45,12 +45,12 @@ public:
     glm::vec3 cameraViewPoint() const;
 
 private:
-    BoxObject* m_objectBody;
-    BoxObject* m_objectSalon;
-    QVector<SphereObject*> m_objectWheels;
-    QVector<SphereObject*> m_objectsDebugRays;
-    QVector<float> m_lastSuspentionLenght;
+    FuryBoxObject* m_objectBody;
+    FuryBoxObject* m_objectSalon;
+    QVector<FurySphereObject*> m_objectWheels;
+    QVector<FurySphereObject*> m_objectsDebugRays;
     float m_springLenght;
+    QVector<float> m_lastSuspentionLenght;
 
     //! Точку, куда смотрит камера (в локальных координатах)
     glm::vec3 m_cameraLocalViewPoint;
@@ -64,7 +64,7 @@ private:
 
 
     /// Дополнительные указатели. НЕ УДАЛЯТЬ!
-    QVector<Object*> m_objectsForDraw;
+    QVector<FuryObject*> m_objectsForDraw;
 };
 
 

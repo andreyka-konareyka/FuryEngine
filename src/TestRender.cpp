@@ -13,8 +13,10 @@
 
 #include <QString>
 #include <QMouseEvent>
+#include <QThread>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QMessageBox>
 
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 QVector<QString> pbr_material_names{ "pbr_gold", "pbr_grass", "pbr_iron", "pbr_plastic", "pbr_wall" };
@@ -46,6 +48,17 @@ TestRender::TestRender(QWidget *_parent) :
     connect(m_timer, SIGNAL(timeout()),
             this,    SLOT(update()));
     setFocusPolicy(Qt::StrongFocus);
+
+
+    try
+    {
+        throw FuryException(ru("Ошибка для тестов."),
+                            ru("Отладочная информация вот такая"));
+    }
+    catch (const FuryException& _e)
+    {
+        Log(_e);
+    }
 }
 
 TestRender::~TestRender()
@@ -268,17 +281,17 @@ void TestRender::init() {
     Debug(ru("Версия OpenGL: ") + ru(glGetString(GL_VERSION)));
     Debug(ru("Количество потоков: ") + QString::number(QThread::idealThreadCount()));
 
-    m_my_first_boxObject = new BoxObject(glm::vec3(0, 5, 0), 1, 1, 1);
+    m_my_first_boxObject = new FuryBoxObject(glm::vec3(0, 5, 0), 1, 1, 1);
     int count_in_line = 6;
     for (int i = 0; i < count_in_line; ++i) {
         for (int j = 0; j < count_in_line; ++j) {
-            m_new_floor.push_back(new BoxObject(glm::vec3((i - count_in_line / 2 + 0.5) * 5, -0.5 - 0.02, (j - count_in_line / 2 + 0.5) * 5), 5, 1, 5));
+            m_new_floor.push_back(new FuryBoxObject(glm::vec3((i - count_in_line / 2 + 0.5) * 5, -0.5 - 0.02, (j - count_in_line / 2 + 0.5) * 5), 5, 1, 5));
         }
     }
 
 
-    m_testWorld = new World;
-    m_sunVisualBox = new BoxObject(m_dirlight_position);
+    m_testWorld = new FuryWorld;
+    m_sunVisualBox = new FuryBoxObject(m_dirlight_position);
     m_testWorld->addObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 5.0f, 20.0f)));
@@ -300,12 +313,12 @@ void TestRender::init() {
         double angle_y = static_cast<double>(rand() % 1000) / 1000 * 3.14;
         double angle_z = static_cast<double>(rand() % 1000) / 1000 * 3.14;
 
-        BoxObject* box = new BoxObject(glm::vec3(x, y, z), glm::vec3(2, 5, 2), glm::vec3(angle_x, angle_y, angle_z));
+        FuryBoxObject* box = new FuryBoxObject(glm::vec3(x, y, z), glm::vec3(2, 5, 2), glm::vec3(angle_x, angle_y, angle_z));
         box->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
         m_testWorld->addObject(box);
     }
 
-    SphereObject* testSphere = new SphereObject(glm::vec3(6, 20, 10), 2);
+    FurySphereObject* testSphere = new FurySphereObject(glm::vec3(6, 20, 10), 2);
     testSphere->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
     m_testWorld->addObject(testSphere);
 
@@ -316,7 +329,7 @@ void TestRender::init() {
     m_carObject = new CarObject(glm::vec3(30, 3.2, 30));
     m_carObject->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
 
-    const QVector<Object*>& tempObjectsForDraw = m_carObject->objectsForDraw();
+    const QVector<FuryObject*>& tempObjectsForDraw = m_carObject->objectsForDraw();
     for (int i = 0; i < tempObjectsForDraw.size(); ++i)
     {
         m_testWorld->addObject(tempObjectsForDraw[i]);
@@ -324,7 +337,7 @@ void TestRender::init() {
 
 
     // Большой пол
-    m_bigFloor = new BoxObject(glm::vec3(0, -2, 0), 500, 1, 500);
+    m_bigFloor = new FuryBoxObject(glm::vec3(0, -2, 0), 500, 1, 500);
     m_bigFloor->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
     m_testWorld->addObject(m_bigFloor);
 
@@ -447,7 +460,7 @@ void TestRender::render()
                 // Выход с экрана загрузки
                 // is_loading = false;
                 QTime t_end = QTime::currentTime();
-                Debug((ru("Кубическая карта:\t") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
+                Debug((ru("Кубическая карта:") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
             }
 
             if (m_ourModel_textures_loaded && (!m_ourModel_textures_bind)) {
@@ -529,9 +542,9 @@ void TestRender::render()
 
         for (int i = 0; i < m_testWorld->getObjects().size(); ++i)
         {
-            m_testWorld->getObjects()[i]->Tick(m_deltaTime);
+            m_testWorld->getObjects()[i]->tick(m_deltaTime);
         }
-        m_carObject->Tick(m_deltaTime);
+        m_carObject->tick(m_deltaTime);
 
 
         m_cameras[1]->Position = m_carObject->cameraPosition();
@@ -710,18 +723,18 @@ void TestRender::render()
 
         renderSphere();
 
-        m_my_first_boxObject->Draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
+        m_my_first_boxObject->draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
 
         for (int i = 0; i < m_new_floor.size(); ++i) {
-            m_new_floor[i]->Draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
+            m_new_floor[i]->draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
         }
 
 
-        const QVector<Object*>& testWorldObjects = m_testWorld->getObjects();
+        const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
 
         for (int i = 0; i < testWorldObjects.size(); ++i)
         {
-            Object* renderObject = testWorldObjects[i];
+            FuryObject* renderObject = testWorldObjects[i];
             Shader* shader = renderObject->shader();
 
             // renderObject->Tick(m_deltaTime);
@@ -817,7 +830,7 @@ void TestRender::render()
                     model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
                 }
 
-                model = glm::scale(model, renderObject->sizes());	// it's a bit too big for our scene, so scale it down
+                model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
                 shader->setMat4("model", model);
 
@@ -1182,11 +1195,11 @@ void TestRender::renderDepthMap()
 
 
 
-        const QVector<Object*>& testWorldObjects = m_testWorld->getObjects();
+        const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
 
         for (int i = 0; i < testWorldObjects.size(); ++i)
         {
-            Object* renderObject = testWorldObjects[i];
+            FuryObject* renderObject = testWorldObjects[i];
 
 
             model = glm::mat4(1.0f);
@@ -1211,7 +1224,7 @@ void TestRender::renderDepthMap()
                 model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
             }
 
-            model = glm::scale(model, renderObject->sizes());	// it's a bit too big for our scene, so scale it down
+            model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
             glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
@@ -1230,7 +1243,7 @@ void TestRender::renderDepthMap()
         }
 
         {
-            Object* renderObject = m_my_first_boxObject;
+            FuryObject* renderObject = m_my_first_boxObject;
 
 
             model = glm::mat4(1.0f);
@@ -1255,7 +1268,7 @@ void TestRender::renderDepthMap()
                 model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
             }
 
-            model = glm::scale(model, renderObject->sizes());	// it's a bit too big for our scene, so scale it down
+            model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
             glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 

@@ -24,40 +24,40 @@ LIBS        += -Llibs \
 
 
 SOURCES += \
-    src/BoxObject.cpp \
     src/CarObject.cpp \
+    src/FuryBoxObject.cpp \
     src/FuryException.cpp \
     src/FuryLogger.cpp \
+    src/FuryObject.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
-    src/Object.cpp \
+    src/FurySphereObject.cpp \
+    src/FuryTexture.cpp \
+    src/FuryTextureManager.cpp \
+    src/FuryWorld.cpp \
     src/Particle.cpp \
     src/ParticleSystem.cpp \
-    src/SphereObject.cpp \
     src/TestRender.cpp \
-    src/Texture.cpp \
-    src/TextureManager.cpp \
-    src/World.cpp \
     src/main.cpp \
     src/MainWindow.cpp
 
 HEADERS += \
-    src/BoxObject.h \
     src/Camera.h \
     src/CarObject.h \
+    src/FuryBoxObject.h \
     src/FuryException.h \
     src/FuryLogger.h \
+    src/FuryObject.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
+    src/FurySphereObject.h \
+    src/FuryTexture.h \
+    src/FuryTextureManager.h \
+    src/FuryWorld.h \
     src/MainWindow.h \
-    src/Object.h \
     src/Particle.h \
     src/ParticleSystem.h \
     src/Shader.h \
-    src/SphereObject.h \
     src/TestRender.h \
-    src/Texture.h \
     src/TextureLoader.h \
-    src/TextureManager.h \
-    src/World.h \
     src/mesh.h \
     src/model.h
 

@@ -9,3 +9,4 @@ debug
 release
 *.user
 FuryEngine_resource.rc
+bin/FuryEngine.pdb

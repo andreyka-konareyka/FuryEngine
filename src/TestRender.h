@@ -28,9 +28,9 @@
 #include "ParticleSystem.h"
 
 
-#include "World.h"
-#include "BoxObject.h"
-#include "TextureManager.h"
+#include "FuryWorld.h"
+#include "FuryBoxObject.h"
+#include "FuryTextureManager.h"
 #include "CarObject.h"
 
 
@@ -107,12 +107,12 @@ private:
     void displayBuffer(GLuint _bufferId);
 
 
-    BoxObject* m_my_first_boxObject;
-    BoxObject* m_bigFloor;
-    QVector<BoxObject*> m_new_floor;
-    QVector<BoxObject*> m_test_physics_cubes;
-    BoxObject* m_sunVisualBox;
-    World* m_testWorld;
+    FuryBoxObject* m_my_first_boxObject;
+    FuryBoxObject* m_bigFloor;
+    QVector<FuryBoxObject*> m_new_floor;
+    QVector<FuryBoxObject*> m_test_physics_cubes;
+    FuryBoxObject* m_sunVisualBox;
+    FuryWorld* m_testWorld;
 
 
     Shader* m_ourShader;
@@ -180,7 +180,7 @@ private:
     glm::vec3 m_dirLightSpecular = glm::vec3(0.5f, 0.5f, 0.5f);
 
 
-    TextureManager m_textureManager;
+    FuryTextureManager m_textureManager;
     CarObject* m_carObject = nullptr;
 
 private:
