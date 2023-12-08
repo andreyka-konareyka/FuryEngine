@@ -1,0 +1,11 @@
+#git ignore
+.qtc_clangd
+.qmake.stash
+Makefile
+Makefile.Debug
+Makefile.Release
+build
+debug
+release
+*.user
+FuryEngine_resource.rc
