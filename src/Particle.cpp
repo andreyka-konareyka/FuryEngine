@@ -61,7 +61,7 @@ void Particle::Tick(float _dt)
 
 void Particle::Draw(Camera& _camera, int& _width, int& _height)
 {
-    glm::mat4 projection = glm::perspective(glm::radians(_camera.Zoom), (float)_width / (float)_height, 0.1f, 300.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(_camera.zoom()), (float)_width / (float)_height, 0.1f, 300.0f);
     glm::mat4 view = _camera.GetViewMatrix();
 
     m_particleShader->Use();
@@ -72,7 +72,7 @@ void Particle::Draw(Camera& _camera, int& _width, int& _height)
     model = glm::translate(model, m_position);
 
     glm::vec3 particle_pos = m_position;
-    glm::vec3 camera_pos = _camera.Position;
+    glm::vec3 camera_pos = _camera.position();
 
     glm::vec3 direct = camera_pos - particle_pos;
 

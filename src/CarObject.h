@@ -44,12 +44,32 @@ public:
     */
     glm::vec3 cameraViewPoint() const;
 
+    /*!
+     * \brief Установка локальной позиции камеры
+     * \param[in] _x - Координата x
+     * \param[in] _y - Координата y
+     */
+    void setLocalCameraPosition(int _x, int _y);
+
+    /*!
+     * \brief Установка длины пружин
+     * \param[in] _lenght - Длина пружин
+     */
+    void setSpringLenght(float _lenght);
+
+    /*!
+     * \brief Установка жёсткости пружин
+     * \param[in] _k - Жёсткость пружин
+     */
+    void setSpringK(float _k);
+
 private:
     FuryBoxObject* m_objectBody;
     FuryBoxObject* m_objectSalon;
     QVector<FurySphereObject*> m_objectWheels;
     QVector<FurySphereObject*> m_objectsDebugRays;
     float m_springLenght;
+    float m_springK;
     QVector<float> m_lastSuspentionLenght;
 
     //! Точку, куда смотрит камера (в локальных координатах)

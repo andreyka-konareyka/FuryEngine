@@ -17,7 +17,14 @@ public:
 
 private slots:
     void onAboutQtSlot();
-    void onMoveSliderSlot();
+    void onMoveSliderSlot(int _value);
+    void onCarCameraMoveSliderSlot();
+
+    void onSetWindowTitleSlot(const QString& _title);
+    void onSetComputerLoadSlot(int _value);
+
+    void onCarSpringLenghtSliderSlot();
+    void onCarSpringKSliderSlot();
 
 private:
     void prepareUi();

@@ -9,10 +9,11 @@ CarObject::CarObject(const glm::vec3& _position) :
     FuryObject(_position),
     m_objectBody(nullptr),
     m_objectSalon(nullptr),
-    m_springLenght(1),
+    m_springLenght(0.4),
+    m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
     m_cameraLocalViewPoint(0, 2, 0),
-    m_cameraLocalPosition(-6, 3, 0),
+    m_cameraLocalPosition(-10, 7, 0),
     m_forward(0),
     m_right(0)
 {
@@ -21,13 +22,14 @@ CarObject::CarObject(const glm::vec3& _position) :
     m_objectsForDraw.push_back(m_objectBody);
     m_objectsForDraw.push_back(m_objectSalon);
 
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), 0.25));
+    float sphereRadius = 0.1;
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, -1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, -1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, 1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, -1), 0.25));
+    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, -1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
 
     for (int i = 0; i < 100; ++i)
@@ -105,8 +107,7 @@ void CarObject::tick(double _dt)
             float currentLenght = m_springLenght * callbackObject.m_lastHitFraction;
 
             float deltaX = m_springLenght - currentLenght;
-            float k = 500;
-            float forceValue = k * deltaX;
+            float forceValue = m_springK * deltaX;
 
 
             float damperK = 20;
@@ -144,7 +145,26 @@ void CarObject::tick(double _dt)
             rp3d::Vector3 velocity = m_objectWheels[i]->physicsBody()->getLinearVelocity();
             rp3d::Vector3 localVelocity = m_objectWheels[i]->physicsBody()->getLocalVector(velocity);
             rp3d::decimal tireForceRight = forceValue * std::clamp(-localVelocity.z, -1.f, 1.f);
-            rp3d::decimal tireForceForward = forceValue * 1 * m_forward;
+
+            float slipAngle = 0;
+            float slipAnglePeak = 8 / 180.0 * 3.14;
+
+            if (localVelocity.x != 0)
+            {
+                slipAngle = atan(-localVelocity.z / abs(localVelocity.x));
+            }
+
+            float Sy = slipAngle / slipAnglePeak;
+
+            tireForceRight = forceValue * std::clamp(Sy, -2.f, 2.f);
+
+            rp3d::decimal tireForceForward = forceValue * 1.5 * m_forward;
+            int localVelXSign = localVelocity.x < 0 ? -1 : 1;
+            rp3d::decimal tireForceBack
+                    = 0.003
+                    * localVelXSign
+                    * std::clamp(-pow(localVelocity.x, 2.f), -1000.f, 1000.f);
+            tireForceForward += forceValue * tireForceBack;
 
             rp3d::Vector3 tireForce = (rightProjection * tireForceRight) + (forwardProjection * tireForceForward);
 
@@ -282,14 +302,30 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
 
 glm::vec3 CarObject::cameraPosition() const
 {
-    reactphysics3d::Vector3 cameraLocalPosition(m_cameraLocalPosition.x, m_cameraLocalPosition.y, m_cameraLocalPosition.z);
+    reactphysics3d::Vector3 cameraLocalPosition(m_cameraLocalPosition.x, 0, m_cameraLocalPosition.z);
     reactphysics3d::Vector3 worldPos = m_objectBody->physicsBody()->getWorldPoint(cameraLocalPosition);
-    return glm::vec3(worldPos.x, worldPos.y, worldPos.z);
+    return glm::vec3(worldPos.x, worldPos.y + m_cameraLocalPosition.y, worldPos.z);
 }
 
 glm::vec3 CarObject::cameraViewPoint() const
 {
-    reactphysics3d::Vector3 cameraLocalViewPoint(m_cameraLocalViewPoint.x, m_cameraLocalViewPoint.y, m_cameraLocalViewPoint.z);
+    reactphysics3d::Vector3 cameraLocalViewPoint(m_cameraLocalViewPoint.x, 0, m_cameraLocalViewPoint.z);
     reactphysics3d::Vector3 worldPoint = m_objectBody->physicsBody()->getWorldPoint(cameraLocalViewPoint);
-    return glm::vec3(worldPoint.x, worldPoint.y, worldPoint.z);
+    return glm::vec3(worldPoint.x, worldPoint.y + m_cameraLocalViewPoint.y, worldPoint.z);
+}
+
+void CarObject::setLocalCameraPosition(int _x, int _y)
+{
+    m_cameraLocalPosition.x = -_x;
+    m_cameraLocalPosition.y = _y;
+}
+
+void CarObject::setSpringLenght(float _lenght)
+{
+    m_springLenght = _lenght;
+}
+
+void CarObject::setSpringK(float _k)
+{
+    m_springK = _k;
 }

@@ -4,7 +4,7 @@ VERSION = 0.0.1
 
 QT += core gui widgets opengl openglwidgets
 
-CONFIG += c++17
+CONFIG += c++17 console
 
 DESTDIR = bin
 OBJECTS_DIR = build
@@ -24,6 +24,7 @@ LIBS        += -Llibs \
 
 
 SOURCES += \
+    src/Camera.cpp \
     src/CarObject.cpp \
     src/FuryBoxObject.cpp \
     src/FuryException.cpp \

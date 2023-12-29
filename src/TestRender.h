@@ -36,16 +36,43 @@
 
 #include <QOpenGLWidget>
 
+
+//! Тестовый класс рендера
 class TestRender : public QOpenGLWidget
 {
     Q_OBJECT
 public:
+    /*!
+     * \brief Конструктор
+     * \param[in] _parent - Родительский виджет
+     */
     explicit TestRender(QWidget* _parent = nullptr);
+    //! Деструктор
     ~TestRender();
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
+
+    /*!
+     * \brief Установка увеличения камеры
+     * \param[in] _value - Увеличение камеры
+     */
+    void setCameraZoomValue(int _value);
+
+    /*!
+     * \brief Установка позиции камеры машины
+     * \param[in] _x - Координата x
+     * \param[in] _y - Координата y
+     */
+    void setCarCameraPos(int _x, int _y);
+
+    void setCarSpringLenght(float _lenght);
+    void setCarSpringK(float _k);
+
+signals:
+    void setWindowTitleSignal(const QString& _title);
+    void setComputerLoadSignal(int _value);
 
 protected:
     void mouseMoveEvent(QMouseEvent* _event) override;
@@ -109,7 +136,7 @@ private:
 
     FuryBoxObject* m_my_first_boxObject;
     FuryBoxObject* m_bigFloor;
-    QVector<FuryBoxObject*> m_new_floor;
+    //QVector<FuryBoxObject*> m_new_floor;
     QVector<FuryBoxObject*> m_test_physics_cubes;
     FuryBoxObject* m_sunVisualBox;
     FuryWorld* m_testWorld;
