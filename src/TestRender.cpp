@@ -352,8 +352,8 @@ void TestRender::init() {
     m_sunVisualBox = new FuryBoxObject(m_dirlight_position);
     m_testWorld->addObject(m_sunVisualBox);
     // Camera
-    m_cameras.push_back(new Camera(glm::vec3(0.0f, 5.0f, 20.0f)));
-    m_cameras.push_back(new Camera(glm::vec3(30.0f, 30.0f, 60.0f)));
+    m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
+    m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
     m_testWorld->setCamera(m_cameras[0]);
 
 
@@ -382,7 +382,7 @@ void TestRender::init() {
     // МАШИНА
     //
 
-    m_carObject = new CarObject(glm::vec3(30, -0.5, 30));
+    m_carObject = new CarObject(glm::vec3(0, -0.5, 22.5));
     m_carObject->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
 
     const QVector<FuryObject*>& tempObjectsForDraw = m_carObject->objectsForDraw();
@@ -390,13 +390,6 @@ void TestRender::init() {
     {
         m_testWorld->addObject(tempObjectsForDraw[i]);
     }
-
-
-    FuryBoxObject* angleFloor = new FuryBoxObject(glm::vec3(40, -1, -20),
-                                                  glm::vec3(20, 1, 15),
-                                                  glm::vec3(3.14/10, 0, 0));
-    angleFloor->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(angleFloor);
 
 
     // Большой пол
@@ -479,6 +472,7 @@ void TestRender::init() {
     initSkyboxModel();
 
     initDepthMapFBO();
+    initRaceMap();
 
     m_textureManager.addTexture("textures/box_texture_5x5.png", "defaultBoxTexture");
     m_textureManager.addTexture("textures/box_texture3_orig.png", "numbersBoxTexture");
@@ -1996,6 +1990,175 @@ void TestRender::initDepthMapFBO()
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void TestRender::initRaceMap()
+{
+    QList<glm::vec3> wallPos(
+                {
+                    glm::vec3(0.5, -1.25, 2),
+                    glm::vec3(2, -1.25, 1.5),
+                    glm::vec3(3, -1.25, 1),
+                    glm::vec3(4, -1.25, -0.5),
+                    glm::vec3(2, -1.25, 0),
+                    glm::vec3(3, -1.25, -0.5),
+                    glm::vec3(3, -1.25, -2),
+                    glm::vec3(2, -1.25, -1.5),
+                    glm::vec3(1, -1.25, -2),
+                    glm::vec3(3, -1.25, -3),
+                    glm::vec3(5, -1.25, -0.5),
+                    glm::vec3(4, -1.25, 2),
+                    glm::vec3(3, -1.25, 3),
+                    glm::vec3(2.5, -1.25, 3),
+                    glm::vec3(2.5, -1.25, 4),
+                    glm::vec3(2, -1.25, 3.5),
+                    glm::vec3(1, -1.25, 3.5),
+                    glm::vec3(2.5, -1.25, 5),
+                    glm::vec3(4, -1.25, 4),
+                    glm::vec3(5, -1.25, 3),
+                    glm::vec3(6, -1.25, 2),
+                    glm::vec3(5.5, -1.25, 0),
+                    glm::vec3(6.5, -1.25, 1),
+                    glm::vec3(6, -1.25, -1),
+                    glm::vec3(7, -1.25, -1),
+                    glm::vec3(6.5, -1.25, -3),
+                    glm::vec3(6, -1.25, -4),
+                    glm::vec3(5.5, -1.25, -2),
+                    glm::vec3(4, -1.25, -4),
+                    glm::vec3(4, -1.25, -5),
+                    glm::vec3(5, -1.25, -3.5),
+                    glm::vec3(3, -1.25, -3.5),
+                    glm::vec3(2, -1.25, -4.5),
+                    glm::vec3(-0.5, -1.25, -4),
+                    glm::vec3(0, -1.25, -3),
+                    glm::vec3(-3, -1.25, -3),
+                    glm::vec3(-1, -1.25, -2),
+                    glm::vec3(-2, -1.25, -1),
+                    glm::vec3(-1.5, -1.25, -3),
+                    glm::vec3(-2.5, -1.25, -2),
+                    glm::vec3(-2.5, -1.25, 0),
+                    glm::vec3(-1.5, -1.25, 1),
+                    glm::vec3(-3, -1.25, 2.5),
+                    glm::vec3(-2, -1.25, 2.5),
+                    glm::vec3(-1, -1.25, 5),
+                    glm::vec3(-1, -1.25, 4),
+                    glm::vec3(0, -1.25, 3),
+                    glm::vec3(-1, -1.25, 2.5)
+                });
+    QList<float> wallSize(
+                {
+                    3,
+                    1,
+                    2,
+                    3,
+                    2,
+                    1,
+                    2,
+                    1,
+                    2,
+                    4,
+                    5,
+                    2,
+                    2,
+                    1,
+                    1,
+                    1,
+                    3,
+                    3,
+                    2,
+                    2,
+                    2,
+                    1,
+                    1,
+                    2,
+                    4,
+                    1,
+                    2,
+                    1,
+                    2,
+                    4,
+                    1,
+                    1,
+                    1,
+                    5,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1,
+                    1,
+                    1,
+                    1,
+                    5,
+                    3,
+                    4,
+                    2,
+                    2,
+                    1
+                });
+    QList<float> wallRotate(
+                {
+                    0,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    0,
+                    0,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    3.14f/2,
+                    3.14f/2,
+                    0,
+                    0,
+                    0,
+                    3.14f/2
+                });
+
+    for (int i = 0; i < wallPos.size(); ++i)
+    {
+        wallPos[i].x *= 15;
+        wallPos[i].z *= 15;
+        wallSize[i] *= 15;
+        FuryBoxObject* wall = new FuryBoxObject(wallPos[i],
+                                                glm::vec3(wallSize[i], 2.5, 0.1),
+                                                glm::vec3(0, wallRotate[i], 0));
+        wall->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+        m_testWorld->addObject(wall);
+    }
 }
 
 

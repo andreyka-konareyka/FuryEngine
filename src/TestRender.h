@@ -125,6 +125,7 @@ private:
     void loadModel();
     void initSkyboxModel();
     void initDepthMapFBO();
+    void initRaceMap();
 
     void createPBRTextures();
 
