@@ -75,6 +75,20 @@ TestRender::~TestRender()
         camera = nullptr;
     }
 
+    if (m_testWorld != nullptr)
+    {
+        delete m_testWorld;
+        m_testWorld = nullptr;
+    }
+
+    our_physicsWorld->setEventListener(nullptr);
+
+    if (m_eventListener != nullptr)
+    {
+        delete m_eventListener;
+        m_eventListener = nullptr;
+    }
+
     Debug(ru("Остановка текстурного менеджера..."));
     m_textureManager.stopLoopAndWait();
 }
@@ -177,7 +191,7 @@ void TestRender::mouseMoveEvent(QMouseEvent* _event)
         lastX = (GLfloat)(_event->position().x());
         lastY = (GLfloat)(_event->position().y());
 
-        m_testWorld->camera()->ProcessMouseMovement(xoffset, yoffset);
+        m_testWorld->camera()->processMouseMovement(xoffset, yoffset);
     }
 }
 
@@ -312,6 +326,7 @@ void TestRender::InitGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE); // enabled by default on some drivers, but not all so always enable to make sure
     glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 
@@ -333,6 +348,9 @@ void TestRender::init() {
     own_physicsCommon = new reactphysics3d::PhysicsCommon;
     our_physicsWorld = own_physicsCommon->createPhysicsWorld();
 
+    m_eventListener = new FuryEventListener;
+    our_physicsWorld->setEventListener(m_eventListener);
+
     m_my_first_boxObject = new FuryBoxObject(glm::vec3(0, 5, 0), 1, 1, 1);
     int count_in_line = 6;
     for (int i = 0; i < count_in_line; ++i) {
@@ -343,8 +361,9 @@ void TestRender::init() {
                                                    5, 2.5, 5);
             box->setTextureName("numbersBoxTexture");
             box->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+            box->setName("startWall");
+            box->physicsBody()->setUserData(box);
             m_testWorld->addObject(box);
-            //m_new_floor.push_back(box);
         }
     }
 
@@ -395,6 +414,7 @@ void TestRender::init() {
     // Большой пол
     m_bigFloor = new FuryBoxObject(glm::vec3(0, -3, 0), 500, 1, 500);
     m_bigFloor->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+    m_bigFloor->setTextureName("asphalt");
     m_testWorld->addObject(m_bigFloor);
 
     // Настройка физики сфер
@@ -435,8 +455,9 @@ void TestRender::init() {
     m_pbrShader = new Shader("pbr.vs", "pbr.fs");
     m_floorShader = new Shader("multiple_lights.vs", "multiple_lights.fs");
     m_simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
+    m_bigFloorShader = new Shader("shaders/bigFloorShader.vs", "shaders/bigFloorShader.frag");
 
-
+    m_bigFloor->setShader(m_bigFloorShader);
 
 
     // PBR-материалы
@@ -476,177 +497,93 @@ void TestRender::init() {
 
     m_textureManager.addTexture("textures/box_texture_5x5.png", "defaultBoxTexture");
     m_textureManager.addTexture("textures/box_texture3_orig.png", "numbersBoxTexture");
+    m_textureManager.addTexture("textures/carBody.png", "carBody");
+    m_textureManager.addTexture("textures/carSalon.png", "carSalon");
+    m_textureManager.addTexture("textures/rayCastBall.png", "rayCastBall");
+    m_textureManager.addTexture("textures/raceWall.png", "raceWall");
+    m_textureManager.addTexture("textures/asphalt.png", "asphalt");
+    m_textureManager.addTexture("textures/redCheckBox.png", "redCheckBox");
+    m_textureManager.addTexture("textures/greenCheckBox.png", "greenCheckBox");
 
+    {
+        FuryBoxObject* object = new FuryBoxObject(glm::vec3(-7.5, -1.25, 22.5),
+                                                  glm::vec3(13, 2.5, 0.5),
+                                                  glm::vec3(0, 3.14/2, 0));
+        object->setTextureName("redCheckBox");
+        m_testWorld->addTransparentObject(object);
+
+        object = new FuryBoxObject(glm::vec3(-5.5, -1.25, 22.5),
+                                   glm::vec3(13, 2.5, 0.5),
+                                   glm::vec3(0, 3.14/2, 0));
+        object->setTextureName("greenCheckBox");
+        m_testWorld->addTransparentObject(object);
+
+        object = new FuryBoxObject(glm::vec3(-9.5, -1.25, 22.5),
+                                   glm::vec3(13, 2.5, 0.5),
+                                   glm::vec3(0, 3.14/2, 0));
+        object->setTextureName("redCheckBox");
+        m_testWorld->addTransparentObject(object);
+
+        object = new FuryBoxObject(glm::vec3(-11.5, -1.25, 22.5),
+                                   glm::vec3(13, 2.5, 0.5),
+                                   glm::vec3(0, 3.14/2, 0));
+        object->setTextureName("greenCheckBox");
+        m_testWorld->addTransparentObject(object);
+    }
 
     {
         // initShaderInform
 
-        Shader* shader = m_bigFloor->shader();
+        QList<Shader*> shaders({
+                                   m_testWorld->getObjects()[0]->shader(),
+                                   m_bigFloorShader,
+                                   testSphere->shader(),
+                                   m_ourShader,
+                                   m_floorShader
+                               });
 
-        shader->Use();
-        shader->setVec3("dirLight.ambient", m_dirLightAmbient); // 0.25f
-        shader->setVec3("dirLight.diffuse", m_dirLightDiffuse); // 0.35f
-        shader->setVec3("dirLight.specular", m_dirLightSpecular); // 0.4f
-        //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        // point light 1
-        shader->setVec3("pointLights[0].position", pointLightPositions[0]);
-        shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[0].constant", 1.0f);
-        shader->setFloat("pointLights[0].linear", 0.09f);
-        shader->setFloat("pointLights[0].quadratic", 0.032f);
-        // point light 2
-        shader->setVec3("pointLights[1].position", pointLightPositions[1]);
-        shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[1].constant", 1.0f);
-        shader->setFloat("pointLights[1].linear", 0.09f);
-        shader->setFloat("pointLights[1].quadratic", 0.032f);
-        // point light 3
-        shader->setVec3("pointLights[2].position", pointLightPositions[2]);
-        shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[2].constant", 1.0f);
-        shader->setFloat("pointLights[2].linear", 0.09f);
-        shader->setFloat("pointLights[2].quadratic", 0.032f);
-        // point light 4
-        shader->setVec3("pointLights[3].position", pointLightPositions[3]);
-        shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[3].constant", 1.0f);
-        shader->setFloat("pointLights[3].linear", 0.09f);
-        shader->setFloat("pointLights[3].quadratic", 0.032f);
-
-
-        shader = testSphere->shader();
-
-        shader->Use();
-        shader->setVec3("dirLight.ambient", m_dirLightAmbient); // 0.25f
-        shader->setVec3("dirLight.diffuse", m_dirLightDiffuse); // 0.35f
-        shader->setVec3("dirLight.specular", m_dirLightSpecular); // 0.4f
-        //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        // point light 1
-        shader->setVec3("pointLights[0].position", pointLightPositions[0]);
-        shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[0].constant", 1.0f);
-        shader->setFloat("pointLights[0].linear", 0.09f);
-        shader->setFloat("pointLights[0].quadratic", 0.032f);
-        // point light 2
-        shader->setVec3("pointLights[1].position", pointLightPositions[1]);
-        shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[1].constant", 1.0f);
-        shader->setFloat("pointLights[1].linear", 0.09f);
-        shader->setFloat("pointLights[1].quadratic", 0.032f);
-        // point light 3
-        shader->setVec3("pointLights[2].position", pointLightPositions[2]);
-        shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[2].constant", 1.0f);
-        shader->setFloat("pointLights[2].linear", 0.09f);
-        shader->setFloat("pointLights[2].quadratic", 0.032f);
-        // point light 4
-        shader->setVec3("pointLights[3].position", pointLightPositions[3]);
-        shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        shader->setFloat("pointLights[3].constant", 1.0f);
-        shader->setFloat("pointLights[3].linear", 0.09f);
-        shader->setFloat("pointLights[3].quadratic", 0.032f);
-
-
-        m_ourShader->Use();
-
-        m_ourShader->setVec3("dirLight.ambient", m_dirLightAmbient);
-        m_ourShader->setVec3("dirLight.diffuse", m_dirLightDiffuse);
-        m_ourShader->setVec3("dirLight.specular", m_dirLightSpecular);
-        // point light 1
-        m_ourShader->setVec3("pointLights[0].position", pointLightPositions[0]);
-        m_ourShader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        m_ourShader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        m_ourShader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        m_ourShader->setFloat("pointLights[0].constant", 1.0f);
-        m_ourShader->setFloat("pointLights[0].linear", 0.09f);
-        m_ourShader->setFloat("pointLights[0].quadratic", 0.032f);
-        // point light 2
-        m_ourShader->setVec3("pointLights[1].position", pointLightPositions[1]);
-        m_ourShader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        m_ourShader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        m_ourShader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        m_ourShader->setFloat("pointLights[1].constant", 1.0f);
-        m_ourShader->setFloat("pointLights[1].linear", 0.09f);
-        m_ourShader->setFloat("pointLights[1].quadratic", 0.032f);
-        // point light 3
-        m_ourShader->setVec3("pointLights[2].position", pointLightPositions[2]);
-        m_ourShader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        m_ourShader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        m_ourShader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        m_ourShader->setFloat("pointLights[2].constant", 1.0f);
-        m_ourShader->setFloat("pointLights[2].linear", 0.09f);
-        m_ourShader->setFloat("pointLights[2].quadratic", 0.032f);
-        // point light 4
-        m_ourShader->setVec3("pointLights[3].position", pointLightPositions[3]);
-        m_ourShader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        m_ourShader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        m_ourShader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        m_ourShader->setFloat("pointLights[3].constant", 1.0f);
-        m_ourShader->setFloat("pointLights[3].linear", 0.09f);
-        m_ourShader->setFloat("pointLights[3].quadratic", 0.032f);
-
-
-        m_floorShader->Use();
-
-        m_floorShader->setVec3("dirLight.ambient", m_dirLightAmbient);
-
-        m_floorShader->setVec3("dirLight.diffuse", m_dirLightDiffuse);
-        m_floorShader->setVec3("dirLight.specular", m_dirLightSpecular);
-        //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        // point light 1
-        m_floorShader->setVec3("pointLights[0].position", pointLightPositions[0]);
-        m_floorShader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        m_floorShader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        m_floorShader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        m_floorShader->setFloat("pointLights[0].constant", 1.0f);
-        m_floorShader->setFloat("pointLights[0].linear", 0.09f);
-        m_floorShader->setFloat("pointLights[0].quadratic", 0.032f);
-        // point light 2
-        m_floorShader->setVec3("pointLights[1].position", pointLightPositions[1]);
-        m_floorShader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        m_floorShader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        m_floorShader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        m_floorShader->setFloat("pointLights[1].constant", 1.0f);
-        m_floorShader->setFloat("pointLights[1].linear", 0.09f);
-        m_floorShader->setFloat("pointLights[1].quadratic", 0.032f);
-        // point light 3
-        m_floorShader->setVec3("pointLights[2].position", pointLightPositions[2]);
-        m_floorShader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        m_floorShader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        m_floorShader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        m_floorShader->setFloat("pointLights[2].constant", 1.0f);
-        m_floorShader->setFloat("pointLights[2].linear", 0.09f);
-        m_floorShader->setFloat("pointLights[2].quadratic", 0.032f);
-        // point light 4
-        m_floorShader->setVec3("pointLights[3].position", pointLightPositions[3]);
-        m_floorShader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        m_floorShader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        m_floorShader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        m_floorShader->setFloat("pointLights[3].constant", 1.0f);
-        m_floorShader->setFloat("pointLights[3].linear", 0.09f);
-        m_floorShader->setFloat("pointLights[3].quadratic", 0.032f);
+        for (Shader* shader : shaders)
+        {
+            shader->Use();
+            shader->setVec3("dirLight.ambient", m_dirLightAmbient); // 0.25f
+            shader->setVec3("dirLight.diffuse", m_dirLightDiffuse); // 0.35f
+            shader->setVec3("dirLight.specular", m_dirLightSpecular); // 0.4f
+            //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+            //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+            //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+            // point light 1
+            shader->setVec3("pointLights[0].position", pointLightPositions[0]);
+            shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+            shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+            shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+            shader->setFloat("pointLights[0].constant", 1.0f);
+            shader->setFloat("pointLights[0].linear", 0.09f);
+            shader->setFloat("pointLights[0].quadratic", 0.032f);
+            // point light 2
+            shader->setVec3("pointLights[1].position", pointLightPositions[1]);
+            shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+            shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+            shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+            shader->setFloat("pointLights[1].constant", 1.0f);
+            shader->setFloat("pointLights[1].linear", 0.09f);
+            shader->setFloat("pointLights[1].quadratic", 0.032f);
+            // point light 3
+            shader->setVec3("pointLights[2].position", pointLightPositions[2]);
+            shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+            shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+            shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+            shader->setFloat("pointLights[2].constant", 1.0f);
+            shader->setFloat("pointLights[2].linear", 0.09f);
+            shader->setFloat("pointLights[2].quadratic", 0.032f);
+            // point light 4
+            shader->setVec3("pointLights[3].position", pointLightPositions[3]);
+            shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+            shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+            shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+            shader->setFloat("pointLights[3].constant", 1.0f);
+            shader->setFloat("pointLights[3].linear", 0.09f);
+            shader->setFloat("pointLights[3].quadratic", 0.032f);
+        }
 
 
         m_pbrShader->Use();
@@ -787,9 +724,9 @@ void TestRender::render()
 
         our_physicsWorld->update(m_deltaTime);
 
-        for (int i = 0; i < m_testWorld->getObjects().size(); ++i)
+        for (int i = 0; i < m_testWorld->getAllObjects().size(); ++i)
         {
-            m_testWorld->getObjects()[i]->tick(m_deltaTime);
+            m_testWorld->getAllObjects()[i]->tick(m_deltaTime);
         }
         m_carObject->tick(m_deltaTime);
 
@@ -864,7 +801,7 @@ void TestRender::render()
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
-        glm::mat4 view =  m_testWorld->camera()->GetViewMatrix();
+        glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
         m_ourShader->setMat4("projection", projection);
         m_ourShader->setMat4("view", view);
 
@@ -987,69 +924,19 @@ void TestRender::render()
             FuryObject* renderObject = testWorldObjects[i];
             Shader* shader = renderObject->shader();
 
-            // renderObject->Tick(m_deltaTime);
-            // m_test_physics_cubes[i]->Draw(&camera, this->width, this->height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
             {
-//                glm::vec3 pointLightPositions[] = {
-//                    glm::vec3(0.7f,  0.2f,  2.0f),
-//                    glm::vec3(2.3f, -3.3f, -4.0f),
-//                    glm::vec3(-4.0f,  2.0f, -12.0f),
-//                    glm::vec3(0.0f,  0.0f, -3.0f)
-//                };
 
                 shader->Use();
 
 
                 shader->setVec3("viewPos", m_testWorld->camera()->position());
                 shader->setFloat("material.shininess", 128.0f); // 32.0 - default
-                //floorShader.setInt("material.diffuse", 2);
-
-
-                //floorShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);-8.0f, 6.0f, -3.0f
                 shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-//                shader->setVec3("dirLight.ambient", m_dirLightAmbient); // 0.25f
-//                shader->setVec3("dirLight.diffuse", m_dirLightDiffuse); // 0.35f
-//                shader->setVec3("dirLight.specular", m_dirLightSpecular); // 0.4f
-//                //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-//                //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-//                //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-//                // point light 1
-//                shader->setVec3("pointLights[0].position", pointLightPositions[0]);
-//                shader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-//                shader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-//                shader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-//                shader->setFloat("pointLights[0].constant", 1.0f);
-//                shader->setFloat("pointLights[0].linear", 0.09f);
-//                shader->setFloat("pointLights[0].quadratic", 0.032f);
-//                // point light 2
-//                shader->setVec3("pointLights[1].position", pointLightPositions[1]);
-//                shader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-//                shader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-//                shader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-//                shader->setFloat("pointLights[1].constant", 1.0f);
-//                shader->setFloat("pointLights[1].linear", 0.09f);
-//                shader->setFloat("pointLights[1].quadratic", 0.032f);
-//                // point light 3
-//                shader->setVec3("pointLights[2].position", pointLightPositions[2]);
-//                shader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-//                shader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-//                shader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-//                shader->setFloat("pointLights[2].constant", 1.0f);
-//                shader->setFloat("pointLights[2].linear", 0.09f);
-//                shader->setFloat("pointLights[2].quadratic", 0.032f);
-//                // point light 4
-//                shader->setVec3("pointLights[3].position", pointLightPositions[3]);
-//                shader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-//                shader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-//                shader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-//                shader->setFloat("pointLights[3].constant", 1.0f);
-//                shader->setFloat("pointLights[3].linear", 0.09f);
-//                shader->setFloat("pointLights[3].quadratic", 0.032f);
 
 
                 // view/projection transformations
                 glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)m_width / (float)m_height, m_perspective_near, m_perspective_far);
-                glm::mat4 view = m_testWorld->camera()->GetViewMatrix();
+                glm::mat4 view = m_testWorld->camera()->getViewMatrix();
                 shader->setMat4("projection", projection);
                 shader->setMat4("view", view);
 
@@ -1129,7 +1016,7 @@ void TestRender::render()
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         m_skyboxShader->Use();
-        view = glm::mat4(glm::mat3(m_testWorld->camera()->GetViewMatrix())); // remove translation from the view matrix
+        view = glm::mat4(glm::mat3(m_testWorld->camera()->getViewMatrix())); // remove translation from the view matrix
         m_skyboxShader->setMat4("view", view);
         m_skyboxShader->setMat4("projection", projection);
         // skybox cube
@@ -1156,55 +1043,12 @@ void TestRender::render()
 
         m_floorShader->setVec3("viewPos", m_testWorld->camera()->position());
         m_floorShader->setFloat("material.shininess", 128.0f); // 32.0 - default
-        //floorShader.setInt("material.diffuse", 2);
-
-
-        //floorShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);-8.0f, 6.0f, -3.0f
         m_floorShader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-//        m_floorShader->setVec3("dirLight.ambient", m_dirLightAmbient);
-
-//        m_floorShader->setVec3("dirLight.diffuse", m_dirLightDiffuse);
-//        m_floorShader->setVec3("dirLight.specular", m_dirLightSpecular);
-//        //floorShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-//        //floorShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-//        //floorShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-//        // point light 1
-//        m_floorShader->setVec3("pointLights[0].position", pointLightPositions[0]);
-//        m_floorShader->setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-//        m_floorShader->setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-//        m_floorShader->setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-//        m_floorShader->setFloat("pointLights[0].constant", 1.0f);
-//        m_floorShader->setFloat("pointLights[0].linear", 0.09f);
-//        m_floorShader->setFloat("pointLights[0].quadratic", 0.032f);
-//        // point light 2
-//        m_floorShader->setVec3("pointLights[1].position", pointLightPositions[1]);
-//        m_floorShader->setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-//        m_floorShader->setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-//        m_floorShader->setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-//        m_floorShader->setFloat("pointLights[1].constant", 1.0f);
-//        m_floorShader->setFloat("pointLights[1].linear", 0.09f);
-//        m_floorShader->setFloat("pointLights[1].quadratic", 0.032f);
-//        // point light 3
-//        m_floorShader->setVec3("pointLights[2].position", pointLightPositions[2]);
-//        m_floorShader->setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-//        m_floorShader->setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-//        m_floorShader->setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-//        m_floorShader->setFloat("pointLights[2].constant", 1.0f);
-//        m_floorShader->setFloat("pointLights[2].linear", 0.09f);
-//        m_floorShader->setFloat("pointLights[2].quadratic", 0.032f);
-//        // point light 4
-//        m_floorShader->setVec3("pointLights[3].position", pointLightPositions[3]);
-//        m_floorShader->setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-//        m_floorShader->setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-//        m_floorShader->setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-//        m_floorShader->setFloat("pointLights[3].constant", 1.0f);
-//        m_floorShader->setFloat("pointLights[3].linear", 0.09f);
-//        m_floorShader->setFloat("pointLights[3].quadratic", 0.032f);
 
 
         // view/projection transformations
         projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
-        view = m_testWorld->camera()->GetViewMatrix();
+        view = m_testWorld->camera()->getViewMatrix();
         m_floorShader->setMat4("projection", projection);
         m_floorShader->setMat4("view", view);
 
@@ -1260,6 +1104,111 @@ void TestRender::render()
         // ##################################
 
 
+        const QVector<FuryObject*>& testWorldTransparentObjects = m_testWorld->getTransparentObjects();
+
+        QList<QPair<float, FuryObject*>> sorted;
+        for (unsigned int i = 0; i < testWorldTransparentObjects.size(); i++){
+            float distance = glm::length(m_testWorld->camera()->position() - testWorldTransparentObjects[i]->getPosition());
+            sorted.append(qMakePair(distance, testWorldTransparentObjects[i]));
+        }
+
+        std::sort(sorted.begin(), sorted.end(), [](auto& p1, auto& p2){return p1.first < p2.first;});
+
+//        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
+//        {
+//            it->second->Draw(camera, width, height);
+//        }
+
+        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
+        {
+            FuryObject* renderObject = it->second;
+            Shader* shader = renderObject->shader();
+
+            {
+
+                shader->Use();
+
+
+                shader->setVec3("viewPos", m_testWorld->camera()->position());
+                shader->setFloat("material.shininess", 128.0f); // 32.0 - default
+                shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
+
+
+                // view/projection transformations
+                glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)m_width / (float)m_height, m_perspective_near, m_perspective_far);
+                glm::mat4 view = m_testWorld->camera()->getViewMatrix();
+                shader->setMat4("projection", projection);
+                shader->setMat4("view", view);
+
+                glUniformMatrix4fv(glGetUniformLocation(shader->Program, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+
+                //float angle_x = -3.14 / 2;
+
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, renderObject->getPosition()); // translate it down so it's at the center of the scene
+
+                if (renderObject->physicsEnabled()) {
+                    reactphysics3d::Vector3 axis_rotate;
+                    reactphysics3d::decimal angle_rotate;
+                    renderObject->physicsBody()->getTransform().getOrientation().getRotationAngleAxis(angle_rotate, axis_rotate);
+                    if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
+                        model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
+                        model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
+                        model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
+                    }
+                    else {
+                        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
+                    }
+                }
+                else {
+                    model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
+                    model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
+                    model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
+                }
+
+                model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
+
+                shader->setMat4("model", model);
+
+
+
+
+                GLuint texture_id = m_textureManager.textureByName(renderObject->textureName()).idOpenGL();
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texture_id);
+                glUniform1i(glGetUniformLocation(shader->Program, "diffuse_texture"), 0);
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                glUniform1i(glGetUniformLocation(shader->Program, "shadowMap"), 1);
+                //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "diffuse_texture"), 0);
+                //glActiveTexture(GL_TEXTURE1);
+                //glBindTexture(GL_TEXTURE_2D, depthMap);
+                //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "shadowMap"), 1);
+                //glBindTexture(GL_TEXTURE_2D, depthMap);
+
+                GLuint renderVAO = renderObject->VAO();
+                glBindVertexArray(renderVAO);
+
+                if (renderObject->isDrawElements())
+                {
+                    glDrawElements(renderObject->renderType(), renderObject->vertexCount(), GL_UNSIGNED_INT, 0);
+                }
+                else
+                {
+                    glDrawArrays(renderObject->renderType(), 0, renderObject->vertexCount());
+                }
+                glBindVertexArray(0);
+
+
+                glActiveTexture(GL_TEXTURE0);
+
+            }
+        }
+
+        sorted.clear();
+
 
         // Swap the screen buffers
         //displayBuffer(m_depthMap);
@@ -1269,6 +1218,8 @@ void TestRender::render()
 
 void TestRender::createPBRTextures()
 {
+    glCullFace(GL_FRONT);
+
     // pbr: setup framebuffer
             // ----------------------
     unsigned int captureFBO;
@@ -1413,6 +1364,9 @@ void TestRender::createPBRTextures()
     renderQuad();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    glCullFace(GL_BACK);
 }
 
 void TestRender::renderDepthMap()
@@ -1703,18 +1657,18 @@ void TestRender::do_movement()
 {
     // Camera controls
     if (m_keys[Qt::Key_W])
-        m_testWorld->camera()->ProcessKeyboard(FORWARD, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(FORWARD, m_deltaTime);
     if (m_keys[Qt::Key_S])
-        m_testWorld->camera()->ProcessKeyboard(BACKWARD, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(BACKWARD, m_deltaTime);
     if (m_keys[Qt::Key_A])
-        m_testWorld->camera()->ProcessKeyboard(LEFT, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(LEFT, m_deltaTime);
     if (m_keys[Qt::Key_D])
-        m_testWorld->camera()->ProcessKeyboard(RIGHT, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(RIGHT, m_deltaTime);
 
     if (m_keys[Qt::Key_Shift])
-        m_testWorld->camera()->ProcessKeyboard(Up, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(Up, m_deltaTime);
     if (m_keys[Qt::Key_Control])
-        m_testWorld->camera()->ProcessKeyboard(Down, m_deltaTime);
+        m_testWorld->camera()->processKeyboard(Down, m_deltaTime);
 }
 
 void TestRender::on_mouse_callback(double xpos, double ypos)
@@ -1733,13 +1687,13 @@ void TestRender::on_mouse_callback(double xpos, double ypos)
     lastY = (GLfloat)ypos;
 
     //if (mouse_enable) {
-        m_testWorld->camera()->ProcessMouseMovement(xoffset, yoffset);
+        m_testWorld->camera()->processMouseMovement(xoffset, yoffset);
     //}
 }
 
 void TestRender::on_scroll_callback(double /*xoffset*/, double yoffset)
 {
-    m_testWorld->camera()->ProcessMouseScroll((GLfloat)yoffset);
+    m_testWorld->camera()->processMouseScroll((GLfloat)yoffset);
 }
 
 
@@ -1794,8 +1748,8 @@ void TestRender::initFloorModel()
         1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
 
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
     };
 
     glGenVertexArrays(1, &m_floorVAO);
@@ -2148,15 +2102,19 @@ void TestRender::initRaceMap()
                     3.14f/2
                 });
 
+
     for (int i = 0; i < wallPos.size(); ++i)
     {
         wallPos[i].x *= 15;
         wallPos[i].z *= 15;
         wallSize[i] *= 15;
         FuryBoxObject* wall = new FuryBoxObject(wallPos[i],
-                                                glm::vec3(wallSize[i], 2.5, 0.1),
+                                                glm::vec3(wallSize[i], 2.5, 0.5),
                                                 glm::vec3(0, wallRotate[i], 0));
         wall->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+        wall->setName("raceWall");
+        wall->physicsBody()->setUserData(wall);
+        wall->setTextureName("raceWall");
         m_testWorld->addObject(wall);
     }
 }

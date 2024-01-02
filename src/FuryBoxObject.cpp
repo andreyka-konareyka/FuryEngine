@@ -148,7 +148,7 @@ void FuryBoxObject::draw(Camera* _camera, int _windowWidth, int _windowHeight, g
 
     // view/projection transformations
     glm::mat4 projection = glm::perspective(glm::radians((*_camera).zoom()), (float)_windowWidth / (float)_windowHeight, 0.1f, 300.0f);
-    glm::mat4 view = (*_camera).GetViewMatrix();
+    glm::mat4 view = (*_camera).getViewMatrix();
     shader()->setMat4("projection", projection);
     shader()->setMat4("view", view);
 

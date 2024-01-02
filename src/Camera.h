@@ -2,8 +2,6 @@
 #define CAMERA_H
 
 
-// Std. Includes
-#include <vector>
 
 // GL Includes
 #include <GL/glew.h>
@@ -32,70 +30,117 @@ const GLfloat SENSITIVTY = 0.25f;
 const GLfloat ZOOM = 100.0f;
 
 
-// An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
+//! Класс камеры игрового пространства
 class Camera
 {
 public:
-    // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-           glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
-           GLfloat yaw = YAW,
-           GLfloat pitch = PITCH);
+    /*!
+     * \brief Конструктор
+     * \param[in] _position - Позиция камеры
+     * \param[in] _up - Направление верха камеры
+     * \param[in] _yaw - Расканье камеры
+     * \param[in] _pitch - Тангаж камеры
+     */
+    Camera(glm::vec3 _position = glm::vec3(0.0f, 0.0f, 0.0f),
+           glm::vec3 _up = glm::vec3(0.0f, 1.0f, 0.0f),
+           GLfloat _yaw = YAW,
+           GLfloat _pitch = PITCH);
 
-    // Constructor with scalar values
-    Camera(GLfloat posX, GLfloat posY, GLfloat posZ,
-           GLfloat upX, GLfloat upY, GLfloat upZ,
-           GLfloat yaw, GLfloat pitch);
+    /*!
+     * \brief Получить ViewMatrix для OpenGL
+     * \return Возвращает ViewMatrix для OpenGL
+     */
+    glm::mat4 getViewMatrix();
 
-    // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix();
+    /*!
+     * \brief Обработка нажатий клавиатуры
+     * \param[in] _direction - Направление движения
+     * \param[in] _deltaTime - Время
+     */
+    void processKeyboard(Camera_Movement _direction, GLfloat _deltaTime);
 
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime);
+    /*!
+     * \brief Обработка перемещения мыши
+     * \param[in] _xOffset - Изменение координаты X
+     * \param[in] _yOffset - Изменение координаты Y
+     * \param[in] _constrainPitch - Ограничить ли тангаж
+     */
+    void processMouseMovement(GLfloat _xOffset, GLfloat _yOffset, GLboolean _constrainPitch = true);
 
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true);
+    /*!
+     * \brief Обработка скролла мыши
+     * \param[in] _yOffset - Величина скролла
+     */
+    void processMouseScroll(GLfloat _yOffset);
 
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void ProcessMouseScroll(GLfloat yoffset);
-
+    /*!
+     * \brief Установка угла обзора камеры
+     * \param[in] _value - Значение угла обзора
+     */
     void setCameraZoom(int _value);
 
+    /*!
+     * \brief Получить позицию камеры
+     * \return Возвращает позицию камеры
+     */
     inline const glm::vec3& position() const
     { return m_position; }
 
+    /*!
+     * \brief Установить позицию камеры
+     * \param[in] _position - Позиция камеры
+     */
     inline void setPosition(const glm::vec3& _position)
     { m_position = _position; }
 
+    /*!
+     * \brief Получить направление "Вперёд"
+     * \return Возвращает направление "Вперёд"
+     */
     inline const glm::vec3& front() const
     { return m_front; }
 
+    /*!
+     * \brief Установить направление "Вперёд"
+     * \param[in] _front - Направление "Вперёд"
+     */
     inline void setFront(const glm::vec3& _front)
     { m_front = _front; }
 
+    /*!
+     * \brief Получить угол обзора камеры
+     * \return Возвращает угол обзора камеры
+     */
     inline GLfloat zoom() const
     { return m_zoom; }
 
 private:
-    // Calculates the front vector from the Camera's (updated) Eular Angles
+    //! Обновление внутренних векторов камеры
     void updateCameraVectors();
 
 private:
-    // Camera Attributes
+    //! Позиция камеры
     glm::vec3 m_position;
+    //! Направление "Вперёд"
     glm::vec3 m_front;
+    //! Направление "Вверх"
     glm::vec3 m_up;
+    //! Направление "Вправо"
     glm::vec3 m_right;
+    //! Мировое направление "Вверх"
     glm::vec3 m_worldUp;
-    // Eular Angles
+
+    //! Рысканье камеры
     GLfloat m_yaw;
+    //! Тангаж камеры
     GLfloat m_pitch;
-    // Camera options
-    GLfloat m_movementSpeed;
-    GLfloat m_mouseSensitivity;
-
-
+    //! Угол обзора камеры
     GLfloat m_zoom;
+
+    //! Скорость передвижения камеры
+    GLfloat m_movementSpeed;
+    //! Чувствительность мыши
+    GLfloat m_mouseSensitivity;
 };
 
 #endif // CAMERA_H

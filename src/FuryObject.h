@@ -224,6 +224,20 @@ public:
     inline void setScales(const glm::vec3& _scales)
     { m_scales = _scales; }
 
+    /*!
+     * \brief Получение имени объекта
+     * \return Возвращает имя объекта
+     */
+    inline const QString& name() const
+    { return m_name; }
+
+    /*!
+     * \brief Установка имени объекта
+     * \param[in] _name - Имя объекта
+     */
+    inline void setName(const QString& _name)
+    { m_name = _name; }
+
 
 protected:
     //! Позиция
@@ -257,6 +271,9 @@ private:
     float m_angle;
     //! Масштабы по осям
     glm::vec3 m_scales;
+
+    //! Название объекта
+    QString m_name;
 };
 
 #endif // FURYOBJECT_H

@@ -26,10 +26,16 @@ public:
     void tick(double _dt);
 
     /*!
-     * \brief Добавление объекта
-     * \param[in] _object - Объект
+     * \brief Добавление непрозрачный объекта
+     * \param[in] _object - Непрозрачный объект
      */
     void addObject(FuryObject* _object);
+
+    /*!
+     * \brief Добавить полупрозрачный объект
+     * \param[in] _object - Полупрозрачный объект
+     */
+    void addTransparentObject(FuryObject* _object);
 
     /*!
      * \brief Установка камеры
@@ -41,10 +47,23 @@ public:
     void deleteCurrentCamera();
 
     /*!
-     * \brief Получение всех объектов
-     * \return Возвращает все объекты
+     * \brief Получение всех непрозрачных объектов
+     * \return Возвращает все непрозрачные объекты
      */
     const QVector<FuryObject*>& getObjects();
+
+    /*!
+     * \brief Получить все полупрозрачные объекты
+     * \return Возвращает все полупрозрачные объекты
+     */
+    const QVector<FuryObject*>& getTransparentObjects();
+
+    /*!
+     * \brief Получить все объекты
+     * \return Возвращает все объекты
+     */
+    const QVector<FuryObject*>& getAllObjects();
+
 
     /*!
      * \brief Получение текущей камеры
@@ -56,8 +75,13 @@ public:
 private:
     //! Текущая камера
     Camera* m_currentCamera;
-    //! Список объектов
+    //! Список непрозрачный объектов
     QVector<FuryObject*> m_objects;
+    //! Список прозрачных объектов
+    QVector<FuryObject*> m_transparentObjects;
+
+    //! Список всех объектов
+    QVector<FuryObject*> m_allObjects;
 };
 
 #endif // WORLD_H

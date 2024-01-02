@@ -27,8 +27,10 @@ SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
     src/FuryBoxObject.cpp \
+    src/FuryEventListener.cpp \
     src/FuryException.cpp \
     src/FuryLogger.cpp \
+    src/FuryMainWindow.cpp \
     src/FuryObject.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
     src/FurySphereObject.cpp \
@@ -38,22 +40,22 @@ SOURCES += \
     src/Particle.cpp \
     src/ParticleSystem.cpp \
     src/TestRender.cpp \
-    src/main.cpp \
-    src/MainWindow.cpp
+    src/main.cpp
 
 HEADERS += \
     src/Camera.h \
     src/CarObject.h \
     src/FuryBoxObject.h \
+    src/FuryEventListener.h \
     src/FuryException.h \
     src/FuryLogger.h \
+    src/FuryMainWindow.h \
     src/FuryObject.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
     src/FurySphereObject.h \
     src/FuryTexture.h \
     src/FuryTextureManager.h \
     src/FuryWorld.h \
-    src/MainWindow.h \
     src/Particle.h \
     src/ParticleSystem.h \
     src/Shader.h \
@@ -63,7 +65,7 @@ HEADERS += \
     src/model.h
 
 FORMS += \
-    src/MainWindow.ui
+    src/FuryMainWindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

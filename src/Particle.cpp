@@ -10,8 +10,8 @@ void InitParticleMesh()
         1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
     };
 
     glGenVertexArrays(1, &defaultVAO);
@@ -62,7 +62,7 @@ void Particle::Tick(float _dt)
 void Particle::Draw(Camera& _camera, int& _width, int& _height)
 {
     glm::mat4 projection = glm::perspective(glm::radians(_camera.zoom()), (float)_width / (float)_height, 0.1f, 300.0f);
-    glm::mat4 view = _camera.GetViewMatrix();
+    glm::mat4 view = _camera.getViewMatrix();
 
     m_particleShader->Use();
     m_particleShader->setMat4("projection", projection);

@@ -48,7 +48,7 @@ void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
     FuryTexture* texture;
     QMap<QString, FuryTexture*>::ConstIterator iter = m_textures.find(texturePath.absoluteFilePath());
 
-    if (iter == m_textures.end())
+    if (iter == m_textures.constEnd())
     {
         GLuint textureID;
         glGenTextures(1, &textureID);

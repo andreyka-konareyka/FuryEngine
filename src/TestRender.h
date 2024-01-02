@@ -32,6 +32,7 @@
 #include "FuryBoxObject.h"
 #include "FuryTextureManager.h"
 #include "CarObject.h"
+#include "FuryEventListener.h"
 
 
 #include <QOpenGLWidget>
@@ -119,6 +120,8 @@ private:
     reactphysics3d::RigidBody* physics_sphere2;
     reactphysics3d::RigidBody* physics_floor;
 
+    FuryEventListener* m_eventListener;
+
 
     void loadPBR();
     void initFloorModel();
@@ -149,6 +152,7 @@ private:
     Shader* m_pbrShader;
     Shader* m_floorShader;
     Shader* m_simpleDepthShader;
+    Shader* m_bigFloorShader;
 
     GLuint m_particle_texture_id;
     GLuint m_gold_albedo_texture_id;

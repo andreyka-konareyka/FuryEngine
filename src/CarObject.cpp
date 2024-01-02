@@ -22,6 +22,9 @@ CarObject::CarObject(const glm::vec3& _position) :
     m_objectsForDraw.push_back(m_objectBody);
     m_objectsForDraw.push_back(m_objectSalon);
 
+    m_objectBody->setTextureName("carBody");
+    m_objectSalon->setTextureName("carSalon");
+
     float sphereRadius = 0.1;
     m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
@@ -35,6 +38,7 @@ CarObject::CarObject(const glm::vec3& _position) :
     for (int i = 0; i < 100; ++i)
     {
         m_objectsDebugRays.push_back(new FurySphereObject(_position + glm::vec3(30, 0, 0), 0.25));
+        m_objectsDebugRays.last()->setTextureName("rayCastBall");
         m_objectsForDraw.push_back(m_objectsDebugRays.last());
     }
 }
@@ -262,6 +266,12 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
 
     m_objectBody->Setup_physics(phys_common, phys_world, type);
     m_objectSalon->Setup_physics(phys_common, phys_world, type);
+
+    m_objectBody->setName("carBody");
+    m_objectSalon->setName("carSalon");
+    m_objectBody->physicsBody()->setUserData(m_objectBody);
+    m_objectSalon->physicsBody()->setUserData(m_objectSalon);
+
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
