@@ -34,6 +34,12 @@ void FuryMainWindow::onCarCameraMoveSliderSlot()
     int x = m_ui->carCamXSlider->value();
     int y = m_ui->carCamYSlider->value();
 
+    QString camX = QString("CarCam.x: %1").arg(x);
+    QString camY = QString("CarCam.y: %1").arg(y);
+
+    m_ui->carCamXLabel->setText(camX);
+    m_ui->carCamYLabel->setText(camY);
+
     m_ui->openGLWidget->setCarCameraPos(x, y);
 }
 

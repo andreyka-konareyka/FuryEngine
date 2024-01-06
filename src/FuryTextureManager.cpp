@@ -11,6 +11,9 @@
 #include <QString>
 #include <QThread>
 
+FuryTextureManager* FuryTextureManager::s_instance = nullptr;
+
+
 FuryTextureManager::FuryTextureManager() :
     m_needStop(false),
     m_stopped(false)
@@ -37,42 +40,73 @@ FuryTextureManager::~FuryTextureManager()
     }
 }
 
+FuryTextureManager *FuryTextureManager::instance()
+{
+    if (s_instance == nullptr)
+    {
+        return createInstance();
+    }
+
+    return s_instance;
+}
+
+FuryTextureManager *FuryTextureManager::createInstance()
+{
+    if (s_instance != nullptr)
+    {
+        throw FuryException(ru("Повторное создание текстурного менеджера"));
+    }
+
+    s_instance = new FuryTextureManager;
+    return s_instance;
+}
+
+void FuryTextureManager::deleteInstance()
+{
+    if (s_instance == nullptr)
+    {
+        throw FuryException(ru("Удаление ещё не созданного текстурного менеджера"));
+    }
+
+    delete s_instance;
+    s_instance = nullptr;
+}
+
 void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
 {
     static QMutex mutexAddTexture;
     QMutexLocker mutexLocker(&mutexAddTexture);
 
 
-    QFileInfo texturePath(_path);
-
-    FuryTexture* texture;
-    QMap<QString, FuryTexture*>::ConstIterator iter = m_textures.find(texturePath.absoluteFilePath());
+    QString texturePath = QFileInfo(_path).absoluteFilePath();
+    QMap<QString, FuryTexture*>::ConstIterator iter = m_textures.find(texturePath);
 
     if (iter == m_textures.constEnd())
     {
-        GLuint textureID;
+        GLuint textureID = 0;
         glGenTextures(1, &textureID);
 
-        texture = new FuryTexture(textureID, _path);
-        m_textures.insert( texturePath.absoluteFilePath(), texture);
+        FuryTexture* texture = new FuryTexture(textureID, _path);
+        m_textures.insert(texturePath, texture);
         m_textureLoadQueue.enqueue(texture);
-    }
-    else
-    {
-        texture = iter.value();
     }
 
     if (!_name.isEmpty())
     {
-        m_nameToPath.insert(_name, texture->path());
+        m_nameToPath.insert(_name, texturePath);
     }
+}
+
+void FuryTextureManager::addTextureFromAnotherThread(const QString &_path, const QString &_name)
+{
+    m_texturesAddQueue.enqueue(qMakePair(_path, _name));
 }
 
 const FuryTexture& FuryTextureManager::textureByName(const QString& _name) const
 {
     QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
 
-    if (pathIter == m_nameToPath.end() || pathIter.value().isEmpty())
+    if (pathIter == m_nameToPath.constEnd() || pathIter.value().isEmpty())
     {
         return m_emptyTexture;
     }
@@ -85,7 +119,7 @@ const FuryTexture& FuryTextureManager::textureByPath(const QString& _path) const
     QFileInfo texturePath(_path);
     QMap<QString, FuryTexture*>::ConstIterator textureIter = m_textures.find(texturePath.absoluteFilePath());
 
-    if (textureIter == m_textures.end() || !(textureIter.value()->isReady()))
+    if (textureIter == m_textures.constEnd() || !(textureIter.value()->isReady()))
     {
         return m_emptyTexture;
     }
@@ -128,6 +162,13 @@ void FuryTextureManager::loadTexturePart()
 
         Debug("Texture loaded: (" + texture->path() + ")");
     }
+
+
+    if (!m_texturesAddQueue.isEmpty())
+    {
+        QPair<QString, QString> pair = m_texturesAddQueue.dequeue();
+        addTexture(pair.first, pair.second);
+    }
 }
 
 void FuryTextureManager::stopLoopAndWait()
@@ -156,6 +197,12 @@ void FuryTextureManager::infiniteLoop()
 
             int width, height;
             unsigned char* data = SOIL_load_image(qUtf8Printable(texture->path()), &width, &height, 0, SOIL_LOAD_RGBA);
+
+            if (width == 0 || height == 0)
+            {
+                Debug(ru("Текстура не загружена: %1").arg(texture->path()));
+                continue;
+            }
 
             texture->setData(data);
             texture->setWidth(width);

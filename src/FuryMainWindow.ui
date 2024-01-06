@@ -65,7 +65,7 @@
         <item>
          <widget class="QLabel" name="carCamXLabel">
           <property name="text">
-           <string>CarCam.x</string>
+           <string>CarCam.x: 7</string>
           </property>
          </widget>
         </item>
@@ -78,7 +78,7 @@
            <number>30</number>
           </property>
           <property name="value">
-           <number>10</number>
+           <number>7</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -86,9 +86,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="carCamYLlabel">
+         <widget class="QLabel" name="carCamYLabel">
           <property name="text">
-           <string>CarCam.y</string>
+           <string>CarCam.y: 3</string>
           </property>
          </widget>
         </item>
@@ -101,7 +101,7 @@
            <number>20</number>
           </property>
           <property name="value">
-           <number>7</number>
+           <number>3</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

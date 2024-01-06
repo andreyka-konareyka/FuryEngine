@@ -31,6 +31,10 @@ SOURCES += \
     src/FuryException.cpp \
     src/FuryLogger.cpp \
     src/FuryMainWindow.cpp \
+    src/FuryMaterial.cpp \
+    src/FuryMesh.cpp \
+    src/FuryModel.cpp \
+    src/FuryModelManager.cpp \
     src/FuryObject.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
     src/FurySphereObject.cpp \
@@ -50,6 +54,10 @@ HEADERS += \
     src/FuryException.h \
     src/FuryLogger.h \
     src/FuryMainWindow.h \
+    src/FuryMaterial.h \
+    src/FuryMesh.h \
+    src/FuryModel.h \
+    src/FuryModelManager.h \
     src/FuryObject.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
     src/FurySphereObject.h \

@@ -5,25 +5,22 @@
 #include <QString>
 
 
-CarObject::CarObject(const glm::vec3& _position) :
+CarObject::CarObject(const glm::vec3& _position, Shader *_shader) :
     FuryObject(_position),
     m_objectBody(nullptr),
-    m_objectSalon(nullptr),
     m_springLenght(0.4),
     m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
     m_cameraLocalViewPoint(0, 2, 0),
-    m_cameraLocalPosition(-10, 7, 0),
+    m_cameraLocalPosition(-7, 3, 0),
     m_forward(0),
     m_right(0)
 {
-    m_objectBody = new FuryBoxObject(_position, 5, 0.85, 2.5);
-    m_objectSalon = new FuryBoxObject(_position + glm::vec3(-0.5, 0.85, 0), 2.5, 0.85, 2.5);
+    m_objectBody = new FuryBoxObject(_position, 6, 1, 3);
     m_objectsForDraw.push_back(m_objectBody);
-    m_objectsForDraw.push_back(m_objectSalon);
 
     m_objectBody->setTextureName("carBody");
-    m_objectSalon->setTextureName("carSalon");
+    m_objectBody->setShader(_shader);
 
     float sphereRadius = 0.1;
     m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), sphereRadius));
@@ -51,12 +48,6 @@ CarObject::~CarObject()
         m_objectBody = nullptr;
     }
 
-    if (m_objectSalon != nullptr)
-    {
-        delete m_objectSalon;
-        m_objectSalon = nullptr;
-    }
-
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
         if (m_objectWheels[i] != nullptr)
@@ -80,7 +71,6 @@ void CarObject::tick(double _dt)
 {
     // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 17, rp3d::Vector3(2, -0.5, 1));
     // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 20, rp3d::Vector3(2, -0.5, -1));
-
 
 
 
@@ -265,12 +255,9 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
 
 
     m_objectBody->Setup_physics(phys_common, phys_world, type);
-    m_objectSalon->Setup_physics(phys_common, phys_world, type);
 
     m_objectBody->setName("carBody");
-    m_objectSalon->setName("carSalon");
     m_objectBody->physicsBody()->setUserData(m_objectBody);
-    m_objectSalon->physicsBody()->setUserData(m_objectSalon);
 
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
@@ -288,21 +275,6 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
 
         // Create the joint info object
         reactphysics3d::FixedJointInfo jointInfo(m_objectBody->physicsBody(), m_objectWheels[i]->physicsBody(), anchorPoint);
-        jointInfo.isCollisionEnabled = false;
-
-        // Create the hinge joint in the physics world
-        phys_world->createJoint(jointInfo);
-    }
-
-    {
-        // Anchor point in world-space
-        float x = m_objectBody->getPosition().x;
-        float y = m_objectBody->getPosition().y;
-        float z = m_objectBody->getPosition().z;
-        const reactphysics3d::Vector3 anchorPoint(x, y, z);
-
-        // Create the joint info object
-        reactphysics3d::FixedJointInfo jointInfo(m_objectBody->physicsBody(), m_objectSalon->physicsBody(), anchorPoint);
         jointInfo.isCollisionEnabled = false;
 
         // Create the hinge joint in the physics world

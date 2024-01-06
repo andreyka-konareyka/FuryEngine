@@ -16,7 +16,7 @@
 class CarObject : public FuryObject
 {
 public:
-    CarObject(const glm::vec3& _position);
+    CarObject(const glm::vec3& _position, Shader* _shader);
     ~CarObject();
 
     void tick(double dt) override;
@@ -65,7 +65,6 @@ public:
 
 private:
     FuryBoxObject* m_objectBody;
-    FuryBoxObject* m_objectSalon;
     QVector<FurySphereObject*> m_objectWheels;
     QVector<FurySphereObject*> m_objectsDebugRays;
     float m_springLenght;

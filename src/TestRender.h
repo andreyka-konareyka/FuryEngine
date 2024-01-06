@@ -33,6 +33,9 @@
 #include "FuryTextureManager.h"
 #include "CarObject.h"
 #include "FuryEventListener.h"
+#include "FuryMaterial.h"
+#include "FuryModel.h"
+#include "FuryModelManager.h"
 
 
 #include <QOpenGLWidget>
@@ -84,10 +87,6 @@ protected:
 
 private:
     QTimer* m_timer;
-
-    void show();
-    void renderThread();
-    bool m_isOpen;
 
 
     int m_width;
@@ -153,6 +152,7 @@ private:
     Shader* m_floorShader;
     Shader* m_simpleDepthShader;
     Shader* m_bigFloorShader;
+    Shader* m_testMaterialShader;
 
     GLuint m_particle_texture_id;
     GLuint m_gold_albedo_texture_id;
@@ -212,12 +212,15 @@ private:
     glm::vec3 m_dirLightSpecular = glm::vec3(0.5f, 0.5f, 0.5f);
 
 
-    FuryTextureManager m_textureManager;
+    FuryTextureManager* m_textureManager;
+    FuryModelManager* m_modelManager;
     CarObject* m_carObject = nullptr;
 
 private:
     //! Камеры
     QVector<Camera*> m_cameras;
+    //! Аккумулятор для обновления физики
+    double m_updateAccumulator;
 };
 
 #endif // TESTRENDER_H
