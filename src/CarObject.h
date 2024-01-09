@@ -16,7 +16,7 @@
 class CarObject : public FuryObject
 {
 public:
-    CarObject(const glm::vec3& _position, Shader* _shader);
+    CarObject(FuryWorld* _world, const glm::vec3& _position, Shader* _shader);
     ~CarObject();
 
     void tick(double dt) override;
@@ -27,7 +27,7 @@ public:
     //! resetKeyInput Сброс кнопок управления
     void resetKeyInput();
 
-    void Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactphysics3d::PhysicsWorld* phys_world, reactphysics3d::BodyType type);
+    void Setup_physics(reactphysics3d::BodyType type);
 
     inline const QVector<FuryObject*>& objectsForDraw() const
     { return m_objectsForDraw; }
@@ -75,8 +75,6 @@ private:
     glm::vec3 m_cameraLocalViewPoint;
     //! Позиция камеры (в локальных координатах)
     glm::vec3 m_cameraLocalPosition;
-
-    reactphysics3d::PhysicsWorld* m_physicsWorld;
 
     int m_forward;
     int m_right;

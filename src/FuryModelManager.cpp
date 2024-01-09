@@ -29,7 +29,7 @@ FuryModelManager::~FuryModelManager()
         if (iter.value() != nullptr)
         {
             FuryModel*& model = iter.value();
-            Debug("Delete model (" + model->path() + ")");
+            Debug(ru("Удаление модели (%1)").arg(model->path()));
             delete model;
             model = nullptr;
         }

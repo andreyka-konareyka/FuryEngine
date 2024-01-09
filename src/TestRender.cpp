@@ -39,33 +39,20 @@ void renderSphere();
 void renderCube();
 void renderQuad();
 
-void renderCube_2();
-
 
 
 TestRender::TestRender(QWidget *_parent) :
     QOpenGLWidget(_parent),
-    m_timer(new QTimer(this)),
-    m_textureManager(FuryTextureManager::instance()),
-    m_modelManager(FuryModelManager::instance()),
+    m_textureManager(FuryTextureManager::createInstance()),
+    m_modelManager(FuryModelManager::createInstance()),
+    m_materialManager(FuryMaterialManager::createInstance()),
     m_updateAccumulator(0)
 {
     Debug(ru("Создание рендера"));
 
-    connect(m_timer, SIGNAL(timeout()),
-            this,    SLOT(update()));
+    connect(this, &QOpenGLWidget::frameSwapped,
+            this, &TestRender::updateGL);
     setFocusPolicy(Qt::StrongFocus);
-
-
-//    try
-//    {
-//        throw FuryException(ru("Ошибка для тестов."),
-//                            ru("Отладочная информация вот такая"));
-//    }
-//    catch (const FuryException& _e)
-//    {
-//        Log(_e);
-//    }
 }
 
 TestRender::~TestRender()
@@ -99,25 +86,20 @@ TestRender::~TestRender()
     Debug(ru("Остановка менеджера моделей..."));
     m_modelManager->stopLoopAndWait();
     FuryModelManager::deleteInstance();
+
+    Debug(ru("Удаление менеджера материалов..."));
+    FuryMaterialManager::deleteInstance();
 }
 
 void TestRender::initializeGL()
 {
     Debug(ru("Инициализация OpenGL"));
     InitGL();
-
-    m_timer->start(1000 / 60.0);
 }
 
 void TestRender::resizeGL(int w, int h)
 {
     glViewport(0,0,w,h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45, (float)w/h, 0.01, 100.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0,0,5,0,0,0,0,1,0);
 
     m_height = h;
     m_width = w;
@@ -125,24 +107,28 @@ void TestRender::resizeGL(int w, int h)
 
 void TestRender::paintGL()
 {
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//    glBegin(GL_TRIANGLES);
-//        glColor3f(1.0, 0.0, 0.0);
-//        glVertex3f(-0.5, -0.5, 0);
-//        glColor3f(0.0, 1.0, 0.0);
-//        glVertex3f( 0.5, -0.5, 0);
-//        glColor3f(0.0, 0.0, 1.0);
-//        glVertex3f( 0.0,  0.5, 0);
-//    glEnd();
-
-
     static QDateTime lastTime = QDateTime::currentDateTime();
     static QDateTime lastFPSUpdate = QDateTime::currentDateTime();
     QDateTime startTime = QDateTime::currentDateTime();
-    render();
-    m_textureManager->loadTexturePart();
-    m_modelManager->loadModelPart();
+
+    {
+        static int intervalLoadPart = 0;
+
+        render();
+
+        if (intervalLoadPart == 0)
+        {
+            m_textureManager->loadTexturePart();
+        }
+        else if (intervalLoadPart == 5)
+        {
+            m_modelManager->loadModelPart();
+        }
+
+        intervalLoadPart = (intervalLoadPart + 1) % 10;
+    }
+
+
     QDateTime endTime = QDateTime::currentDateTime();
 
     if (lastFPSUpdate.msecsTo(endTime) >= 200)
@@ -195,7 +181,7 @@ void TestRender::mouseMoveEvent(QMouseEvent* _event)
     if (_event->buttons().testFlag(Qt::LeftButton))
     {
         GLfloat xoffset = (GLfloat)(_event->position().x() - lastX);
-        GLfloat yoffset = (GLfloat)(lastY - _event->position().y());  // Reversed since y-coordinates go from bottom to left
+        GLfloat yoffset = (GLfloat)(lastY - _event->position().y());
 
         lastX = (GLfloat)(_event->position().x());
         lastY = (GLfloat)(_event->position().y());
@@ -252,6 +238,11 @@ void TestRender::keyReleaseEvent(QKeyEvent *_event)
     }
 }
 
+void TestRender::updateGL()
+{
+    update();
+}
+
 
 
 
@@ -259,7 +250,6 @@ void TestRender::InitGL()
 {
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
     glewExperimental = GL_TRUE;
-    //glewExperimental = GL_FALSE;
     // Initialize GLEW to setup the OpenGL Function pointers
     glewInit();
 
@@ -287,58 +277,51 @@ void TestRender::InitGL()
 void TestRender::init() {
     Debug(ru("Версия OpenGL: ") + ru(glGetString(GL_VERSION)));
     Debug(ru("Количество потоков: ") + QString::number(QThread::idealThreadCount()));
-
-    m_testWorld = new FuryWorld;
     own_physicsCommon = new reactphysics3d::PhysicsCommon;
-    our_physicsWorld = own_physicsCommon->createPhysicsWorld();
 
+    m_testWorld = new FuryWorld(own_physicsCommon);
+    our_physicsWorld = m_testWorld->physicsWorld();
     m_eventListener = new FuryEventListener;
     our_physicsWorld->setEventListener(m_eventListener);
 
-    m_my_first_boxObject = new FuryBoxObject(glm::vec3(0, 5, 0), 1, 1, 1);
+    m_modelManager->addModel("objects/cube/cube.obj", "cube");
+    m_modelManager->addModel("objects/sphere/sphere.obj", "sphere");
+
+    m_testWorld->addObject(new FuryBoxObject(m_testWorld, glm::vec3(0, 5, 0), 1, 1, 1));
     int count_in_line = 6;
     for (int i = 0; i < count_in_line; ++i) {
         for (int j = 0; j < count_in_line; ++j) {
-            FuryBoxObject* box = new FuryBoxObject(glm::vec3((i - count_in_line / 2 + 0.5) * 5,
+            FuryBoxObject* box = new FuryBoxObject(m_testWorld, glm::vec3((i - count_in_line / 2 + 0.5) * 5,
                                                              -1.25 - 0.02,
                                                              (j - count_in_line / 2 + 0.5) * 5),
                                                    5, 2.5, 5);
-            box->setTextureName("numbersBoxTexture");
-            box->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+            box->setTextureName("Diffuse_numbersBoxTexture");
+            box->Setup_physics(reactphysics3d::BodyType::STATIC);
             box->setName("startWall");
             box->physicsBody()->setUserData(box);
             m_testWorld->addObject(box);
+
+            if (!m_materialManager->materialExist("numberBoxMaterial"))
+            {
+                FuryMaterial* mat = m_materialManager->createMaterial("numberBoxMaterial");
+                mat->setDiffuseTexture("Diffuse_numbersBoxTexture");
+            }
+
+            box->setMaterialName("numberBoxMaterial");
         }
     }
 
 
-    m_sunVisualBox = new FuryBoxObject(m_dirlight_position);
+    m_sunVisualBox = new FuryBoxObject(m_testWorld, m_dirlight_position);
+    m_sunVisualBox->Setup_physics(rp3d::BodyType::STATIC);
     m_testWorld->addObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
     m_testWorld->setCamera(m_cameras[0]);
 
-
-
-//    int count_test_physics_cubes = 20;
-//    for (int i = 0; i < count_test_physics_cubes; ++i) {
-//        int rand_maximum = 19;
-//        double x = rand() % rand_maximum - (rand_maximum / 2);
-//        double y = (rand() % (rand_maximum * 2) + 4);
-//        double z = rand() % rand_maximum - (rand_maximum / 2);
-
-//        double angle_x = static_cast<double>(rand() % 1000) / 1000 * 3.14;
-//        double angle_y = static_cast<double>(rand() % 1000) / 1000 * 3.14;
-//        double angle_z = static_cast<double>(rand() % 1000) / 1000 * 3.14;
-
-//        FuryBoxObject* box = new FuryBoxObject(glm::vec3(x, y, z), glm::vec3(2, 5, 2), glm::vec3(angle_x, angle_y, angle_z));
-//        box->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
-//        m_testWorld->addObject(box);
-//    }
-
-    FurySphereObject* testSphere = new FurySphereObject(glm::vec3(6, 10, 10), 2);
-    testSphere->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(6, 10, 10), 2);
+    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
     m_testWorld->addObject(testSphere);
 
     //
@@ -346,8 +329,8 @@ void TestRender::init() {
     //
     m_testMaterialShader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
 
-    m_carObject = new CarObject(glm::vec3(0, -0.5, 22.5), m_testMaterialShader);
-    m_carObject->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::DYNAMIC);
+    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 22.5), m_testMaterialShader);
+    m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
 
     const QVector<FuryObject*>& tempObjectsForDraw = m_carObject->objectsForDraw();
     for (int i = 0; i < tempObjectsForDraw.size(); ++i)
@@ -357,10 +340,18 @@ void TestRender::init() {
 
 
     // Большой пол
-    m_bigFloor = new FuryBoxObject(glm::vec3(0, -3, 0), 500, 1, 500);
-    m_bigFloor->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+    m_bigFloor = new FuryBoxObject(m_testWorld, glm::vec3(0, -3, 0), 500, 1, 500);
+    m_bigFloor->Setup_physics(reactphysics3d::BodyType::STATIC);
     m_bigFloor->setTextureName("asphalt");
     m_testWorld->addObject(m_bigFloor);
+
+    if (!m_materialManager->materialExist("asphaltMaterial"))
+    {
+        FuryMaterial* mat = m_materialManager->createMaterial("asphaltMaterial");
+        mat->setDiffuseTexture("Diffuse_asphalt");
+    }
+
+    m_bigFloor->setMaterialName("asphaltMaterial");
 
     // Настройка физики сфер
     reactphysics3d::Vector3 position(2, 7, 0);
@@ -385,12 +376,6 @@ void TestRender::init() {
     reactphysics3d::Transform transform_shape2 = reactphysics3d::Transform::identity();
     physics_sphere2->addCollider(sphereShape2, transform_shape2);
 
-
-    // Настройка физики пола
-//    for (int i = 0; i < m_new_floor.size(); ++i) {
-//        m_new_floor[i]->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
-//    }
-
     // Конец настроек физики
 
 
@@ -407,7 +392,8 @@ void TestRender::init() {
                                           glm::vec3(0.3, 0.3, 0.3));
         testMaterial->setShaderMaterial(m_testMaterialShader);
 
-        FuryBoxObject* box = new FuryBoxObject(glm::vec3(0, -2.5, 22.5),
+        FuryBoxObject* box = new FuryBoxObject(m_testWorld,
+                                               glm::vec3(0, -2.5, 22.5),
                                                glm::vec3(1.5, 1.5, 1.4),
                                                glm::vec3(0, 3.14/2, 0));
         box->setShader(m_testMaterialShader);
@@ -439,7 +425,6 @@ void TestRender::init() {
     m_myFirstParticle = new Particle(part_pos, part_scale, part_speed, part_color, m_particle_texture_id, 10, m_particleShader);
 
     glm::vec3 part_sys_pos(0, 2, 0);
-    //ParticleSystem myFirstParticleSystem(part_sys_pos, win_texture_id, 50);
     m_myFirstParticleSystem = new ParticleSystem(part_sys_pos, m_smoke_texture_id, 1);
 
 
@@ -454,11 +439,11 @@ void TestRender::init() {
     initRaceMap();
 
     m_textureManager->addTexture("textures/box_texture_5x5.png", "defaultBoxTexture");
-    m_textureManager->addTexture("textures/box_texture3_orig.png", "numbersBoxTexture");
+    m_textureManager->addTexture("textures/box_texture3_orig.png", "Diffuse_numbersBoxTexture");
     m_textureManager->addTexture("textures/carBody.png", "carBody");
-    m_textureManager->addTexture("textures/rayCastBall.png", "rayCastBall");
-    m_textureManager->addTexture("textures/raceWall.png", "raceWall");
-    m_textureManager->addTexture("textures/asphalt.png", "asphalt");
+    m_textureManager->addTexture("textures/rayCastBall.png", "Diffuse_rayCastBall");
+    m_textureManager->addTexture("textures/raceWall.png", "Diffuse_raceWall");
+    m_textureManager->addTexture("textures/asphalt.png", "Diffuse_asphalt");
     m_textureManager->addTexture("textures/redCheckBox.png", "redCheckBox");
     m_textureManager->addTexture("textures/greenCheckBox.png", "greenCheckBox");
 
@@ -466,25 +451,29 @@ void TestRender::init() {
     m_modelManager->addModel("objects/car2/car.obj", "backpack2");
 
     {
-        FuryBoxObject* object = new FuryBoxObject(glm::vec3(-7.5, -1.25, 22.5),
+        FuryBoxObject* object = new FuryBoxObject(m_testWorld,
+                                                  glm::vec3(-7.5, -1.25, 22.5),
                                                   glm::vec3(13, 2.5, 0.5),
                                                   glm::vec3(0, 3.14/2, 0));
         object->setTextureName("redCheckBox");
         m_testWorld->addTransparentObject(object);
 
-        object = new FuryBoxObject(glm::vec3(-5.5, -1.25, 22.5),
+        object = new FuryBoxObject(m_testWorld,
+                                   glm::vec3(-5.5, -1.25, 22.5),
                                    glm::vec3(13, 2.5, 0.5),
                                    glm::vec3(0, 3.14/2, 0));
         object->setTextureName("greenCheckBox");
         m_testWorld->addTransparentObject(object);
 
-        object = new FuryBoxObject(glm::vec3(-9.5, -1.25, 22.5),
+        object = new FuryBoxObject(m_testWorld,
+                                   glm::vec3(-9.5, -1.25, 22.5),
                                    glm::vec3(13, 2.5, 0.5),
                                    glm::vec3(0, 3.14/2, 0));
         object->setTextureName("redCheckBox");
         m_testWorld->addTransparentObject(object);
 
-        object = new FuryBoxObject(glm::vec3(-11.5, -1.25, 22.5),
+        object = new FuryBoxObject(m_testWorld,
+                                   glm::vec3(-11.5, -1.25, 22.5),
                                    glm::vec3(13, 2.5, 0.5),
                                    glm::vec3(0, 3.14/2, 0));
         object->setTextureName("greenCheckBox");
@@ -562,86 +551,22 @@ void TestRender::init() {
 
 void TestRender::render()
 {
-//    if (glfwWindowShouldClose(m_window))
-//    {
-//        m_isOpen = false;
-
-//        // Terminate GLFW, clearing any resources allocated by GLFW.
-//        glfwDestroyWindow(m_window);
-//        own_physicsCommon->destroyPhysicsWorld(our_physicsWorld);
-
-//        Application::getInstance()->disconnectWindow(this);
-//    }
-//    else
     {
-        //glfwMakeContextCurrent(m_window);
-
         // Calculate deltatime of current frame
         static QTime startTime = QTime::currentTime();
-        float currentFrame = startTime.msecsTo(QTime::currentTime()); //(GLfloat)glfwGetTime();
-        m_deltaTime = 1/60.0f;//m_lastFrame.msecsTo(currentFrame);
+        float currentFrame = startTime.msecsTo(QTime::currentTime());
+        m_deltaTime = (currentFrame - m_lastFrame)/1000.0;
         m_lastFrame = currentFrame;
-
-
 
         /*
         =======================================================
         =================  Загрузка текстур  ==================
         =======================================================
         */
-        if (m_is_loading) {
-            if (m_cubemap_is_loaded && m_ourModel_textures_loaded) {
-                m_is_loading = false;
-            }
-
-            if (m_cubemap_is_loaded && (!m_cubemap_bind)) {
-                QTime t_start = QTime::currentTime();
-                // Когда текстура загружена в память, мы её подключаем к openGL
-                m_cubemapTexture = TextureLoader::BindDataToCubemap(m_data_array, m_width_array, m_height_array);
-                m_cubemap_bind = true;
-                // Выход с экрана загрузки
-                // is_loading = false;
-                QTime t_end = QTime::currentTime();
-                Debug((ru("Кубическая карта:") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
-            }
-
-            if (m_ourModel_textures_loaded && (!m_ourModel_textures_bind)) {
-
-                QTime t_start = QTime::currentTime();
-
-                for (unsigned int i = 0; i < m_textures_to_loading.size(); i++) {
-                    bool skipped = false;
-                    for (unsigned int j = 0; j < i; j++)
-                    {
-                        QString name1 = m_textures_to_loading[i]->name;
-                        QString name2 = m_textures_to_loading[j]->name;
-
-                        if (name1 == name2) {
-                            m_textures_to_loading[i]->id = m_textures_to_loading[j]->id;
-                            skipped = true;
-                        }
-                    }
-                    if (!skipped) {
-                        m_textures_to_loading[i]->id = TextureLoader::BindDataToTexture(m_textures_to_loading[i]->data, m_ourModel_width_array[i], m_ourModel_height_array[i]);
-                    }
-                }
-                m_ourModel_textures_bind = true;
-
-                QTime t_end = QTime::currentTime();
-                Debug((ru("Загрузка модели:\t") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
-            }
-
-            // Показываем экран загрузки
-            //glfwPollEvents();
-            glm::vec3 color(0.0f, 120.0 / 255.0, 215.0 / 255.0);
-            color = color * (sin(currentFrame / 1000) * 0.5f + 0.5f);
-            glClearColor(color.r, color.g, color.b, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            //glfwSwapBuffers(m_window);
-
+        if (m_is_loading)
+        {
+            renderLoadingAndBindData(currentFrame);
             return;
-
         }
 
         /*
@@ -668,7 +593,6 @@ void TestRender::render()
 
 
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
-       // glfwPollEvents();
 
         if (m_height == 0 || m_width == 0)
         {
@@ -677,26 +601,7 @@ void TestRender::render()
 
         do_movement();
 
-        m_updateAccumulator += m_deltaTime;
-        float timeStep = 1.0 / 60.0;
-
-        while (m_updateAccumulator >= timeStep)
-        {
-
-            m_myFirstParticle->Tick(timeStep);
-            m_myFirstParticleSystem->Tick(timeStep);
-
-            our_physicsWorld->update(timeStep);
-
-            for (int i = 0; i < m_testWorld->getAllObjects().size(); ++i)
-            {
-                m_testWorld->getAllObjects()[i]->tick(timeStep);
-            }
-            m_carObject->tick(timeStep);
-
-
-            m_updateAccumulator -= timeStep;
-        }
+        updatePhysics();
 
 
         m_cameras[1]->setPosition(m_carObject->cameraPosition());
@@ -720,134 +625,13 @@ void TestRender::render()
         glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_ourShader->Use();
+        renderOldModel();
+        renderPbrSpheres();
 
 
-        m_ourShader->setVec3("lightPos", m_dirlight_position);
-        m_ourShader->setVec3("viewPos", m_testWorld->camera()->position());
-        m_ourShader->setFloat("material.shininess", 32.0f);
-
-
-
-        m_ourShader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-
-
-        // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
         glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
-        m_ourShader->setMat4("projection", projection);
-        m_ourShader->setMat4("view", view);
-
-        // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, m_ourModel_position); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(m_modelScale, m_modelScale, m_modelScale));	// it's a bit too big for our scene, so scale it down
-        m_ourShader->setMat4("model", model);
-        m_ourModel->Draw(*m_ourShader);
-
-
-        m_pbrShader->Use();
-        m_pbrShader->setMat4("projection", projection);
-        m_pbrShader->setMat4("view", view);
-        m_pbrShader->setVec3("camPos", m_testWorld->camera()->position());
-
-        //pbrShader.setVec3("lightPos", dirlight_position);
-        //pbrShader.setFloat("material.shininess", 32.0f);
-
-       // pbrShader.setVec3("dirLight.direction", glm::vec3(0, 0, 0) - dirlight_position);
-        //pbrShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        //pbrShader.setVec3("dirLight.diffuse", 0.8f, 0.8f, 0.8f);
-        //pbrShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        // point light 1
-//        m_pbrShader->setVec3("lightPositions[0]", glm::vec3(-10.0f, 10.0f, 10.0f));
-//        m_pbrShader->setVec3("lightColors[0]", 300.0f, 300.0f, 300.0f);
-//        // point light 2
-//        m_pbrShader->setVec3("lightPositions[1]", glm::vec3(10.0f, 10.0f, 10.0f));
-//        m_pbrShader->setVec3("lightColors[1]", 300.0f, 300.0f, 300.0f);
-//        // point light 3
-//        m_pbrShader->setVec3("lightPositions[2]", glm::vec3(-10.0f, -10.0f, 10.0f));
-//        m_pbrShader->setVec3("lightColors[2]", 300.0f, 300.0f, 300.0f);
-//        // point light 4
-//        m_pbrShader->setVec3("lightPositions[3]", glm::vec3(10.0f, -10.0f, 10.0f));
-//        m_pbrShader->setVec3("lightColors[3]", 300.0f, 300.0f, 300.0f);
-
-
-
-        const reactphysics3d::Transform& physics_sphere_transform = physics_sphere->getTransform();
-        const reactphysics3d::Vector3& physics_sphere_position = physics_sphere_transform.getPosition();
-        auto physics_sphere_rotate = physics_sphere_transform.getOrientation();
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(physics_sphere_position.x, physics_sphere_position.y, physics_sphere_position.z)); // translate it down so it's at the center of the scene
-
-        reactphysics3d::Vector3 axis_rotate;
-        reactphysics3d::decimal angle_rotate;
-        physics_sphere_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
-        if (axis_rotate.x != 0 ||
-            axis_rotate.y != 0 ||
-            axis_rotate.z != 0)
-        {
-            model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-        }
-
-        model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
-        //model = glm::rotate(model, physics_sphere_rotate.y, glm::vec3(0, 1, 0));
-        //model = glm::rotate(model, physics_sphere_rotate.x, glm::vec3(1, 0, 0));
-        //model = glm::rotate(model, physics_sphere_rotate.z, glm::vec3(0, 0, 1));
-
-        m_pbrShader->setMat4("model", model);
-
-        //glBindTexture(GL_TEXTURE_2D, gold_texture_id);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
-
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, m_gold_albedo_texture_id);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, m_gold_norm_texture_id);
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, m_gold_metallic_texture_id);
-        glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, m_gold_roughness_texture_id);
-        glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_2D, m_gold_ao_texture_id);
-
-        renderSphere();
-
-        const reactphysics3d::Transform& physics_sphere2_transform = physics_sphere2->getTransform();
-        const reactphysics3d::Vector3& physics_sphere_position2 = physics_sphere2_transform.getPosition();
-        auto physics_sphere2_rotate = physics_sphere2_transform.getOrientation();
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(physics_sphere_position2.x, physics_sphere_position2.y, physics_sphere_position2.z)); // translate it down so it's at the center of the scene
-
-        //reactphysics3d::Vector3 axis_rotate;
-        //reactphysics3d::decimal angle_rotate;
-        physics_sphere2_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
-        if (axis_rotate.x != 0 ||
-            axis_rotate.y != 0 ||
-            axis_rotate.z != 0)
-        {
-            model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-        }
-        model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
-        //model = glm::rotate(model, physics_sphere2_rotate.y, glm::vec3(0, 1, 0));
-        //model = glm::rotate(model, physics_sphere2_rotate.x, glm::vec3(1, 0, 0));
-        //model = glm::rotate(model, physics_sphere2_rotate.z, glm::vec3(0, 0, 1));
-
-        m_pbrShader->setMat4("model", model);
-
-        renderSphere();
-
-        m_my_first_boxObject->draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
-
-//        for (int i = 0; i < m_new_floor.size(); ++i) {
-//            m_new_floor[i]->draw(m_testWorld->camera(), this->m_width, this->m_height, m_dirlight_position, lightSpaceMatrix, m_depthMap);
-//        }
 
 
         const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
@@ -873,33 +657,9 @@ void TestRender::render()
                 shader->setMat4("projection", projection);
                 shader->setMat4("view", view);
 
-                glUniformMatrix4fv(glGetUniformLocation(shader->Program, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+                shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-
-                //float angle_x = -3.14 / 2;
-
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, renderObject->getPosition()); // translate it down so it's at the center of the scene
-
-                if (renderObject->physicsEnabled()) {
-                    reactphysics3d::Vector3 axis_rotate;
-                    reactphysics3d::decimal angle_rotate;
-                    renderObject->physicsBody()->getTransform().getOrientation().getRotationAngleAxis(angle_rotate, axis_rotate);
-                    if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
-                        model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                        model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                        model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                    }
-                    else {
-                        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-                    }
-                }
-                else {
-                    model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                    model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                    model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                }
-
+                glm::mat4 model = renderObject->getOpenGLTransform();
                 model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
                 shader->setMat4("model", model);
@@ -914,31 +674,13 @@ void TestRender::render()
 
                 if (renderObject->name() != "carBody")
                 {
-                    GLuint texture_id = m_textureManager->textureByName(renderObject->textureName()).idOpenGL();
-
-                    glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, texture_id);
-                    glUniform1i(glGetUniformLocation(shader->Program, "diffuse_texture"), 0);
-                    glActiveTexture(GL_TEXTURE1);
+                    glm::vec3 lightPos = m_testWorld->camera()->position()
+                                       + m_dirlight_position;
+                    shader->setVec3("lightPos", lightPos);
+                    glActiveTexture(GL_TEXTURE3);
                     glBindTexture(GL_TEXTURE_2D, m_depthMap);
-                    glUniform1i(glGetUniformLocation(shader->Program, "shadowMap"), 1);
-                    //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "diffuse_texture"), 0);
-                    //glActiveTexture(GL_TEXTURE1);
-                    //glBindTexture(GL_TEXTURE_2D, depthMap);
-                    //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "shadowMap"), 1);
-                    //glBindTexture(GL_TEXTURE_2D, depthMap);
 
-                    GLuint renderVAO = renderObject->VAO();
-                    glBindVertexArray(renderVAO);
-
-                    if (renderObject->isDrawElements())
-                    {
-                        glDrawElements(renderObject->renderType(), renderObject->vertexCount(), GL_UNSIGNED_INT, 0);
-                    }
-                    else
-                    {
-                        glDrawArrays(renderObject->renderType(), 0, renderObject->vertexCount());
-                    }
+                    renderObject->draw();
                 }
                 else
                 {
@@ -948,37 +690,16 @@ void TestRender::render()
                     glActiveTexture(GL_TEXTURE3);
                     glBindTexture(GL_TEXTURE_2D, m_depthMap);
 
-                    glm::vec3 newPos = renderObject->getPosition();
-                    newPos -= glm::vec3(0, 0.8, 0);
 
-                    model = glm::mat4(1.0f);
-                    model = glm::translate(model, newPos); // translate it down so it's at the center of the scene
-//                    model = glm::rotate(model, 3.14f/2, glm::vec3(0, 1, 0));
+                    model = renderObject->getOpenGLTransform();
 
-                    if (renderObject->physicsEnabled()) {
-                        reactphysics3d::Vector3 axis_rotate;
-                        reactphysics3d::decimal angle_rotate;
-                        {
-                            rp3d::Quaternion rotation = renderObject->physicsBody()->getTransform().getOrientation();
-                            rp3d::Quaternion rot2 = rp3d::Quaternion::fromEulerAngles(0, 3.14/2, 0);
-                            (rotation * rot2).getRotationAngleAxis(angle_rotate, axis_rotate);
-                        }
-                        if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
-                            model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                            model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                            model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                        }
-                        else {
-                            model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-                        }
-                    }
-                    else {
-                        model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                        model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                        model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                    }
+                    glm::mat4 testSubModel = glm::mat4(1.0f);
 
-                    model = glm::scale(model, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+                    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.8, 0));
+                    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+                    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+
+                    model = model * testSubModel;
 
                     shader->setMat4("model", model);
 
@@ -1055,7 +776,7 @@ void TestRender::render()
         m_floorShader->setMat4("view", view);
 
 
-        glUniformMatrix4fv(glGetUniformLocation(m_floorShader->Program, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        m_floorShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
         float angle_x = - 3.14f / 2;
@@ -1073,7 +794,6 @@ void TestRender::render()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, m_depthMap);
         glUniform1i(glGetUniformLocation(m_floorShader->Program, "shadowMap"), 1);
-        //glBindTexture(GL_TEXTURE_2D, depthMap);
 
         glBindVertexArray(m_floorVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1116,11 +836,6 @@ void TestRender::render()
 
         std::sort(sorted.begin(), sorted.end(), [](auto& p1, auto& p2){return p1.first < p2.first;});
 
-//        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
-//        {
-//            it->second->Draw(camera, width, height);
-//        }
-
         for (auto it = sorted.rbegin(); it != sorted.rend(); ++it)
         {
             FuryObject* renderObject = it->second;
@@ -1142,33 +857,12 @@ void TestRender::render()
                 shader->setMat4("projection", projection);
                 shader->setMat4("view", view);
 
-                glUniformMatrix4fv(glGetUniformLocation(shader->Program, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+                shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
                 //float angle_x = -3.14 / 2;
 
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, renderObject->getPosition()); // translate it down so it's at the center of the scene
-
-                if (renderObject->physicsEnabled()) {
-                    reactphysics3d::Vector3 axis_rotate;
-                    reactphysics3d::decimal angle_rotate;
-                    renderObject->physicsBody()->getTransform().getOrientation().getRotationAngleAxis(angle_rotate, axis_rotate);
-                    if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
-                        model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                        model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                        model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                    }
-                    else {
-                        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-                    }
-                }
-                else {
-                    model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                    model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                    model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                }
-
+                glm::mat4 model = renderObject->getOpenGLTransform();
                 model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
                 shader->setMat4("model", model);
@@ -1184,11 +878,6 @@ void TestRender::render()
                 glActiveTexture(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_2D, m_depthMap);
                 glUniform1i(glGetUniformLocation(shader->Program, "shadowMap"), 1);
-                //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "diffuse_texture"), 0);
-                //glActiveTexture(GL_TEXTURE1);
-                //glBindTexture(GL_TEXTURE_2D, depthMap);
-                //glUniform1i(glGetUniformLocation((*(this->shader)).Program, "shadowMap"), 1);
-                //glBindTexture(GL_TEXTURE_2D, depthMap);
 
                 GLuint renderVAO = renderObject->VAO();
                 glBindVertexArray(renderVAO);
@@ -1212,9 +901,7 @@ void TestRender::render()
         sorted.clear();
 
 
-        // Swap the screen buffers
         // displayBuffer(m_depthMap);
-        //glfwSwapBuffers(m_window);
     }
 }
 
@@ -1223,7 +910,7 @@ void TestRender::createPBRTextures()
     glCullFace(GL_FRONT);
 
     // pbr: setup framebuffer
-            // ----------------------
+    // ----------------------
     unsigned int captureFBO;
     unsigned int captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -1382,8 +1069,7 @@ void TestRender::renderDepthMap()
 
     glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
     m_simpleDepthShader->Use();
-    glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
-    //simpleDepthShader.setMat4
+    m_simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
@@ -1393,9 +1079,7 @@ void TestRender::renderDepthMap()
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, m_ourModel_position); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(m_modelScale, m_modelScale, m_modelScale));	// it's a bit too big for our scene, so scale it down
-        //ourShader.setMat4("model", model);
-        //ourModel.Draw(ourShader);
-        glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        m_simpleDepthShader->setMat4("model", model);
         m_ourModel->Draw(*m_simpleDepthShader);
 
 
@@ -1407,75 +1091,10 @@ void TestRender::renderDepthMap()
             FuryObject* renderObject = testWorldObjects[i];
 
 
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, renderObject->getPosition()); // translate it down so it's at the center of the scene
-
-            if (renderObject->physicsEnabled()) {
-                reactphysics3d::Vector3 axis_rotate;
-                reactphysics3d::decimal angle_rotate;
-                renderObject->physicsBody()->getTransform().getOrientation().getRotationAngleAxis(angle_rotate, axis_rotate);
-                if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
-                    model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                    model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                    model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                }
-                else {
-                    model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-                }
-            }
-            else {
-                model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-            }
-
+            model = renderObject->getOpenGLTransform();
             model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
 
-            glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-            GLuint renderVAO = renderObject->VAO();
-            glBindVertexArray(renderVAO);
-
-            if (renderObject->isDrawElements())
-            {
-                glDrawElements(renderObject->renderType(), renderObject->vertexCount(), GL_UNSIGNED_INT, 0);
-            }
-            else
-            {
-                glDrawArrays(renderObject->renderType(), 0, renderObject->vertexCount());
-            }
-            glBindVertexArray(0);
-        }
-
-        {
-            FuryObject* renderObject = m_my_first_boxObject;
-
-
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, renderObject->getPosition()); // translate it down so it's at the center of the scene
-
-            if (renderObject->physicsEnabled()) {
-                reactphysics3d::Vector3 axis_rotate;
-                reactphysics3d::decimal angle_rotate;
-                renderObject->physicsBody()->getTransform().getOrientation().getRotationAngleAxis(angle_rotate, axis_rotate);
-                if (axis_rotate.x == 0 and axis_rotate.y == 0 and axis_rotate.z == 0) {
-                    model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                    model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                    model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-                }
-                else {
-                    model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-                }
-            }
-            else {
-                model = glm::rotate(model, renderObject->rotate().y, glm::vec3(0, 1, 0));
-                model = glm::rotate(model, renderObject->rotate().x, glm::vec3(1, 0, 0));
-                model = glm::rotate(model, renderObject->rotate().z, glm::vec3(0, 0, 1));
-            }
-
-            model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
-
-            glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            m_simpleDepthShader->setMat4("model", model);
 
             GLuint renderVAO = renderObject->VAO();
             glBindVertexArray(renderVAO);
@@ -1513,7 +1132,7 @@ void TestRender::renderDepthMap()
 
             model = glm::scale(model, glm::vec3(1, 1, 1));
 
-            glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            m_simpleDepthShader->setMat4("model", model);
 
 
             renderSphere();
@@ -1534,7 +1153,7 @@ void TestRender::renderDepthMap()
             }
             model = glm::scale(model, glm::vec3(1, 1, 1));
 
-            glUniformMatrix4fv(glGetUniformLocation(m_simpleDepthShader->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            m_simpleDepthShader->setMat4("model", model);
 
 
             renderSphere();
@@ -1556,6 +1175,182 @@ glm::mat4 TestRender::getLightSpaceMatrix()
         glm::vec3(0.0f, 1.0f, 0.0f));
 
     return lightProjection * lightView;
+}
+
+void TestRender::renderLoadingAndBindData(float _currentFrame)
+{
+    if (m_cubemap_is_loaded && m_ourModel_textures_loaded) {
+        m_is_loading = false;
+    }
+
+    if (m_cubemap_is_loaded && (!m_cubemap_bind)) {
+        QTime t_start = QTime::currentTime();
+        // Когда текстура загружена в память, мы её подключаем к openGL
+        m_cubemapTexture = TextureLoader::BindDataToCubemap(m_data_array, m_width_array, m_height_array);
+        m_cubemap_bind = true;
+        QTime t_end = QTime::currentTime();
+        Debug((ru("Кубическая карта:") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
+    }
+
+    if (m_ourModel_textures_loaded && (!m_ourModel_textures_bind)) {
+
+        QTime t_start = QTime::currentTime();
+
+        for (unsigned int i = 0; i < m_textures_to_loading.size(); i++) {
+            bool skipped = false;
+            for (unsigned int j = 0; j < i; j++)
+            {
+                QString name1 = m_textures_to_loading[i]->name;
+                QString name2 = m_textures_to_loading[j]->name;
+
+                if (name1 == name2) {
+                    m_textures_to_loading[i]->id = m_textures_to_loading[j]->id;
+                    skipped = true;
+                }
+            }
+            if (!skipped) {
+                m_textures_to_loading[i]->id = TextureLoader::BindDataToTexture(m_textures_to_loading[i]->data, m_ourModel_width_array[i], m_ourModel_height_array[i]);
+            }
+        }
+        m_ourModel_textures_bind = true;
+
+        QTime t_end = QTime::currentTime();
+        Debug((ru("Загрузка модели:\t") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
+    }
+
+    // Показываем экран загрузки
+    glm::vec3 color(0.0f, 120.0 / 255.0, 215.0 / 255.0);
+    color = color * (sin(_currentFrame / 1000) * 0.5f + 0.5f);
+    glClearColor(color.r, color.g, color.b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void TestRender::renderOldModel()
+{
+    m_ourShader->Use();
+
+
+    m_ourShader->setVec3("lightPos", m_dirlight_position);
+    m_ourShader->setVec3("viewPos", m_testWorld->camera()->position());
+    m_ourShader->setFloat("material.shininess", 32.0f);
+
+
+
+    m_ourShader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
+
+
+    // view/projection transformations
+    glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
+    glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
+    m_ourShader->setMat4("projection", projection);
+    m_ourShader->setMat4("view", view);
+
+    // render the loaded model
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, m_ourModel_position); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(m_modelScale, m_modelScale, m_modelScale));	// it's a bit too big for our scene, so scale it down
+    m_ourShader->setMat4("model", model);
+    m_ourModel->Draw(*m_ourShader);
+}
+
+void TestRender::renderPbrSpheres()
+{
+    glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
+    glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
+    glm::mat4 model = glm::mat4(1.0f);
+
+    m_pbrShader->Use();
+    m_pbrShader->setMat4("projection", projection);
+    m_pbrShader->setMat4("view", view);
+    m_pbrShader->setVec3("camPos", m_testWorld->camera()->position());
+
+
+
+    const reactphysics3d::Transform& physics_sphere_transform = physics_sphere->getTransform();
+    const reactphysics3d::Vector3& physics_sphere_position = physics_sphere_transform.getPosition();
+    auto physics_sphere_rotate = physics_sphere_transform.getOrientation();
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(physics_sphere_position.x, physics_sphere_position.y, physics_sphere_position.z)); // translate it down so it's at the center of the scene
+
+    reactphysics3d::Vector3 axis_rotate;
+    reactphysics3d::decimal angle_rotate;
+    physics_sphere_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
+    if (axis_rotate.x != 0 ||
+        axis_rotate.y != 0 ||
+        axis_rotate.z != 0)
+    {
+        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
+    }
+
+    model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
+
+    m_pbrShader->setMat4("model", model);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, m_gold_albedo_texture_id);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, m_gold_norm_texture_id);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, m_gold_metallic_texture_id);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, m_gold_roughness_texture_id);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, m_gold_ao_texture_id);
+
+    renderSphere();
+
+    const reactphysics3d::Transform& physics_sphere2_transform = physics_sphere2->getTransform();
+    const reactphysics3d::Vector3& physics_sphere_position2 = physics_sphere2_transform.getPosition();
+    auto physics_sphere2_rotate = physics_sphere2_transform.getOrientation();
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(physics_sphere_position2.x, physics_sphere_position2.y, physics_sphere_position2.z)); // translate it down so it's at the center of the scene
+
+    physics_sphere2_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
+    if (axis_rotate.x != 0 ||
+        axis_rotate.y != 0 ||
+        axis_rotate.z != 0)
+    {
+        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
+    }
+    model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
+
+    m_pbrShader->setMat4("model", model);
+
+    renderSphere();
+}
+
+void TestRender::updatePhysics()
+{
+    m_updateAccumulator += m_deltaTime;
+    float timeStep = 1.0 / 60.0;
+
+    while (m_updateAccumulator >= timeStep)
+    {
+
+        m_myFirstParticle->Tick(timeStep);
+        m_myFirstParticleSystem->Tick(timeStep);
+
+        our_physicsWorld->update(timeStep);
+
+        for (int i = 0; i < m_testWorld->getAllObjects().size(); ++i)
+        {
+            m_testWorld->getAllObjects()[i]->tick(timeStep);
+        }
+
+        m_carObject->tick(timeStep);
+
+
+        m_updateAccumulator -= timeStep;
+    }
 }
 
 void TestRender::displayBuffer(GLuint _bufferId)
@@ -1602,58 +1397,6 @@ void TestRender::displayBuffer(GLuint _bufferId)
 }
 
 
-// Is called whenever a key is pressed/released via GLFW
-
-void TestRender::on_key_callback(int key, int /*scancode*/, int /*action*/, int /*mode*/)
-{
-    if (key == Qt::Key_Escape)// && action == GLFW_PRESS)
-        //glfwSetWindowShouldClose(m_window, GL_TRUE);
-
-    if (key >= 0 && key < 1024)
-    {
-        //if (action == GLFW_PRESS)
-        {
-            keys[key] = true;
-            m_carObject->keyPressEvent(key);
-        }
-        //else if (action == GLFW_RELEASE)
-        {
-            keys[key] = false;
-            m_carObject->keyReleaseEvent(key);
-        }
-    }
-    // Изменение состояния мышки
-//    static bool last_KEY_E_state = false;
-//    if (keys[Qt::Key_E] == true) {
-//        if (last_KEY_E_state == false) {
-//            mouse_enable = !mouse_enable;
-//            if (mouse_enable) {
-//                //glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-//            }
-//            else {
-//                //glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-//            }
-//        }
-//    }
-    //static bool last_KEY_TAB_state = false;
-//    if (keys[Qt::Key_Tab] == true)
-//    {
-//        if (last_KEY_TAB_state == false)
-//        {
-//            if (m_testWorld->camera() == m_cameras[0])
-//            {
-//                m_testWorld->setCamera(m_cameras[1]);
-//            }
-//            else
-//            {
-//                m_testWorld->setCamera(m_cameras[0]);
-//            }
-//        }
-//    }
-
-    //pre_key_press_to_swap_mouse = keys[GLFW_KEY_E];
-    //last_KEY_E_state = keys[Qt::Key_E];
-}
 
 void TestRender::do_movement()
 {
@@ -1673,38 +1416,10 @@ void TestRender::do_movement()
         m_testWorld->camera()->processKeyboard(Down, m_deltaTime);
 }
 
-void TestRender::on_mouse_callback(double xpos, double ypos)
-{
-    static bool is_first_call = true;
-    if (is_first_call) {
-        lastX = (GLfloat)xpos;
-        lastY = (GLfloat)ypos;
-        is_first_call = false;
-    }
-
-    GLfloat xoffset = (GLfloat)(xpos - lastX);
-    GLfloat yoffset = (GLfloat)(lastY - ypos);  // Reversed since y-coordinates go from bottom to left
-
-    lastX = (GLfloat)xpos;
-    lastY = (GLfloat)ypos;
-
-    //if (mouse_enable) {
-        m_testWorld->camera()->processMouseMovement(xoffset, yoffset);
-    //}
-}
-
-void TestRender::on_scroll_callback(double /*xoffset*/, double yoffset)
-{
-    m_testWorld->camera()->processMouseScroll((GLfloat)yoffset);
-}
-
 
 
 void TestRender::loadPBR()
 {
-//    QVector<QString> pbr_material_names{ "pbr_gold", "pbr_grass", "pbr_iron", "pbr_plastic", "pbr_wall" };
-//    QString current_pbr_material_name = pbr_material_names[0];
-
     int part_w, part_h;
     auto data_particle_texture = TextureLoader::LoadDataFromFile("awesomeface.png", part_w, part_h);
     m_particle_texture_id = TextureLoader::BindDataToTexture(data_particle_texture, part_w, part_h);
@@ -1780,7 +1495,6 @@ void TestRender::loadModel()
 
     QMutexLocker modelLocker(&loadModelMutex);
     m_ourModel = new Model("objects/backpack/backpack.obj");
-    // m_ourModel = new Model("objects/car2/car.obj");
     modelLocker.unlock();
 
 
@@ -1885,7 +1599,6 @@ void TestRender::initSkyboxModel()
     };
 
     // skybox VAO
-    /*unsigned int skyboxVAO, skyboxVBO;*/
     glGenVertexArrays(1, &m_skyboxVAO);
     glGenBuffers(1, &m_skyboxVBO);
     glBindVertexArray(m_skyboxVAO);
@@ -1922,20 +1635,15 @@ void TestRender::initSkyboxModel()
 void TestRender::initDepthMapFBO()
 {
     // Создадим буфер глубины для теней
-    /*unsigned int depthMapFBO;*/
     glGenFramebuffers(1, &m_depthMapFBO);
 
     // Создадим текстуру для буфера
-    /*const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;*/
 
-    /*unsigned int depthMap;*/
     glGenTextures(1, &m_depthMap);
     glBindTexture(GL_TEXTURE_2D, m_depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -2110,14 +1818,23 @@ void TestRender::initRaceMap()
         wallPos[i].x *= 15;
         wallPos[i].z *= 15;
         wallSize[i] *= 15;
-        FuryBoxObject* wall = new FuryBoxObject(wallPos[i],
+        FuryBoxObject* wall = new FuryBoxObject(m_testWorld,
+                                                wallPos[i],
                                                 glm::vec3(wallSize[i], 2.5, 0.5),
                                                 glm::vec3(0, wallRotate[i], 0));
-        wall->Setup_physics(*own_physicsCommon, our_physicsWorld, reactphysics3d::BodyType::STATIC);
+        wall->Setup_physics(reactphysics3d::BodyType::STATIC);
         wall->setName("raceWall");
         wall->physicsBody()->setUserData(wall);
         wall->setTextureName("raceWall");
         m_testWorld->addObject(wall);
+
+        if (!m_materialManager->materialExist("raceWallMaterial"))
+        {
+            FuryMaterial* mat = m_materialManager->createMaterial("raceWallMaterial");
+            mat->setDiffuseTexture("Diffuse_raceWall");
+        }
+
+        wall->setMaterialName("raceWallMaterial");
     }
 }
 
@@ -2220,83 +1937,6 @@ void renderSphere()
     glBindVertexArray(sphereVAO);
     glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 }
-
-
-// renderCube() renders a 1x1 3D cube in NDC.
-// -------------------------------------------------
-unsigned int cubeVAO = 0;
-unsigned int cubeVBO = 0;
-void renderCube_2()
-{
-    // initialize (if necessary)
-    if (cubeVAO == 0)
-    {
-        float vertices[] = {
-            // back face
-            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-             1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
-             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-            -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-            // front face
-            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-             1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-            -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-            // left face
-            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-            -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-            -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-            // right face
-             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-             1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
-             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-             1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
-            // bottom face
-            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-             1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-            -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-            // top face
-            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-             1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-             1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
-             1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-            -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
-        };
-        glGenVertexArrays(1, &cubeVAO);
-        glGenBuffers(1, &cubeVBO);
-        // fill buffer
-        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        // link vertex attributes
-        glBindVertexArray(cubeVAO);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-    }
-    // render Cube
-    glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
-}
-
 
 
 // renderQuad() renders a 1x1 XY quad in NDC

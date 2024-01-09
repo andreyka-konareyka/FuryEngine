@@ -36,6 +36,7 @@
 #include "FuryMaterial.h"
 #include "FuryModel.h"
 #include "FuryModelManager.h"
+#include "FuryMaterialManager.h"
 
 
 #include <QOpenGLWidget>
@@ -84,11 +85,12 @@ protected:
     void keyPressEvent(QKeyEvent* _event) override;
     void keyReleaseEvent(QKeyEvent* _event) override;
 
+private slots:
+    //! Слот обновления фрейма
+    void updateGL();
+
 
 private:
-    QTimer* m_timer;
-
-
     int m_width;
     int m_height;
     const char* m_title;
@@ -96,7 +98,6 @@ private:
     float m_lastFrame;
     float lastX;
     float lastY;
-    bool keys[1024] = { false };
     QMap<int, bool> m_keys;
 
     // Mouse enable
@@ -106,10 +107,6 @@ private:
     void InitGL();
     void render();
 
-    // Function prototypes
-    void on_key_callback(int key, int scancode, int action, int mode);
-    void on_mouse_callback(double xpos, double ypos);
-    void on_scroll_callback(double xoffset, double yoffset);
     void do_movement();
 
 private:
@@ -134,10 +131,15 @@ private:
     void renderDepthMap();
     glm::mat4 getLightSpaceMatrix();
 
+    void renderLoadingAndBindData(float _currentFrame);
+    void renderOldModel();
+    void renderPbrSpheres();
+
+    void updatePhysics();
+
     void displayBuffer(GLuint _bufferId);
 
 
-    FuryBoxObject* m_my_first_boxObject;
     FuryBoxObject* m_bigFloor;
     //QVector<FuryBoxObject*> m_new_floor;
     QVector<FuryBoxObject*> m_test_physics_cubes;
@@ -214,6 +216,7 @@ private:
 
     FuryTextureManager* m_textureManager;
     FuryModelManager* m_modelManager;
+    FuryMaterialManager* m_materialManager;
     CarObject* m_carObject = nullptr;
 
 private:

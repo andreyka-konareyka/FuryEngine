@@ -2,6 +2,7 @@
 
 #include "FuryLogger.h"
 #include "FuryMaterial.h"
+#include "FuryMaterialManager.h"
 
 #include <QFileInfo>
 
@@ -28,11 +29,11 @@ FuryModel::~FuryModel()
     }
 }
 
-void FuryModel::draw(Shader *_shader)
+void FuryModel::draw(Shader *_shader, FuryMaterial *_material)
 {
     for (FuryMesh* mesh : m_meshes)
     {
-        mesh->draw(_shader);
+        mesh->draw(_shader, _material);
     }
 }
 
@@ -146,9 +147,18 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene)
     }
 
     // Обработка материала
+    FuryMaterialManager* materialManager = FuryMaterialManager::instance();
     aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
-    FuryMaterial* furyMaterial = FuryMaterial::createFromAssimp(material, m_directory);
+    QString materialName = "Model:" + ru(material->GetName().C_Str());
 
+    if (!materialManager->materialExist(materialName))
+    {
+        FuryMaterial* modelMaterial = FuryMaterial::createFromAssimp(material, m_directory);
+        FuryMaterial* material = materialManager->createMaterial(materialName);
+        *material = *modelMaterial;
+    }
+
+    FuryMaterial* furyMaterial = materialManager->materialByName(materialName);
 
     // Возвращаем созданный меш
     return new FuryMesh(vertices, indices, furyMaterial);

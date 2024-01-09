@@ -32,6 +32,7 @@ SOURCES += \
     src/FuryLogger.cpp \
     src/FuryMainWindow.cpp \
     src/FuryMaterial.cpp \
+    src/FuryMaterialManager.cpp \
     src/FuryMesh.cpp \
     src/FuryModel.cpp \
     src/FuryModelManager.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     src/FuryLogger.h \
     src/FuryMainWindow.h \
     src/FuryMaterial.h \
+    src/FuryMaterialManager.h \
     src/FuryMesh.h \
     src/FuryModel.h \
     src/FuryModelManager.h \

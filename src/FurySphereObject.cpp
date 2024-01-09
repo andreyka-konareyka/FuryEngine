@@ -2,9 +2,8 @@
 
 #include <QVector>
 
-// GLEW
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include "Shader.h"
+#include "FuryWorld.h"
 
 
 Shader* initSphereShader();
@@ -14,10 +13,12 @@ static GLuint sphereVBO = 0;
 static unsigned int sphereVertexCount = 0;
 
 
-FurySphereObject::FurySphereObject() : FurySphereObject(glm::vec3(0, 0, 0)) {}
-FurySphereObject::FurySphereObject(const glm::vec3& _position) : FurySphereObject(_position, 1) {}
-FurySphereObject::FurySphereObject(const glm::vec3& _position, double _scale) :
-    FuryObject(_position)
+FurySphereObject::FurySphereObject(FuryWorld *_world) :
+    FurySphereObject(_world, glm::vec3(0, 0, 0)) {}
+FurySphereObject::FurySphereObject(FuryWorld *_world, const glm::vec3& _position) :
+    FurySphereObject(_world, _position, 1) {}
+FurySphereObject::FurySphereObject(FuryWorld *_world, const glm::vec3& _position, double _scale) :
+    FuryObject(_world, _position)
 {
     setScales(glm::vec3(_scale, _scale, _scale));
     setShader(initSphereShader());
@@ -28,34 +29,31 @@ FurySphereObject::FurySphereObject(const glm::vec3& _position, double _scale) :
     m_vertexCount = sphereVertexCount;
     setRenderType(GL_TRIANGLE_STRIP);
     setIsDrawElements(true);
+
+    setModelName("sphere");
+
+
+    const rp3d::Vector3& pos = physicsBody()->getTransform().getPosition();
+    rp3d::Quaternion rot = rp3d::Quaternion::fromEulerAngles(rotate().x, rotate().y, rotate().z);
+    rp3d::Transform transform(pos, rot);
+    physicsBody()->setTransform(transform);
 }
 
 void FurySphereObject::tick(double /*_dt*/)
 {
-    if (physicsEnabled())
-    {
-        const reactphysics3d::Transform& physics_box_transform = physicsBody()->getTransform();
-        const reactphysics3d::Vector3& physics_box_position = physics_box_transform.getPosition();
-        const reactphysics3d::Quaternion& physics_box_rotate = physics_box_transform.getOrientation();
+    const reactphysics3d::Transform& physics_box_transform = physicsBody()->getTransform();
+    const reactphysics3d::Vector3& physics_box_position = physics_box_transform.getPosition();
+    const reactphysics3d::Quaternion& physics_box_rotate = physics_box_transform.getOrientation();
 
-        this->m_position = glm::vec3(physics_box_position.x, physics_box_position.y, physics_box_position.z);
-        setRotate(glm::vec3(physics_box_rotate.x, physics_box_rotate.y, physics_box_rotate.z));
-    }
+    this->m_position = glm::vec3(physics_box_position.x, physics_box_position.y, physics_box_position.z);
+    setRotate(glm::vec3(physics_box_rotate.x, physics_box_rotate.y, physics_box_rotate.z));
 }
 
-void FurySphereObject::Setup_physics(reactphysics3d::PhysicsCommon& _physCommon, reactphysics3d::PhysicsWorld* _physWorld, reactphysics3d::BodyType _type)
+void FurySphereObject::Setup_physics(reactphysics3d::BodyType _type)
 {
-    setPhysicsEnabled(true);
-
-    reactphysics3d::Vector3 position_body(this->m_position.x, this->m_position.y, this->m_position.z);
-    reactphysics3d::Quaternion orientation_body = reactphysics3d::Quaternion::fromEulerAngles(rotate().x, rotate().y, rotate().z);
-    reactphysics3d::Transform transform_body(position_body, orientation_body);
-
-    setPhysicsBody(_physWorld->createRigidBody(transform_body));
-
     physicsBody()->setType(_type);
 
-    reactphysics3d::SphereShape* sphereShape = _physCommon.createSphereShape(scales().x);
+    reactphysics3d::SphereShape* sphereShape = world()->physicsCommon()->createSphereShape(scales().x);
     reactphysics3d::Transform transform_shape = reactphysics3d::Transform::identity();
     reactphysics3d::Collider* collider1;
     collider1 = physicsBody()->addCollider(sphereShape, transform_shape);
@@ -166,7 +164,7 @@ Shader* initSphereShader()
 
     if (default_shader == nullptr)
     {
-        default_shader = new Shader("multiple_lights.vs", "multiple_lights.fs");
+        default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
     }
 
     return default_shader;

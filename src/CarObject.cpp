@@ -1,12 +1,15 @@
 #include "CarObject.h"
 
 #include "FuryRaycastCallback.h"
+#include "FuryWorld.h"
+#include "FuryMaterial.h"
+#include "FuryMaterialManager.h"
 
 #include <QString>
 
 
-CarObject::CarObject(const glm::vec3& _position, Shader *_shader) :
-    FuryObject(_position),
+CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_shader) :
+    FuryObject(_world, _position),
     m_objectBody(nullptr),
     m_springLenght(0.4),
     m_springK(500),
@@ -16,27 +19,37 @@ CarObject::CarObject(const glm::vec3& _position, Shader *_shader) :
     m_forward(0),
     m_right(0)
 {
-    m_objectBody = new FuryBoxObject(_position, 6, 1, 3);
+    m_objectBody = new FuryBoxObject(world(), _position, 6, 1, 3);
     m_objectsForDraw.push_back(m_objectBody);
 
     m_objectBody->setTextureName("carBody");
     m_objectBody->setShader(_shader);
 
     float sphereRadius = 0.1;
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, 1), sphereRadius));
+    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(2, -0.5, -1), sphereRadius));
+    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, -1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, 1), sphereRadius));
+    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
-    m_objectWheels.push_back(new FurySphereObject(_position + glm::vec3(-2, -0.5, -1), sphereRadius));
+    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, -1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
 
     for (int i = 0; i < 100; ++i)
     {
-        m_objectsDebugRays.push_back(new FurySphereObject(_position + glm::vec3(30, 0, 0), 0.25));
-        m_objectsDebugRays.last()->setTextureName("rayCastBall");
-        m_objectsForDraw.push_back(m_objectsDebugRays.last());
+        m_objectsDebugRays.push_back(new FurySphereObject(world(), _position + glm::vec3(30, 0, 0), 0.25));
+        m_objectsDebugRays.last()->setTextureName("Diffuse_rayCastBall");
+//        m_objectsForDraw.push_back(m_objectsDebugRays.last());
+
+        FuryMaterialManager* materialManager = FuryMaterialManager::instance();
+
+        if (!FuryMaterialManager::instance()->materialExist("rayCastBall"))
+        {
+            FuryMaterial* mat = materialManager->createMaterial("rayCastBall");
+            mat->setDiffuseTexture("Diffuse_rayCastBall");
+        }
+
+        m_objectsDebugRays.last()->setMaterialName("rayCastBall");
     }
 }
 
@@ -90,7 +103,7 @@ void CarObject::tick(double _dt)
             //std::cout << "raycast " << i << "\n";
 
             // Raycast test
-            m_physicsWorld->raycast(ray, &callbackObject);
+            world()->physicsWorld()->raycast(ray, &callbackObject);
 
             if (abs(1 - callbackObject.m_lastHitFraction) <= rp3d::MACHINE_EPSILON)
             {
@@ -193,7 +206,7 @@ void CarObject::tick(double _dt)
         //std::cout << "raycast " << i << "\n";
 
         // Raycast test
-        m_physicsWorld->raycast(ray, &callbackObject);
+        world()->physicsWorld()->raycast(ray, &callbackObject);
 
 
         glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
@@ -249,12 +262,9 @@ void CarObject::resetKeyInput()
     m_right = 0;
 }
 
-void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactphysics3d::PhysicsWorld* phys_world, reactphysics3d::BodyType type)
+void CarObject::Setup_physics(reactphysics3d::BodyType type)
 {
-    m_physicsWorld = phys_world;
-
-
-    m_objectBody->Setup_physics(phys_common, phys_world, type);
+    m_objectBody->Setup_physics(type);
 
     m_objectBody->setName("carBody");
     m_objectBody->physicsBody()->setUserData(m_objectBody);
@@ -262,7 +272,7 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        m_objectWheels[i]->Setup_physics(phys_common, phys_world, type);
+        m_objectWheels[i]->Setup_physics(type);
     }
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
@@ -278,7 +288,7 @@ void CarObject::Setup_physics(reactphysics3d::PhysicsCommon& phys_common, reactp
         jointInfo.isCollisionEnabled = false;
 
         // Create the hinge joint in the physics world
-        phys_world->createJoint(jointInfo);
+        world()->physicsWorld()->createJoint(jointInfo);
     }
 }
 

@@ -25,10 +25,11 @@ public:
     ~FuryModel();
 
     /*!
-     * \brief Отрисовка
+     * \brief Отрисовка с заданным материалом
      * \param[in] _shader - Шейдер
+     * \param[in] _material - Материал. Если nullptr, то берётся материал из меша
      */
-    void draw(Shader* _shader);
+    void draw(Shader* _shader, FuryMaterial* _material = nullptr);
 
     inline const QString& path() const
     { return m_path; }

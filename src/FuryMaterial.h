@@ -28,6 +28,15 @@ public:
     FuryMaterial(const glm::vec3& _diffuseColor,
                  const glm::vec3& _specularColor);
 
+    inline void setDiffuseTexture(const QString& _diffuseTexture)
+    { m_diffuseTexture = _diffuseTexture; }
+
+    inline void setSpecularTexture(const QString& _specularTexture)
+    { m_specularTexture = _specularTexture; }
+
+    inline void setNormalTexture(const QString& _normalTexture)
+    { m_normalTexture = _normalTexture; }
+
     /*!
      * \brief Установить материал в шейдер
      * \param[in] _shader - Шейдер
@@ -61,8 +70,12 @@ private:
     //! Непрозрачность материала
     float m_opacity;
 
-    //! Список текстур
-    QList<QString> m_textures;
+    //! Текстура рассеянного цвета
+    QString m_diffuseTexture;
+    //! Текстура зеркального цвета
+    QString m_specularTexture;
+    //! Текстура нормалей
+    QString m_normalTexture;
 };
 
 #endif // FURYMATERIAL_H

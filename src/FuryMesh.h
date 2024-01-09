@@ -43,10 +43,11 @@ public:
              FuryMaterial* _material);
 
     /*!
-     * \brief Отрисовка меша
+     * \brief Отрисовка меша с заданным материалом
      * \param[in] _shader - Шейдер
+     * \param[in] _material - Материал. Если nullptr, то берётся из меша
      */
-    void draw(Shader* _shader);
+    void draw(Shader* _shader, FuryMaterial* _material);
 
     //! Инициализация меша
     void setupMesh();

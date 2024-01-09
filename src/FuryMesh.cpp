@@ -14,10 +14,17 @@ FuryMesh::FuryMesh(const QVector<Vertex> &_vertices,
 
 }
 
-void FuryMesh::draw(Shader *_shader)
+void FuryMesh::draw(Shader *_shader, FuryMaterial *_material)
 {
     // Установка материала
-    m_material->setShaderMaterial(_shader);
+    if (_material == nullptr)
+    {
+        m_material->setShaderMaterial(_shader);
+    }
+    else
+    {
+        _material->setShaderMaterial(_shader);
+    }
 
     // Отрисовка
     glBindVertexArray(VAO);

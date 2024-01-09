@@ -1,10 +1,18 @@
 #include "FuryWorld.h"
 
+#include "FuryLogger.h"
+#include "FuryObject.h"
+#include "Camera.h"
 
-FuryWorld::FuryWorld() :
+#include <reactphysics3d/reactphysics3d.h>
+
+
+FuryWorld::FuryWorld(reactphysics3d::PhysicsCommon *_physicsCommon) :
+    m_physicsCommon(_physicsCommon),
     m_currentCamera(nullptr)
 {
     Debug(ru("Создание игрового мира"));
+    m_physicsWorld = m_physicsCommon->createPhysicsWorld();
 }
 
 FuryWorld::~FuryWorld()
@@ -18,6 +26,8 @@ FuryWorld::~FuryWorld()
             delete object;
         }
     }
+
+    m_physicsCommon->destroyPhysicsWorld(m_physicsWorld);
 }
 
 void FuryWorld::tick(double _dt)

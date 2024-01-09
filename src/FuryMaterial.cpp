@@ -6,7 +6,9 @@
 #include "Shader.h"
 #include "FuryTextureManager.h"
 
-FuryMaterial::FuryMaterial()
+FuryMaterial::FuryMaterial() :
+    FuryMaterial(glm::vec3(1, 1, 1),
+                 glm::vec3(1, 1, 1))
 {
 
 }
@@ -35,42 +37,31 @@ void FuryMaterial::setShaderMaterial(Shader *_shader)
     bool specularTextureEnabled = false;
     bool normalTextureEnabled = false;
 
-    QString diffuseStart = aiTextureTypeToString(aiTextureType_DIFFUSE);
-    diffuseStart.append("_");
-    QString specularStart = aiTextureTypeToString(aiTextureType_SPECULAR);
-    specularStart.append("_");
-    QString diffuseRoughnessStart = aiTextureTypeToString(aiTextureType_DIFFUSE_ROUGHNESS);
-    diffuseRoughnessStart.append("_");
-    QString heightStart = aiTextureTypeToString(aiTextureType_HEIGHT);
-    heightStart.append("_");
-
-    for (const QString& textureName : m_textures)
+    if (!m_diffuseTexture.isEmpty())
     {
-        if (textureName.startsWith(diffuseStart))
-        {
-            diffuseTextureEnabled = true;
+        diffuseTextureEnabled = true;
 
-            GLuint textureId = FuryTextureManager::instance()->textureByName(textureName).idOpenGL();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureId);
-        }
-        else if (textureName.startsWith(specularStart)
-                 || textureName.startsWith(diffuseRoughnessStart))
-        {
-            specularTextureEnabled = true;
+        GLuint textureId = FuryTextureManager::instance()->textureByName(m_diffuseTexture).idOpenGL();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+    }
 
-            GLuint textureId = FuryTextureManager::instance()->textureByName(textureName).idOpenGL();
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, textureId);
-        }
-        else if (textureName.startsWith(heightStart))
-        {
-            normalTextureEnabled = true;
+    if (!m_specularTexture.isEmpty())
+    {
+        specularTextureEnabled = true;
 
-            GLuint textureId = FuryTextureManager::instance()->textureByName(textureName).idOpenGL();
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, textureId);
-        }
+        GLuint textureId = FuryTextureManager::instance()->textureByName(m_specularTexture).idOpenGL();
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+    }
+
+    if (!m_normalTexture.isEmpty())
+    {
+        normalTextureEnabled = true;
+
+        GLuint textureId = FuryTextureManager::instance()->textureByName(m_normalTexture).idOpenGL();
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureId);
     }
 
     _shader->setInt("material.diffuseTextureEnabled", diffuseTextureEnabled);
@@ -159,7 +150,21 @@ FuryMaterial *FuryMaterial::createFromAssimp(const aiMaterial *_assimpMaterial,
 
             QString textureType = aiTextureTypeToString(type);
             QString loadTextureName = textureType + "_" + ru(textureName.C_Str());
-            result->m_textures.append(loadTextureName);
+
+            if ((aiTextureType)i == aiTextureType_DIFFUSE)
+            {
+                result->setDiffuseTexture(loadTextureName);
+            }
+
+            if ((aiTextureType)i == aiTextureType_SPECULAR)
+            {
+                result->setSpecularTexture(loadTextureName);
+            }
+
+            if ((aiTextureType)i == aiTextureType_HEIGHT)
+            {
+                result->setNormalTexture(loadTextureName);
+            }
 
             FuryTextureManager* texManager = FuryTextureManager::instance();
             texManager->addTextureFromAnotherThread(_path + textureName.C_Str(),
@@ -169,19 +174,3 @@ FuryMaterial *FuryMaterial::createFromAssimp(const aiMaterial *_assimpMaterial,
 
     return result;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

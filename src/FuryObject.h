@@ -2,33 +2,41 @@
 #define FURYOBJECT_H
 
 
-#include <string>
-#include <vector>
-#include <map>
+#define GLEW_STATIC
+#include <GL/glew.h>
 
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <reactphysics3d/reactphysics3d.h>
-
-#include "Camera.h"
-#include "Shader.h"
-
 #include <QString>
+
+class Camera;
+class Shader;
+class FuryWorld;
+class FuryModel;
+
+namespace reactphysics3d
+{
+    class RigidBody;
+}
+
 
 //! Класс объекта 3D-сцены
 class FuryObject {
 public:
-    //! Конструктор
-    FuryObject();
+    /*!
+     * \brief Конструктор
+     * \param[in] _world - Мир, к которому принадлежит объект
+     */
+    FuryObject(FuryWorld* _world);
 
     /*!
      * \brief Конструктор
      * \param[in] _position - Позиция
      */
-    FuryObject(const glm::vec3& _position);
+    FuryObject(FuryWorld* _world, const glm::vec3& _position);
 
     //! Деструктор
     virtual ~FuryObject();
@@ -38,18 +46,6 @@ public:
      * \param[in] _dt - Время от прошлого обновления
      */
     virtual void tick(double /*_dt*/) {};
-
-    /*!
-     * \brief Отрисовка объекта
-     * \param[in] _camera - Камера
-     * \param[in] _windowWidth - Ширина окна
-     * \param[in] _windowHeight - Высота окна
-     * \param[in] _dirlight - Направление света
-     * \param[in] _shadowMap - Карта теней
-     * \param[in] _depthMap - Карта глубины
-     */
-    virtual void draw(Camera* /*_camera*/, int /*_windowWidth*/, int /*_windowHeight*/,
-                      glm::vec3& /*_dirlight*/, glm::mat4& /*_shadowMap*/, GLuint /*_depthMap*/) {};
 
     /*!
      * \brief Событие нажатия на кнопку
@@ -74,8 +70,7 @@ public:
      * \brief Установка позиции
      * \param[in] _position - Позиция
      */
-    inline void setPosition(const glm::vec3& _position)
-    { m_position = _position; }
+    void setPosition(const glm::vec3& _position);
 
     /*!
      * \brief Получение VAO
@@ -139,20 +134,6 @@ public:
      */
     inline void setShader(Shader* _shader)
     { m_shader = _shader; }
-
-    /*!
-     * \brief Получение признака симуляции физики
-     * \return Возвращает признак симуляции физики
-     */
-    inline bool physicsEnabled() const
-    { return m_physicsEnabled; }
-
-    /*!
-     * \brief Установка признака симуляции физики
-     * \param[in] _physicsEnabled - Признак симуляции физики
-     */
-    inline void setPhysicsEnabled(bool _physicsEnabled)
-    { m_physicsEnabled = _physicsEnabled; }
 
     /*!
      * \brief Получение физического тела
@@ -238,6 +219,50 @@ public:
     inline void setName(const QString& _name)
     { m_name = _name; }
 
+    /*!
+     * \brief Получить матрицу модели (model) для объекта
+     * \return Возвращает матрицу модели (model) для объекта
+     */
+    virtual glm::mat4 getOpenGLTransform() const;
+
+    /*!
+     * \brief Получить мир, к которому принадлежит объект
+     * \return Возвращает мир, к которому принадлежит объект
+     */
+    inline FuryWorld* world() const
+    { return m_world; }
+
+    /*!
+     * \brief Установка названия модели для ототбражения
+     * \param[in] _modelName - Название модели для отображения
+     */
+    inline void setModelName(const QString& _modelName)
+    { m_modelName = _modelName; }
+
+    /*!
+     * \brief Получить название модели для отображения
+     * \return Возвращает название модели для отображения
+     */
+    inline const QString& modelName() const
+    { return m_modelName; }
+
+    //! Отрисовка объекта
+    virtual void draw();
+
+    /*!
+     * \brief Установка названия материала
+     * \param[in] _materialName - Название материала
+     */
+    inline void setMaterialName(const QString& _materialName)
+    { m_materialName = _materialName; }
+
+    /*!
+     * \brief Получить название материала
+     * \return Возвращает название материала
+     */
+    inline const QString& materialName() const
+    { return m_materialName; }
+
 
 protected:
     //! Позиция
@@ -253,8 +278,6 @@ protected:
 private:
     //! Шейдер
     Shader* m_shader{ nullptr };
-    //! Признак симуляции физики
-    bool m_physicsEnabled = false;
     //! Физическое тело
     reactphysics3d::RigidBody* m_physicsBody = nullptr;
 
@@ -274,6 +297,13 @@ private:
 
     //! Название объекта
     QString m_name;
+
+    //! Мир, к которому принадлежит объект
+    FuryWorld* m_world;
+    //! Название модели для отображения
+    QString m_modelName;
+    //! Название материала объекта
+    QString m_materialName;
 };
 
 #endif // FURYOBJECT_H
