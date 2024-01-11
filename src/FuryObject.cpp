@@ -27,6 +27,7 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
 
     m_physicsBody = m_world->physicsWorld()->createRigidBody(objectTransform);
     m_physicsBody->setType(rp3d::BodyType::STATIC);
+    m_physicsBody->setUserData(this);
 }
 
 FuryObject::~FuryObject()

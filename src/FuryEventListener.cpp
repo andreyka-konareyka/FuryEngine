@@ -55,3 +55,72 @@ void FuryEventListener::onContact(const CallbackData &_callbackData)
         }
     }
 }
+
+void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::CallbackData &_callbackData)
+{
+    for (uint i = 0; i < _callbackData.getNbOverlappingPairs(); ++i)
+    {
+        reactphysics3d::OverlapCallback::OverlapPair overlapPair
+                =_callbackData.getOverlappingPair(i);
+        reactphysics3d::OverlapCallback::OverlapPair::EventType eventType
+                = overlapPair.getEventType();
+
+        if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStay)
+        {
+            // Нам интересно только вход и выход из триггера
+            continue;
+        }
+
+
+        FuryObject* tempObj1 = static_cast<FuryObject*>(overlapPair.getBody1()->getUserData());
+        FuryObject* tempObj2 = static_cast<FuryObject*>(overlapPair.getBody2()->getUserData());
+
+        if (tempObj2->name() == "carBody")
+        {
+            FuryObject* tempObj3 = tempObj1;
+            tempObj1 = tempObj2;
+            tempObj2 = tempObj3;
+        }
+        else if (tempObj1->name() != "carBody")
+        {
+            // Столкновение колёс, их не считаем
+            continue;
+        }
+
+
+
+
+        if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStart)
+        {
+            qDebug() << "EventType::OverlapStart";
+            tempObj2->setTextureName("greenCheckBox");
+        }
+        else if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapExit)
+        {
+            qDebug() << "EventType::OverlapExit";
+            tempObj2->setTextureName("redCheckBox");
+        }
+        else
+        {
+            qDebug() << "EventType::OverlapStay";
+        }
+
+        if (tempObj1 != nullptr)
+        {
+            qDebug() << "body1" << tempObj1->name();
+        }
+        else
+        {
+            qDebug() << "body1" << "nullptr";
+        }
+
+        if (tempObj2 != nullptr)
+        {
+            qDebug() << "body2" << tempObj2->name();
+        }
+        else
+        {
+            qDebug() << "body2" << "nullptr";
+        }
+    }
+}

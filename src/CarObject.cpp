@@ -23,6 +23,7 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_objectsForDraw.push_back(m_objectBody);
 
     m_objectBody->setTextureName("carBody");
+    m_objectBody->setName("carBody");
     m_objectBody->setShader(_shader);
 
     float sphereRadius = 0.1;
@@ -266,13 +267,9 @@ void CarObject::Setup_physics(reactphysics3d::BodyType type)
 {
     m_objectBody->Setup_physics(type);
 
-    m_objectBody->setName("carBody");
-    m_objectBody->physicsBody()->setUserData(m_objectBody);
-
-
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        m_objectWheels[i]->Setup_physics(type);
+        m_objectWheels[i]->physicsBody()->setType(type);
     }
 
     for (int i = 0; i < m_objectWheels.size(); ++i)

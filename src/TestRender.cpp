@@ -451,36 +451,6 @@ void TestRender::init() {
     m_modelManager->addModel("objects/car2/car.obj", "backpack2");
 
     {
-        FuryBoxObject* object = new FuryBoxObject(m_testWorld,
-                                                  glm::vec3(-7.5, -1.25, 22.5),
-                                                  glm::vec3(13, 2.5, 0.5),
-                                                  glm::vec3(0, 3.14/2, 0));
-        object->setTextureName("redCheckBox");
-        m_testWorld->addTransparentObject(object);
-
-        object = new FuryBoxObject(m_testWorld,
-                                   glm::vec3(-5.5, -1.25, 22.5),
-                                   glm::vec3(13, 2.5, 0.5),
-                                   glm::vec3(0, 3.14/2, 0));
-        object->setTextureName("greenCheckBox");
-        m_testWorld->addTransparentObject(object);
-
-        object = new FuryBoxObject(m_testWorld,
-                                   glm::vec3(-9.5, -1.25, 22.5),
-                                   glm::vec3(13, 2.5, 0.5),
-                                   glm::vec3(0, 3.14/2, 0));
-        object->setTextureName("redCheckBox");
-        m_testWorld->addTransparentObject(object);
-
-        object = new FuryBoxObject(m_testWorld,
-                                   glm::vec3(-11.5, -1.25, 22.5),
-                                   glm::vec3(13, 2.5, 0.5),
-                                   glm::vec3(0, 3.14/2, 0));
-        object->setTextureName("greenCheckBox");
-        m_testWorld->addTransparentObject(object);
-    }
-
-    {
         // initShaderInform
 
         QList<Shader*> shaders({
@@ -1331,7 +1301,7 @@ void TestRender::renderPbrSpheres()
 void TestRender::updatePhysics()
 {
     m_updateAccumulator += m_deltaTime;
-    float timeStep = 1.0 / 60.0;
+    float timeStep = 1.0f / 60.0f;
 
     while (m_updateAccumulator >= timeStep)
     {
@@ -1835,6 +1805,172 @@ void TestRender::initRaceMap()
         }
 
         wall->setMaterialName("raceWallMaterial");
+    }
+
+
+    QList<glm::vec3> checkBoxPos({
+                                     glm::vec3(0, -1.15, 1.5),
+                                     glm::vec3(1, -1.15, 1.5),
+                                     glm::vec3(1.5, -1.15, 1),
+                                     glm::vec3(2, -1.15, 0.5),
+                                     glm::vec3(3, -1.15, 0.5),
+                                     glm::vec3(3.5, -1.15, 0),
+                                     glm::vec3(3.5, -1.15, -1),
+                                     glm::vec3(3, -1.15, -1.5),
+                                     glm::vec3(2.5, -1.15, -1),
+                                     glm::vec3(2, -1.15, -0.5),
+                                     glm::vec3(1.5, -1.15, -1),
+                                     glm::vec3(1.5, -1.15, -2),
+                                     glm::vec3(2, -1.15, -2.5),
+                                     glm::vec3(3, -1.15, -2.5),
+                                     glm::vec3(4, -1.15, -2.5),
+                                     glm::vec3(4.5, -1.15, -2),
+                                     glm::vec3(4.5, -1.15, -1),
+                                     glm::vec3(4.5, -1.15, 0),
+                                     glm::vec3(4.5, -1.15, 1),
+                                     glm::vec3(4, -1.15, 1.5),
+                                     glm::vec3(3, -1.15, 1.5),
+                                     glm::vec3(2.5, -1.15, 2),
+                                     glm::vec3(2, -1.15, 2.5),
+                                     glm::vec3(1.5, -1.15, 3),
+                                     glm::vec3(1.5, -1.15, 4),
+                                     glm::vec3(2, -1.15, 4.5),
+                                     glm::vec3(3, -1.15, 4.5),
+                                     glm::vec3(3.5, -1.15, 4),
+                                     glm::vec3(3.5, -1.15, 3),
+                                     glm::vec3(4, -1.15, 2.5),
+                                     glm::vec3(5, -1.15, 2.5),
+                                     glm::vec3(5.5, -1.15, 2),
+                                     glm::vec3(5.5, -1.15, 1),
+                                     glm::vec3(6, -1.15, 0.5),
+                                     glm::vec3(6.5, -1.15, 0),
+                                     glm::vec3(6.5, -1.15, -1),
+                                     glm::vec3(6.5, -1.15, -2),
+                                     glm::vec3(6, -1.15, -2.5),
+                                     glm::vec3(5.5, -1.15, -3),
+                                     glm::vec3(5.5, -1.15, -4),
+                                     glm::vec3(5, -1.15, -4.5),
+                                     glm::vec3(4, -1.15, -4.5),
+                                     glm::vec3(3, -1.15, -4.5),
+                                     glm::vec3(2.5, -1.15, -4),
+                                     glm::vec3(2, -1.15, -3.5),
+                                     glm::vec3(1, -1.15, -3.5),
+                                     glm::vec3(0.5, -1.15, -3),
+                                     glm::vec3(0.5, -1.15, -2),
+                                     glm::vec3(0, -1.15, -1.5),
+                                     glm::vec3(-0.5, -1.15, -2),
+                                     glm::vec3(-0.5, -1.15, -3),
+                                     glm::vec3(-1, -1.15, -3.5),
+                                     glm::vec3(-2, -1.15, -3.5),
+                                     glm::vec3(-2.5, -1.15, -3),
+                                     glm::vec3(-2, -1.15, -2.5),
+                                     glm::vec3(-1.5, -1.15, -2),
+                                     glm::vec3(-1.5, -1.15, -1),
+                                     glm::vec3(-1.5, -1.15, 0),
+                                     glm::vec3(-2, -1.15, 0.5),
+                                     glm::vec3(-2.5, -1.15, 1),
+                                     glm::vec3(-2.5, -1.15, 2),
+                                     glm::vec3(-2.5, -1.15, 3),
+                                     glm::vec3(-2.5, -1.15, 4),
+                                     glm::vec3(-2, -1.15, 4.5),
+                                     glm::vec3(-1, -1.15, 4.5),
+                                     glm::vec3(0, -1.15, 4.5),
+                                     glm::vec3(0.5, -1.15, 4),
+                                     glm::vec3(0, -1.15, 3.5),
+                                     glm::vec3(-1, -1.15, 3.5),
+                                     glm::vec3(-1.5, -1.15, 3),
+                                     glm::vec3(-1.5, -1.15, 2),
+                                     glm::vec3(-1, -1.15, 1.5)
+                                 });
+    QList<float> checkBoxRot({
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 3.14f/2,
+                                 3.14f/2,
+                                 0,
+                                 0,
+                                 3.14f/2
+                             });
+
+    for (int i = 0; i < checkBoxPos.size(); ++i)
+    {
+        checkBoxPos[i].x *= 15;
+        checkBoxPos[i].z *= 15;
+
+        FuryBoxObject* object = new FuryBoxObject(m_testWorld,
+                                                  checkBoxPos[i],
+                                                  glm::vec3(13, 2.5, 0.5),
+                                                  glm::vec3(0, checkBoxRot[i], 0));
+        object->setTextureName("redCheckBox");
+        object->setName(QString("Trigger %1").arg(i));
+        object->Setup_physics(reactphysics3d::BodyType::STATIC);
+        object->physicsBody()->getCollider(0)->setIsTrigger(true);
+        m_testWorld->addTransparentObject(object);
     }
 }
 

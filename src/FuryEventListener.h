@@ -15,6 +15,12 @@ public:
      * \param[in] _callbackData - Информация обо всех контактах
      */
     void onContact(const CallbackData& _callbackData) override;
+
+    /*!
+     * \brief Вызывается при активации триггера
+     * \param[in] _callbackData - Информация об активации триггера
+     */
+    void onTrigger(const reactphysics3d::OverlapCallback::CallbackData & _callbackData) override;
 };
 
 #endif // FURYEVENTLISTENER_H
