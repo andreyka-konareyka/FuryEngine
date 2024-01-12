@@ -105,7 +105,7 @@ public:
      * \param[in] _front - Направление "Вперёд"
      */
     inline void setFront(const glm::vec3& _front)
-    { m_front = _front; }
+    { m_front = glm::normalize(_front); }
 
     /*!
      * \brief Получить угол обзора камеры

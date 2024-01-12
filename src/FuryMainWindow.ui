@@ -155,6 +155,74 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="shadowNearLabel">
+          <property name="text">
+           <string>ShadowNear: 0.1</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="shadowNearSlider">
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="shadowPlaneLabel">
+          <property name="text">
+           <string>ShadowPlane: 70</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="shadowPlaneSlider">
+          <property name="value">
+           <number>60</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="shadowViewSizeLabel">
+          <property name="text">
+           <string>ShadowViewSize: 25</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="shadowViewSizeSlider">
+          <property name="value">
+           <number>15</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="shadowCamDistanceLabel">
+          <property name="text">
+           <string>ShadowCamDistance: 37</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="shadowCamDistanceSlider">
+          <property name="value">
+           <number>64</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>

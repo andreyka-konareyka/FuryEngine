@@ -32,6 +32,13 @@ void FuryMesh::draw(Shader *_shader, FuryMaterial *_material)
     glBindVertexArray(0);
 }
 
+void FuryMesh::drawShadowMap()
+{
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
 void FuryMesh::setupMesh()
 {
     // Создание буферов, массивов openGL

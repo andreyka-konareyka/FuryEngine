@@ -73,3 +73,13 @@ void FuryObject::draw()
         model->draw(m_shader, material);
     }
 }
+
+void FuryObject::drawShadowMap()
+{
+    FuryModel* model = FuryModelManager::instance()->modelByName(m_modelName);
+
+    if (model->isReady())
+    {
+        model->drawShadowMap();
+    }
+}

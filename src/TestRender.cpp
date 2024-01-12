@@ -19,7 +19,8 @@
 #include <QMessageBox>
 
 
-const bool NEED_DRAW_SHADOW = false;
+const bool NEED_DRAW_SHADOW = true;
+const bool NEED_DEBUG_SHADOW_MAP = false;
 
 
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
@@ -313,7 +314,8 @@ void TestRender::init() {
 
 
     m_sunVisualBox = new FuryBoxObject(m_testWorld, m_dirlight_position);
-    m_sunVisualBox->Setup_physics(rp3d::BodyType::STATIC);
+    m_sunVisualBox->setName("sunVisualBox");
+//    m_sunVisualBox->Setup_physics(rp3d::BodyType::STATIC);
     m_testWorld->addObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
@@ -548,11 +550,6 @@ void TestRender::render()
         m_dirlight_position.x = sin(currentFrame / 1000 / 4) * 10;
         m_dirlight_position.z = cos(currentFrame / 1000 / 4) * 10;
 
-        glm::vec3 tempPosition = m_dirlight_position;
-        tempPosition *= 3;
-        tempPosition += m_testWorld->camera()->position();
-        m_sunVisualBox->setPosition(tempPosition);
-
 
 
         if (m_irradianceMap == 0)
@@ -576,6 +573,11 @@ void TestRender::render()
 
         m_cameras[1]->setPosition(m_carObject->cameraPosition());
         m_cameras[1]->setFront(m_carObject->cameraViewPoint() - m_carObject->cameraPosition());
+
+        glm::vec3 tempPosition = m_dirlight_position;
+        tempPosition *= 3;
+        tempPosition += m_testWorld->camera()->position();
+        m_sunVisualBox->setPosition(tempPosition);
 
 
         // 1. сначала рисуем карту глубины
@@ -665,7 +667,7 @@ void TestRender::render()
 
                     glm::mat4 testSubModel = glm::mat4(1.0f);
 
-                    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.8, 0));
+                    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
                     testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
                     testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
 
@@ -871,7 +873,10 @@ void TestRender::render()
         sorted.clear();
 
 
-        // displayBuffer(m_depthMap);
+        if (NEED_DEBUG_SHADOW_MAP)
+        {
+            displayBuffer(m_depthMap);
+        }
     }
 }
 
@@ -1066,16 +1071,48 @@ void TestRender::renderDepthMap()
 
             m_simpleDepthShader->setMat4("model", model);
 
-            GLuint renderVAO = renderObject->VAO();
-            glBindVertexArray(renderVAO);
 
-            if (renderObject->isDrawElements())
+            if (renderObject->name() == "testMaterialBox" || renderObject->name() == "sunVisualBox")
             {
-                glDrawElements(renderObject->renderType(), renderObject->vertexCount(), GL_UNSIGNED_INT, 0);
+                continue;
+            }
+
+            if (renderObject->name() != "carBody")
+            {
+                renderObject->drawShadowMap();
             }
             else
             {
-                glDrawArrays(renderObject->renderType(), 0, renderObject->vertexCount());
+                model = renderObject->getOpenGLTransform();
+                glm::mat4 testSubModel = glm::mat4(1.0f);
+
+                testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+                testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+                testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+
+                model = model * testSubModel;
+
+                m_simpleDepthShader->setMat4("model", model);
+
+                FuryModel* modelObj = m_modelManager->modelByName("backpack2");
+
+                if (modelObj->isReady())
+                {
+                    modelObj->drawShadowMap();
+                }
+                else
+                {
+                    FuryModel* LOD2 = m_modelManager->modelByName("backpack2LOD2");
+
+                    if (LOD2->isReady())
+                    {
+                        LOD2->drawShadowMap();
+                    }
+                    else
+                    {
+                        Debug(ru("Модель не готова"));
+                    }
+                }
             }
             glBindVertexArray(0);
         }
@@ -1137,12 +1174,24 @@ void TestRender::renderDepthMap()
 
 glm::mat4 TestRender::getLightSpaceMatrix()
 {
-    float near_plane = 1.0f, far_plane = 25.0f;
-    glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+    glm::mat4 lightProjection = glm::ortho(-m_shadowViewSize, m_shadowViewSize,
+                                           -m_shadowViewSize, m_shadowViewSize,
+                                           m_shadowNear, m_shadowPlane);
 
-    glm::mat4 lightView = glm::lookAt(m_dirlight_position,
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 tempDirLight = glm::normalize(m_dirlight_position);
+    tempDirLight *= m_shadowCamDistance;
+
+    glm::vec3 cameraPos = m_testWorld->camera()->position();
+    glm::vec3 cameraFront = m_testWorld->camera()->front();
+    cameraFront *= 15;
+
+    glm::vec3 shadowCameraView = cameraPos + cameraFront;
+    shadowCameraView.y = 0;
+    glm::vec3 shadowCameraPos = shadowCameraView + tempDirLight;
+
+    glm::mat4 lightView = glm::lookAt(shadowCameraPos,
+                                      shadowCameraView,
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
 
     return lightProjection * lightView;
 }

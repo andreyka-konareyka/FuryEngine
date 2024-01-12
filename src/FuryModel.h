@@ -31,6 +31,9 @@ public:
      */
     void draw(Shader* _shader, FuryMaterial* _material = nullptr);
 
+    //! Отрисовка для карты теней
+    void drawShadowMap();
+
     inline const QString& path() const
     { return m_path; }
 

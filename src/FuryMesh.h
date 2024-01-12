@@ -49,6 +49,9 @@ public:
      */
     void draw(Shader* _shader, FuryMaterial* _material);
 
+    //! Отрисовка меша для карты теней
+    void drawShadowMap();
+
     //! Инициализация меша
     void setupMesh();
 

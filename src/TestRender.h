@@ -75,6 +75,19 @@ public:
     void setCarSpringLenght(float _lenght);
     void setCarSpringK(float _k);
 
+
+    inline void setShadowNear(float _shadowNear)
+    { m_shadowNear = _shadowNear; }
+
+    inline void setShadowPlane(float _shadowPlane)
+    { m_shadowPlane = _shadowPlane; }
+
+    inline void setShadowViewSize(float _shadowViewSize)
+    { m_shadowViewSize = _shadowViewSize; }
+
+    inline void setShadowCamDistance(float _shadowCamDistance)
+    { m_shadowCamDistance = _shadowCamDistance; }
+
 signals:
     void setWindowTitleSignal(const QString& _title);
     void setComputerLoadSignal(int _value);
@@ -218,6 +231,11 @@ private:
     FuryModelManager* m_modelManager;
     FuryMaterialManager* m_materialManager;
     CarObject* m_carObject = nullptr;
+
+    float m_shadowNear = 0.1f;
+    float m_shadowPlane = 70.f;
+    float m_shadowViewSize = 25.f;
+    float m_shadowCamDistance = 37;
 
 private:
     //! Камеры

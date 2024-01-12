@@ -37,6 +37,14 @@ void FuryModel::draw(Shader *_shader, FuryMaterial *_material)
     }
 }
 
+void FuryModel::drawShadowMap()
+{
+    for (FuryMesh* mesh : m_meshes)
+    {
+        mesh->drawShadowMap();
+    }
+}
+
 void FuryModel::setupMesh()
 {
     for (FuryMesh* mesh : m_meshes)

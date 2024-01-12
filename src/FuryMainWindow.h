@@ -54,6 +54,11 @@ private slots:
     //! Слот изменения жёсткости пружины автомобиля
     void onCarSpringKSliderSlot();
 
+    void onShadowNearSliderSlot();
+    void onShadowPlaneSliderSlot();
+    void onShadowViewSizeSliderSlot();
+    void onShadowCamDistanceSliderSlot();
+
 private:
     //! Подготовка интерфейса
     void prepareUi();

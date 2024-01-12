@@ -248,6 +248,8 @@ public:
 
     //! Отрисовка объекта
     virtual void draw();
+    //! Отрисовка объекта для карты теней
+    virtual void drawShadowMap();
 
     /*!
      * \brief Установка названия материала
