@@ -132,15 +132,11 @@ private:
     reactphysics3d::PhysicsCommon* own_physicsCommon;
     reactphysics3d::PhysicsWorld* our_physicsWorld;
     reactphysics3d::RigidBody* physics_sphere;
-    reactphysics3d::RigidBody* physics_sphere2;
-    reactphysics3d::RigidBody* physics_floor;
 
     FuryEventListener* m_eventListener;
 
 
     void loadPBR();
-    void initFloorModel();
-    void loadModel();
     void initSkyboxModel();
     void initDepthMapFBO();
     void initRaceMap();
@@ -151,7 +147,6 @@ private:
     glm::mat4 getLightSpaceMatrix();
 
     void renderLoadingAndBindData(float _currentFrame);
-    void renderOldModel();
     void renderPbrSpheres();
 
     void updatePhysics();
@@ -160,17 +155,13 @@ private:
 
 
     FuryBoxObject* m_bigFloor;
-    //QVector<FuryBoxObject*> m_new_floor;
-    QVector<FuryBoxObject*> m_test_physics_cubes;
-    FuryBoxObject* m_sunVisualBox;
+    FuryObject* m_sunVisualBox;
     FuryWorld* m_testWorld;
 
 
-    Shader* m_ourShader;
     Shader* m_skyboxShader;
     Shader* m_particleShader;
     Shader* m_pbrShader;
-    Shader* m_floorShader;
     Shader* m_simpleDepthShader;
     Shader* m_bigFloorShader;
     Shader* m_testMaterialShader;
@@ -192,20 +183,7 @@ private:
     Particle* m_myFirstParticle;
     ParticleSystem* m_myFirstParticleSystem;
 
-    GLuint m_floorVBO, m_floorEBO, m_floorVAO;
 
-
-    Model* m_ourModel;
-    float m_modelScale;
-    glm::vec3 m_ourModel_position;
-
-    QVector<raw_Texture*> m_textures_to_loading;
-    QVector<unsigned char*> m_ourModel_data_array;
-    QVector<int> m_ourModel_width_array;
-    QVector<int> m_ourModel_height_array;
-
-    bool m_ourModel_textures_loaded = false;
-    bool m_ourModel_textures_bind = false;
     bool m_cubemap_bind = false;
 
 

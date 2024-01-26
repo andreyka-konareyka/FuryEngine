@@ -77,6 +77,11 @@ void FuryBoxObject::Setup_physics(reactphysics3d::BodyType _type)
     collider_box->getMaterial().setFrictionCoefficient(0.4f);
 }
 
+Shader *FuryBoxObject::defaultShader()
+{
+    return init_shader();
+}
+
 void FuryBoxObject::tick(double /*dt*/)
 {
     const reactphysics3d::Transform& physics_box_transform = physicsBody()->getTransform();

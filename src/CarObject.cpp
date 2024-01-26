@@ -15,7 +15,7 @@ int rayCount = 20;
 CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_shader) :
     FuryObject(_world, _position),
     m_objectBody(nullptr),
-    m_springLenght(0.4),
+    m_springLenght(0.4f),
     m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
     m_cameraLocalViewPoint(0, 2, 0),
@@ -36,7 +36,7 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_objectBody->setName("carBody");
     m_objectBody->setShader(_shader);
 
-    float sphereRadius = 0.1;
+    float sphereRadius = 0.1f;
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, 1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, -1), sphereRadius));
@@ -165,7 +165,7 @@ void CarObject::tick(double _dt)
             rp3d::decimal tireForceRight = forceValue * std::clamp(-localVelocity.z, -1.f, 1.f);
 
             float slipAngle = 0;
-            float slipAnglePeak = 8 / 180.0 * 3.14;
+            float slipAnglePeak = 8.0f / 180.0f * 3.14f;
 
             if (localVelocity.x != 0)
             {

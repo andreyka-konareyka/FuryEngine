@@ -296,41 +296,16 @@ void TestRender::init() {
     m_modelManager->addModel("objects/cube/cube.obj", "cube");
     m_modelManager->addModel("objects/sphere/sphere.obj", "sphere");
 
-    m_testWorld->addObject(new FuryBoxObject(m_testWorld, glm::vec3(0, 5, 0), 1, 1, 1));
-    int count_in_line = 6;
-    for (int i = 0; i < count_in_line; ++i) {
-        for (int j = 0; j < count_in_line; ++j) {
-            FuryBoxObject* box = new FuryBoxObject(m_testWorld, glm::vec3((i - count_in_line / 2 + 0.5) * 5,
-                                                             -1.25 - 0.02,
-                                                             (j - count_in_line / 2 + 0.5) * 5),
-                                                   5, 2.5, 5);
-            box->setTextureName("Diffuse_numbersBoxTexture");
-            box->Setup_physics(reactphysics3d::BodyType::STATIC);
-            box->setName("startWall");
-            box->physicsBody()->setUserData(box);
-            m_testWorld->addObject(box);
 
-            if (!m_materialManager->materialExist("numberBoxMaterial"))
-            {
-                FuryMaterial* mat = m_materialManager->createMaterial("numberBoxMaterial");
-                mat->setDiffuseTexture("Diffuse_numbersBoxTexture");
-            }
-
-            box->setMaterialName("numberBoxMaterial");
-        }
-    }
-
-
-    m_sunVisualBox = new FuryBoxObject(m_testWorld, m_dirlight_position);
+    m_sunVisualBox = new FurySphereObject(m_testWorld, m_dirlight_position);
     m_sunVisualBox->setName("sunVisualBox");
-//    m_sunVisualBox->Setup_physics(rp3d::BodyType::STATIC);
     m_testWorld->addObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
     m_testWorld->setCamera(m_cameras[0]);
 
-    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(6, 10, 10), 2);
+    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(-2, 10, 0), 1);
     testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
     m_testWorld->addObject(testSphere);
 
@@ -365,7 +340,7 @@ void TestRender::init() {
     m_bigFloor->setMaterialName("asphaltMaterial");
 
     // Настройка физики сфер
-    reactphysics3d::Vector3 position(2, 7, 0);
+    reactphysics3d::Vector3 position(2, 10, 0);
     reactphysics3d::Quaternion orientation = reactphysics3d::Quaternion::identity();
     reactphysics3d::Transform transform(position, orientation);
     physics_sphere = our_physicsWorld->createRigidBody(transform);
@@ -375,43 +350,14 @@ void TestRender::init() {
     reactphysics3d::Transform transform_shape = reactphysics3d::Transform::identity();
     physics_sphere->addCollider(sphereShape, transform_shape);
 
-
-
-    reactphysics3d::Vector3 position2(2 + 0.2f, 11, 0);
-    reactphysics3d::Quaternion orientation2 = reactphysics3d::Quaternion::identity();
-    reactphysics3d::Transform transform2(position2, orientation2);
-    physics_sphere2 = our_physicsWorld->createRigidBody(transform2);
-    physics_sphere2->setType(reactphysics3d::BodyType::STATIC);
-
-    reactphysics3d::SphereShape* sphereShape2 = own_physicsCommon->createSphereShape(1);
-    reactphysics3d::Transform transform_shape2 = reactphysics3d::Transform::identity();
-    physics_sphere2->addCollider(sphereShape2, transform_shape2);
-
     // Конец настроек физики
 
 
-    m_ourShader = new Shader("model_loading.vs", "model_loading.fs");
     m_skyboxShader = new Shader("skybox.vs", "skybox.fs");
     m_particleShader = new Shader("particle.vs", "particle.fs");
     m_pbrShader = new Shader("pbr.vs", "pbr.fs");
-    m_floorShader = new Shader("multiple_lights.vs", "multiple_lights.fs");
     m_simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
     m_bigFloorShader = new Shader("shaders/bigFloorShader.vs", "shaders/bigFloorShader.frag");
-
-    {
-        FuryMaterial* testMaterial = new FuryMaterial(glm::vec3(0.5, 0.2, 0.7),
-                                          glm::vec3(0.3, 0.3, 0.3));
-        testMaterial->setShaderMaterial(m_testMaterialShader);
-
-        FuryBoxObject* box = new FuryBoxObject(m_testWorld,
-                                               glm::vec3(0, -2.5, 22.5),
-                                               glm::vec3(1.5, 1.5, 1.4),
-                                               glm::vec3(0, 3.14/2, 0));
-        box->setShader(m_testMaterialShader);
-        box->setName("testMaterialBox");
-        m_testWorld->addObject(box);
-    }
-
     m_bigFloor->setShader(m_bigFloorShader);
 
 
@@ -436,14 +382,12 @@ void TestRender::init() {
     m_myFirstParticle = new Particle(part_pos, part_scale, part_speed, part_color, m_particle_texture_id, 10, m_particleShader);
 
     glm::vec3 part_sys_pos(0, 2, 0);
-    m_myFirstParticleSystem = new ParticleSystem(part_sys_pos, m_smoke_texture_id, 1);
+    m_myFirstParticleSystem = new ParticleSystem(part_sys_pos, m_smoke_texture_id, 100);
 
 
 
 
 
-    initFloorModel();
-    loadModel();
     initSkyboxModel();
 
     initDepthMapFBO();
@@ -465,11 +409,9 @@ void TestRender::init() {
         // initShaderInform
 
         QList<Shader*> shaders({
-                                   m_testWorld->getObjects()[0]->shader(),
+                                   FuryBoxObject::defaultShader(),
                                    m_bigFloorShader,
                                    testSphere->shader(),
-                                   m_ourShader,
-                                   m_floorShader,
                                    m_testMaterialShader
                                });
 
@@ -609,13 +551,11 @@ void TestRender::render()
         glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderOldModel();
         renderPbrSpheres();
 
 
         glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
         glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
 
 
         const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
@@ -648,13 +588,6 @@ void TestRender::render()
 
                 shader->setMat4("model", model);
 
-
-
-
-                if (renderObject->name() == "testMaterialBox")
-                {
-                    continue;
-                }
 
                 if (renderObject->name() != "carBody")
                 {
@@ -736,54 +669,7 @@ void TestRender::render()
 
 
 
-        /*
-            ============================ Floor =====================================
-        */
-        if (m_testWorld->camera()->position().y <= 0) {
-            glDepthMask(GL_FALSE);
-            m_myFirstParticle->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
-            m_myFirstParticleSystem->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
-            glDepthMask(GL_TRUE);
-        }
-        m_floorShader->Use();
 
-
-        m_floorShader->setVec3("viewPos", m_testWorld->camera()->position());
-        m_floorShader->setFloat("material.shininess", 128.0f); // 32.0 - default
-        m_floorShader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-
-
-        // view/projection transformations
-        projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
-        view = m_testWorld->camera()->getViewMatrix();
-        m_floorShader->setMat4("projection", projection);
-        m_floorShader->setMat4("view", view);
-
-
-        m_floorShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-
-
-        float angle_x = - 3.14f / 2;
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::rotate(model, angle_x, glm::vec3(1, 0, 0));
-        model = glm::scale(model, glm::vec3(15, 15, 15));	// it's a bit too big for our scene, so scale it down
-        m_floorShader->setMat4("model", model);
-
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_win_texture_id);
-        glUniform1i(glGetUniformLocation(m_floorShader->Program, "diffuse_texture"), 0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_depthMap);
-        glUniform1i(glGetUniformLocation(m_floorShader->Program, "shadowMap"), 1);
-
-        glBindVertexArray(m_floorVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        glActiveTexture(GL_TEXTURE0);
         // ##################################
         // ##########   Particle   ##########
         // ##################################
@@ -794,7 +680,7 @@ void TestRender::render()
         /*
             Start Draw particle
         */
-        if (m_testWorld->camera()->position().y > 0) {
+        {
             glDepthMask(GL_FALSE);
             m_myFirstParticle->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
             m_myFirstParticleSystem->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
@@ -851,6 +737,9 @@ void TestRender::render()
 
                 shader->setMat4("model", model);
 
+                glm::vec3 lightPos = m_testWorld->camera()->position()
+                                   + m_dirlight_position;
+                shader->setVec3("lightPos", lightPos);
 
 
 
@@ -1064,10 +953,6 @@ void TestRender::renderDepthMap()
     {
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, m_ourModel_position); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(m_modelScale, m_modelScale, m_modelScale));	// it's a bit too big for our scene, so scale it down
-        m_simpleDepthShader->setMat4("model", model);
-        m_ourModel->Draw(*m_simpleDepthShader);
 
 
 
@@ -1084,7 +969,7 @@ void TestRender::renderDepthMap()
             m_simpleDepthShader->setMat4("model", model);
 
 
-            if (renderObject->name() == "testMaterialBox" || renderObject->name() == "sunVisualBox")
+            if (renderObject->name() == "sunVisualBox")
             {
                 continue;
             }
@@ -1155,27 +1040,6 @@ void TestRender::renderDepthMap()
 
 
             renderSphere();
-
-            const reactphysics3d::Transform& physics_sphere2_transform = physics_sphere2->getTransform();
-            const reactphysics3d::Vector3& physics_sphere_position2 = physics_sphere2_transform.getPosition();
-            auto physics_sphere2_rotate = physics_sphere2_transform.getOrientation();
-
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(physics_sphere_position2.x, physics_sphere_position2.y, physics_sphere_position2.z));
-
-            physics_sphere2_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
-            if (axis_rotate.x != 0 ||
-                axis_rotate.y != 0 ||
-                axis_rotate.z != 0)
-            {
-                model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-            }
-            model = glm::scale(model, glm::vec3(1, 1, 1));
-
-            m_simpleDepthShader->setMat4("model", model);
-
-
-            renderSphere();
         }
 
     }
@@ -1210,7 +1074,7 @@ glm::mat4 TestRender::getLightSpaceMatrix()
 
 void TestRender::renderLoadingAndBindData(float _currentFrame)
 {
-    if (m_cubemap_is_loaded && m_ourModel_textures_loaded) {
+    if (m_cubemap_is_loaded) {
         m_is_loading = false;
     }
 
@@ -1223,65 +1087,11 @@ void TestRender::renderLoadingAndBindData(float _currentFrame)
         Debug((ru("Кубическая карта:") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
     }
 
-    if (m_ourModel_textures_loaded && (!m_ourModel_textures_bind)) {
-
-        QTime t_start = QTime::currentTime();
-
-        for (unsigned int i = 0; i < m_textures_to_loading.size(); i++) {
-            bool skipped = false;
-            for (unsigned int j = 0; j < i; j++)
-            {
-                QString name1 = m_textures_to_loading[i]->name;
-                QString name2 = m_textures_to_loading[j]->name;
-
-                if (name1 == name2) {
-                    m_textures_to_loading[i]->id = m_textures_to_loading[j]->id;
-                    skipped = true;
-                }
-            }
-            if (!skipped) {
-                m_textures_to_loading[i]->id = TextureLoader::BindDataToTexture(m_textures_to_loading[i]->data, m_ourModel_width_array[i], m_ourModel_height_array[i]);
-            }
-        }
-        m_ourModel_textures_bind = true;
-
-        QTime t_end = QTime::currentTime();
-        Debug((ru("Загрузка модели:\t") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
-    }
-
     // Показываем экран загрузки
     glm::vec3 color(0.0f, 120.0 / 255.0, 215.0 / 255.0);
     color = color * (sin(_currentFrame / 1000) * 0.5f + 0.5f);
     glClearColor(color.r, color.g, color.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void TestRender::renderOldModel()
-{
-    m_ourShader->Use();
-
-
-    m_ourShader->setVec3("lightPos", m_dirlight_position);
-    m_ourShader->setVec3("viewPos", m_testWorld->camera()->position());
-    m_ourShader->setFloat("material.shininess", 32.0f);
-
-
-
-    m_ourShader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-
-
-    // view/projection transformations
-    glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
-    glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
-    m_ourShader->setMat4("projection", projection);
-    m_ourShader->setMat4("view", view);
-
-    // render the loaded model
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, m_ourModel_position); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(m_modelScale, m_modelScale, m_modelScale));	// it's a bit too big for our scene, so scale it down
-    m_ourShader->setMat4("model", model);
-    m_ourModel->Draw(*m_ourShader);
 }
 
 void TestRender::renderPbrSpheres()
@@ -1337,26 +1147,6 @@ void TestRender::renderPbrSpheres()
     glBindTexture(GL_TEXTURE_2D, m_gold_ao_texture_id);
 
     renderSphere();
-
-    const reactphysics3d::Transform& physics_sphere2_transform = physics_sphere2->getTransform();
-    const reactphysics3d::Vector3& physics_sphere_position2 = physics_sphere2_transform.getPosition();
-    auto physics_sphere2_rotate = physics_sphere2_transform.getOrientation();
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(physics_sphere_position2.x, physics_sphere_position2.y, physics_sphere_position2.z)); // translate it down so it's at the center of the scene
-
-    physics_sphere2_rotate.getRotationAngleAxis(angle_rotate, axis_rotate);
-    if (axis_rotate.x != 0 ||
-        axis_rotate.y != 0 ||
-        axis_rotate.z != 0)
-    {
-        model = glm::rotate(model, static_cast<float>(angle_rotate), glm::vec3(axis_rotate.x, axis_rotate.y, axis_rotate.z));
-    }
-    model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
-
-    m_pbrShader->setMat4("model", model);
-
-    renderSphere();
 }
 
 void TestRender::updatePhysics()
@@ -1386,6 +1176,11 @@ void TestRender::updatePhysics()
 
 //        m_updateAccumulator -= timeStep;
 //    }
+
+
+#define NEED_LEARN 1
+
+#if NEED_LEARN == 1
 
     QVector<float> observation = m_carObject->getRays();
 
@@ -1484,6 +1279,10 @@ void TestRender::updatePhysics()
         int action = m_learnScript->learn(observation, carReward, 0);
         m_carObject->setBotAction(action);
     }
+
+#else
+    m_carObject->getRays();
+#endif
 }
 
 void TestRender::displayBuffer(GLuint _bufferId)
@@ -1588,100 +1387,6 @@ void TestRender::loadPBR()
     m_pbrShader->setInt("roughnessMap", 6);
     m_pbrShader->setInt("aoMap", 7);
     glUseProgram(0);
-}
-
-void TestRender::initFloorModel()
-{
-    GLfloat floor_vertices[] = {
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-    };
-
-    glGenVertexArrays(1, &m_floorVAO);
-    glGenBuffers(1, &m_floorVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_floorVBO);
-    glBindVertexArray(m_floorVAO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(floor_vertices), floor_vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-    //normals
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    // vertex texture coords
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-    glBindVertexArray(0);
-}
-
-void TestRender::loadModel()
-{
-    // load models
-    // -----------
-    static QMutex loadModelMutex;
-    static QMutex loadTextureMutex;
-
-    QMutexLocker modelLocker(&loadModelMutex);
-    m_ourModel = new Model("objects/backpack/backpack.obj");
-    modelLocker.unlock();
-
-
-    m_modelScale = 1.0f;
-    m_ourModel_position = glm::vec3(-5, 3, 0);
-
-    for (unsigned int i = 0; i < m_ourModel->meshes.size(); i++) {
-        QVector<raw_Texture>* T = &(m_ourModel->meshes[i].textures);
-        for (unsigned int j = 0; j < T->size(); j++) {
-            m_textures_to_loading.push_back(&((*T)[j]));
-        }
-    }
-
-    std::thread(
-        [&]()
-        {
-            for (unsigned int i = 0; i < m_textures_to_loading.size(); i++) {
-                m_ourModel_width_array.push_back(0);
-                m_ourModel_height_array.push_back(0);
-                QString str = m_textures_to_loading[i]->name;
-
-                bool skip = false;
-                for (unsigned int j = 0; j < m_ourModel->textures_loaded.size(); j++)
-                {
-                    if (m_ourModel->textures_loaded[j].name == str)
-                    {
-                        m_textures_to_loading[i]->data = m_ourModel->textures_loaded[j].data;
-                        m_ourModel_width_array[i] = m_ourModel_width_array[j];
-                        m_ourModel_height_array[i] = m_ourModel_height_array[j];
-                        skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
-                        break;
-                    }
-                }
-                if (!skip) {
-                    QString name = m_textures_to_loading[i]->path + '/' + str;
-
-
-                    QMutexLocker textureLocker(&loadTextureMutex);
-                    m_textures_to_loading[i]->data = SOIL_load_image(qUtf8Printable(name), &(m_ourModel_width_array[i]), &(m_ourModel_height_array[i]), 0, SOIL_LOAD_RGBA);
-
-                    if (m_textures_to_loading[i]->data == nullptr)
-                    {
-                        qDebug() << "Ошибка при " << name;
-                    }
-                    textureLocker.unlock();
-
-                    m_ourModel->textures_loaded.push_back(*(m_textures_to_loading[i]));
-                }
-            }
-            m_ourModel_textures_loaded = true;
-
-        }
-    ).detach();
-
 }
 
 void TestRender::initSkyboxModel()
@@ -1791,7 +1496,14 @@ void TestRender::initDepthMapFBO()
 
 void TestRender::initRaceMap()
 {
-    QList<glm::vec3> wallPos(
+#define RACE_VERSION 2
+    QList<glm::vec3> wallPos;
+    QList<float> wallSize;
+    QList<float> wallRotate;
+
+
+#if RACE_VERSION == 1
+    wallPos = QList<glm::vec3>(
                 {
                     glm::vec3(0.5, -1.25, 2),
                     glm::vec3(2, -1.25, 1.5),
@@ -1842,7 +1554,8 @@ void TestRender::initRaceMap()
                     glm::vec3(0, -1.25, 3),
                     glm::vec3(-1, -1.25, 2.5)
                 });
-    QList<float> wallSize(
+
+    wallSize = QList<float>(
                 {
                     3,
                     1,
@@ -1893,70 +1606,170 @@ void TestRender::initRaceMap()
                     2,
                     1
                 });
-    QList<float> wallRotate(
+
+    wallRotate = QList<float>(
                 {
                     0,
-                    3.14f/2,
+                    1,
                     0,
-                    3.14f/2,
+                    1,
                     0,
-                    3.14f/2,
+                    1,
                     0,
-                    3.14f/2,
-                    3.14f/2,
+                    1,
+                    1,
                     0,
-                    3.14f/2,
+                    1,
                     0,
-                    3.14f/2,
-                    0,
-                    0,
-                    3.14f/2,
-                    3.14f/2,
-                    0,
-                    3.14f/2,
-                    0,
-                    3.14f/2,
+                    1,
                     0,
                     0,
-                    3.14f/2,
-                    3.14f/2,
+                    1,
+                    1,
                     0,
-                    3.14f/2,
+                    1,
+                    0,
+                    1,
                     0,
                     0,
+                    1,
+                    1,
                     0,
-                    3.14f/2,
-                    3.14f/2,
-                    3.14f/2,
-                    0,
-                    3.14f/2,
-                    3.14f/2,
-                    3.14f/2,
-                    3.14f/2,
+                    1,
                     0,
                     0,
                     0,
+                    1,
+                    1,
+                    1,
                     0,
-                    3.14f/2,
-                    3.14f/2,
+                    1,
+                    1,
+                    1,
+                    1,
                     0,
                     0,
                     0,
-                    3.14f/2
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1
                 });
 
+#elif RACE_VERSION == 2
+
+    wallPos = QList<glm::vec3>(
+                {
+                    glm::vec3(0, -1.25, 1),
+                    glm::vec3(0, -1.25, 2),
+                    glm::vec3(2, -1.25, 0.5),
+                    glm::vec3(1, -1.25, 3),
+                    glm::vec3(2.5, -1.25, 3),
+                    glm::vec3(2.5, -1.25, 4),
+                    glm::vec3(3, -1.25, 2.5),
+                    glm::vec3(4, -1.25, 3.5),
+                    glm::vec3(4, -1.25, 2),
+                    glm::vec3(5, -1.25, 3),
+                    glm::vec3(5, -1.25, 1.5),
+                    glm::vec3(6, -1.25, 1.5),
+                    glm::vec3(5, -1.25, 0),
+                    glm::vec3(3.5, -1.25, 1),
+                    glm::vec3(3, -1.25, -0.5),
+                    glm::vec3(3.5, -1.25, -1),
+                    glm::vec3(4, -1.25, -2),
+                    glm::vec3(4, -1.25, -0.5),
+                    glm::vec3(5, -1.25, -1.5),
+                    glm::vec3(5.5, -1.25, -1),
+                    glm::vec3(6, -1.25, -1.5),
+                    glm::vec3(7, -1.25, -1.5),
+                    glm::vec3(6, -1.25, -3),
+                    glm::vec3(4, -1.25, -3),
+                    glm::vec3(5, -1.25, -4),
+                    glm::vec3(3.5, -1.25, -4),
+                    glm::vec3(3.5, -1.25, -5),
+                    glm::vec3(3, -1.25, -3),
+                    glm::vec3(2, -1.25, -4),
+                    glm::vec3(1.5, -1.25, -3),
+                    glm::vec3(1, -1.25, -2),
+                    glm::vec3(0.5, -1.25, 0),
+                    glm::vec3(0, -1.25, -0.5),
+                    glm::vec3(0.5, -1.25, -1),
+                    glm::vec3(-1, -1.25, -0.5),
+                    glm::vec3(-0.5, -1.25, -2),
+                    glm::vec3(0, -1.25, -2.5),
+                    glm::vec3(-1, -1.25, -4),
+                    glm::vec3(-1, -1.25, -3),
+                    glm::vec3(-2, -1.25, -2.5),
+                    glm::vec3(-3, -1.25, -3.5),
+                    glm::vec3(-2.5, -1.25, -2),
+                    glm::vec3(-4, -1.25, -1.5),
+                    glm::vec3(-3, -1.25, -1.5),
+                    glm::vec3(-2.5, -1.25, -2),
+                    glm::vec3(-3.5, -1.25, -3),
+                    glm::vec3(-2.5, -1.25, -1),
+                    glm::vec3(-3.5, -1.25, 0),
+                    glm::vec3(-2, -1.25, 1.5),
+                    glm::vec3(-3, -1.25, 2.5),
+                    glm::vec3(-1, -1.25, 4),
+                    glm::vec3(-2, -1.25, 5),
+                    glm::vec3(0, -1.25, 4.5),
+                    glm::vec3(-1, -1.25, 5.5),
+                    glm::vec3(-0.5, -1.25, 6),
+                    glm::vec3(0, -1.25, 6.5),
+                    glm::vec3(1.5, -1.25, 7),
+                    glm::vec3(1.5, -1.25, 6),
+                    glm::vec3(1, -1.25, 5.5),
+                    glm::vec3(2, -1.25, 5.5),
+                    glm::vec3(3, -1.25, 5.5),
+                    glm::vec3(1, -1.25, 5),
+                    glm::vec3(0, -1.25, 3),
+                    glm::vec3(-1, -1.25, 2.5)
+                });
+    wallSize = QList<float>(
+                {
+                    4, 2, 5, 2, 1, 3,
+                    1, 1, 2, 2, 1, 3,
+                    4, 3, 1, 1, 4, 1,
+                    1, 1, 1, 3, 2, 2,
+                    2, 1, 3, 2, 2, 1,
+                    4, 1, 1, 1, 3, 1,
+                    1, 4, 2, 1, 1, 1,
+                    3, 1, 1, 1, 1, 1,
+                    5, 5, 2, 2, 1, 1,
+                    1, 1, 3, 1, 1, 1,
+                    3, 2, 2, 1
+                });
+    wallRotate = QList<float>(
+                {
+                    0, 0, 1, 1, 0, 0,
+                    1, 1, 0, 0, 1, 1,
+                    0, 0, 1, 0, 0, 1,
+                    1, 0, 1, 1, 0, 1,
+                    1, 0, 0, 1, 1, 0,
+                    1, 0, 1, 0, 1, 0,
+                    1, 0, 0, 1, 1, 0,
+                    1, 1, 0, 0, 0, 0,
+                    1, 1, 0, 0, 1, 1,
+                    0, 1, 0, 0, 1, 1,
+                    1, 0, 0, 1
+                });
+#endif
 
     for (int i = 0; i < wallPos.size(); ++i)
     {
         wallPos[i].x *= 15;
         wallPos[i].z *= 15;
         wallSize[i] *= 15;
+        wallRotate[i] *= 3.14f/2;
         FuryBoxObject* wall = new FuryBoxObject(m_testWorld,
                                                 wallPos[i],
                                                 glm::vec3(wallSize[i], 2.5, 0.5),
                                                 glm::vec3(0, wallRotate[i], 0));
-        wall->Setup_physics(reactphysics3d::BodyType::STATIC);
         wall->setName("raceWall");
+        wall->Setup_physics(reactphysics3d::BodyType::STATIC);
         wall->physicsBody()->setUserData(wall);
         wall->setTextureName("raceWall");
         m_testWorld->addObject(wall);
@@ -1971,7 +1784,11 @@ void TestRender::initRaceMap()
     }
 
 
-    QList<glm::vec3> checkBoxPos({
+    QList<glm::vec3> checkBoxPos;
+    QList<float> checkBoxRot;
+
+#if RACE_VERSION == 1
+    checkBoxPos = QList<glm::vec3>({
                                      glm::vec3(0, -1.15, 1.5),
                                      glm::vec3(1, -1.15, 1.5),
                                      glm::vec3(1.5, -1.15, 1),
@@ -2045,85 +1862,179 @@ void TestRender::initRaceMap()
                                      glm::vec3(-1.5, -1.15, 2),
                                      glm::vec3(-1, -1.15, 1.5)
                                  });
-    QList<float> checkBoxRot({
-                                 3.14f/2,
-                                 3.14f/2,
+
+    checkBoxRot = QList<float>({
+                                 1,
+                                 1,
                                  0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 3.14f/2,
+                                 1,
+                                 1,
                                  0,
                                  0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 3.14f/2,
+                                 1,
+                                 0,
+                                 1,
                                  0,
                                  0,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 0,
-                                 3.14f/2,
-                                 0,
-                                 0,
-                                 0,
-                                 3.14f/2,
+                                 1,
+                                 1,
+                                 1,
                                  0,
                                  0,
                                  0,
                                  0,
-                                 3.14f/2,
-                                 3.14f/2,
-                                 3.14f/2,
+                                 1,
+                                 1,
                                  0,
-                                 3.14f/2,
-                                 3.14f/2,
+                                 1,
                                  0,
                                  0,
-                                 3.14f/2
+                                 1,
+                                 1,
+                                 0,
+                                 0,
+                                 1,
+                                 1,
+                                 0,
+                                 0,
+                                 1,
+                                 0,
+                                 0,
+                                 0,
+                                 1,
+                                 0,
+                                 0,
+                                 1,
+                                 1,
+                                 1,
+                                 0,
+                                 1,
+                                 1,
+                                 0,
+                                 0,
+                                 1,
+                                 0,
+                                 0,
+                                 1,
+                                 1,
+                                 0,
+                                 1,
+                                 0,
+                                 0,
+                                 0,
+                                 1,
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 1,
+                                 1,
+                                 1,
+                                 0,
+                                 1,
+                                 1,
+                                 0,
+                                 0,
+                                 1
                              });
+
+#elif RACE_VERSION == 2
+
+    checkBoxPos = QList<glm::vec3>({
+                                       glm::vec3(0, -1.15, 1.5),
+                                       glm::vec3(1, -1.15, 1.5),
+                                       glm::vec3(1.5, -1.15, 2),
+                                       glm::vec3(1.5, -1.15, 3),
+                                       glm::vec3(2, -1.15, 3.5),
+                                       glm::vec3(3, -1.15, 3.5),
+                                       glm::vec3(3.5, -1.15, 3),
+                                       glm::vec3(4, -1.15, 2.5),
+                                       glm::vec3(5, -1.15, 2.5),
+                                       glm::vec3(5.5, -1.15, 2),
+                                       glm::vec3(5.5, -1.15, 1),
+                                       glm::vec3(5, -1.15, 0.5),
+                                       glm::vec3(4, -1.15, 0.5),
+                                       glm::vec3(3, -1.15, 0.5),
+                                       glm::vec3(2.5, -1.15, 0),
+                                       glm::vec3(2.5, -1.15, -1),
+                                       glm::vec3(3, -1.15, -1.5),
+                                       glm::vec3(4, -1.15, -1.5),
+                                       glm::vec3(4.5, -1.15, -1),
+                                       glm::vec3(5, -1.15, -0.5),
+                                       glm::vec3(6, -1.15, -0.5),
+                                       glm::vec3(6.5, -1.15, -1),
+                                       glm::vec3(6.5, -1.15, -2),
+                                       glm::vec3(6, -1.15, -2.5),
+                                       glm::vec3(5, -1.15, -2.5),
+                                       glm::vec3(4.5, -1.15, -3),
+                                       glm::vec3(4.5, -1.15, -4),
+                                       glm::vec3(4, -1.15, -4.5),
+                                       glm::vec3(3, -1.15, -4.5),
+                                       glm::vec3(2.5, -1.15, -4),
+                                       glm::vec3(2.5, -1.15, -3),
+                                       glm::vec3(2, -1.15, -2.5),
+                                       glm::vec3(1.5, -1.15, -2),
+                                       glm::vec3(1.5, -1.15, -1),
+                                       glm::vec3(1.5, -1.15, 0),
+                                       glm::vec3(1, -1.15, 0.5),
+                                       glm::vec3(0, -1.15, 0.5),
+                                       glm::vec3(-0.5, -1.15, 0),
+                                       glm::vec3(-0.5, -1.15, -1),
+                                       glm::vec3(0, -1.15, -1.5),
+                                       glm::vec3(0.5, -1.15, -2),
+                                       glm::vec3(0.5, -1.15, -3),
+                                       glm::vec3(0, -1.15, -3.5),
+                                       glm::vec3(-1, -1.15, -3.5),
+                                       glm::vec3(-2, -1.15, -3.5),
+                                       glm::vec3(-2.5, -1.15, -3),
+                                       glm::vec3(-3, -1.15, -2.5),
+                                       glm::vec3(-3.5, -1.15, -2),
+                                       glm::vec3(-3.5, -1.15, -1),
+                                       glm::vec3(-3, -1.15, -0.5),
+                                       glm::vec3(-2.5, -1.15, 0),
+                                       glm::vec3(-2.5, -1.15, 1),
+                                       glm::vec3(-2.5, -1.15, 2),
+                                       glm::vec3(-2.5, -1.15, 3),
+                                       glm::vec3(-2.5, -1.15, 4),
+                                       glm::vec3(-2, -1.15, 4.5),
+                                       glm::vec3(-1, -1.15, 4.5),
+                                       glm::vec3(-0.5, -1.15, 5),
+                                       glm::vec3(0, -1.15, 5.5),
+                                       glm::vec3(0.5, -1.15, 6),
+                                       glm::vec3(1, -1.15, 6.5),
+                                       glm::vec3(2, -1.15, 6.5),
+                                       glm::vec3(2.5, -1.15, 6),
+                                       glm::vec3(2.5, -1.15, 5),
+                                       glm::vec3(2, -1.15, 4.5),
+                                       glm::vec3(1, -1.15, 4.5),
+                                       glm::vec3(0.5, -1.15, 4),
+                                       glm::vec3(0, -1.15, 3.5),
+                                       glm::vec3(-1, -1.15, 3.5),
+                                       glm::vec3(-1.5, -1.15, 3),
+                                       glm::vec3(-1.5, -1.15, 2),
+                                       glm::vec3(-1, -1.15, 1.5)
+                                   });
+    checkBoxRot = QList<float>({
+                                   1, 1, 0, 0, 1, 1,
+                                   0, 1, 1, 0, 0, 1,
+                                   1, 1, 0, 0, 1, 1,
+                                   0, 1, 1, 0, 0, 1,
+                                   1, 0, 0, 1, 1, 0,
+                                   0, 1, 0, 0, 0, 1,
+                                   1, 0, 0, 1, 0, 0,
+                                   1, 1, 1, 0, 1, 0,
+                                   0, 1, 0, 0, 0, 0,
+                                   0, 1, 1, 0, 1, 0,
+                                   1, 1, 0, 0, 1, 1,
+                                   0, 1, 1, 0, 0, 1
+                               });
+#endif
 
     for (int i = 0; i < checkBoxPos.size(); ++i)
     {
         checkBoxPos[i].x *= 15;
         checkBoxPos[i].z *= 15;
+        checkBoxRot[i] *= 3.14f/2;
 
         FuryBoxObject* object = new FuryBoxObject(m_testWorld,
                                                   checkBoxPos[i],

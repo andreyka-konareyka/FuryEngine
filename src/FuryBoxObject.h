@@ -4,8 +4,6 @@
 
 #include "FuryObject.h"
 
-#include "Camera.h"
-
 #include <reactphysics3d/reactphysics3d.h>
 
 //! Класс коробки
@@ -81,5 +79,11 @@ public:
      * \param[in] _type - Тип физического тела
      */
     void Setup_physics(reactphysics3d::BodyType _type);
+
+    /*!
+     * \brief Получение шейдера по умолчанию
+     * \return Возвращает шейдер по умолчанию
+     */
+    static Shader* defaultShader();
 };
 #endif // FURYBOXOBJECT_H
