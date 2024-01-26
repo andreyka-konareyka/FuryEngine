@@ -4,8 +4,12 @@
 #include "FuryWorld.h"
 #include "FuryMaterial.h"
 #include "FuryMaterialManager.h"
+#include "FuryLogger.h"
 
 #include <QString>
+
+
+int rayCount = 20;
 
 
 CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_shader) :
@@ -17,7 +21,13 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_cameraLocalViewPoint(0, 2, 0),
     m_cameraLocalPosition(-7, 3, 0),
     m_forward(0),
-    m_right(0)
+    m_right(0),
+    m_lastTriggerNumber(0),
+    m_reward(0),
+    m_startPosition(_position),
+    m_timeCounter(0),
+    m_backTriggerCounter(0),
+    m_hasContact(false)
 {
     m_objectBody = new FuryBoxObject(world(), _position, 6, 1, 3);
     m_objectsForDraw.push_back(m_objectBody);
@@ -36,11 +46,11 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, -1), sphereRadius));
     m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
 
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < rayCount; ++i)
     {
         m_objectsDebugRays.push_back(new FurySphereObject(world(), _position + glm::vec3(30, 0, 0), 0.25));
         m_objectsDebugRays.last()->setTextureName("Diffuse_rayCastBall");
-//        m_objectsForDraw.push_back(m_objectsDebugRays.last());
+        m_objectsForDraw.push_back(m_objectsDebugRays.last());
 
         FuryMaterialManager* materialManager = FuryMaterialManager::instance();
 
@@ -186,33 +196,33 @@ void CarObject::tick(double _dt)
         }
     }
 
-    int rayCount = 100;
-    float rayLenght = 30;
-    for (int i = 0; i < rayCount; ++i)
-    {
-        float x = std::cos(2 * 3.14 / rayCount * i);
-        float z = std::sin(2 * 3.14 / rayCount * i);
+//    int rayCount = 100;
+//    float rayLenght = 30;
+//    for (int i = 0; i < rayCount; ++i)
+//    {
+//        float x = std::cos(2 * 3.14 / rayCount * i);
+//        float z = std::sin(2 * 3.14 / rayCount * i);
 
-        glm::vec3 tmp1 = m_objectBody->getPosition() - glm::vec3(0, 0.25, 0);
-        reactphysics3d::Vector3 tmp2 = m_objectBody->physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
-        glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
-        tmp3 -= glm::vec3(0, 0.25, 0);
-        // Create the ray
-        reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
-        reactphysics3d::Vector3 endPoint(tmp3.x, tmp3.y, tmp3.z);
-        reactphysics3d::Ray ray(startPoint, endPoint);
+//        glm::vec3 tmp1 = m_objectBody->getPosition() - glm::vec3(0, 0.25, 0);
+//        reactphysics3d::Vector3 tmp2 = m_objectBody->physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
+//        glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
+//        tmp3 -= glm::vec3(0, 0.25, 0);
+//        // Create the ray
+//        reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
+//        reactphysics3d::Vector3 endPoint(tmp3.x, tmp3.y, tmp3.z);
+//        reactphysics3d::Ray ray(startPoint, endPoint);
 
-        // Create an instance of your callback class
-        FuryRaycastCallback callbackObject;
-        //std::cout << "raycast " << i << "\n";
+//        // Create an instance of your callback class
+//        FuryRaycastCallback callbackObject;
+//        //std::cout << "raycast " << i << "\n";
 
-        // Raycast test
-        world()->physicsWorld()->raycast(ray, &callbackObject);
+//        // Raycast test
+//        world()->physicsWorld()->raycast(ray, &callbackObject);
 
 
-        glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
-        m_objectsDebugRays[i]->setPosition(tmp4);
-    }
+//        glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
+//        m_objectsDebugRays[i]->setPosition(tmp4);
+//    }
 }
 
 void CarObject::keyPressEvent(int _keyCode)
@@ -261,6 +271,267 @@ void CarObject::resetKeyInput()
 {
     m_forward = 0;
     m_right = 0;
+}
+
+void CarObject::setBotAction(int _action)
+{
+    switch (_action) {
+    case 0:
+        m_forward = 0;
+        m_right = 0;
+        break;
+    case 1:
+        m_forward = 1;
+        m_right = 0;
+        break;
+    case 2:
+        m_forward = 1;
+        m_right = 1;
+        break;
+    case 3:
+        m_forward = 1;
+        m_right = -1;
+        break;
+    case 4:
+        m_forward = 0;
+        m_right = 1;
+        break;
+    case 5:
+        m_forward = 0;
+        m_right = -1;
+        break;
+    case 6:
+        m_forward = -1;
+        m_right = 0;
+    default:
+        break;
+    }
+}
+
+int CarObject::getUserAction()
+{
+    if (m_forward == 0 && m_right == 0)
+    {
+        return 0;
+    }
+    if (m_forward == 1 && m_right == 0)
+    {
+        return 1;
+    }
+    if (m_forward == 1 && m_right == 1)
+    {
+        return 2;
+    }
+    if (m_forward == 1 && m_right == -1)
+    {
+        return 3;
+    }
+    if (m_forward == 0 && m_right == 1)
+    {
+        return 4;
+    }
+    if (m_forward == 0 && m_right == -1)
+    {
+        return 5;
+    }
+    if (m_forward == -1 && m_right == 0)
+    {
+        return 6;
+    }
+
+    qDebug() << ru("Неправильное действие от пользователя");
+    return 0;
+}
+
+QVector<float> CarObject::getRays()
+{
+    QVector<float> result;
+
+    float rayLenght = 30;
+    for (int i = 0; i < rayCount; ++i)
+    {
+        float x = std::cos(2 * 3.14 / rayCount * i);
+        float z = std::sin(2 * 3.14 / rayCount * i);
+
+        glm::vec3 tmp1 = m_objectBody->getPosition() - glm::vec3(0, 0.25, 0);
+        reactphysics3d::Vector3 tmp2 = m_objectBody->physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
+        glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
+        tmp3 -= glm::vec3(0, 0.25, 0);
+        // Create the ray
+        reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
+        reactphysics3d::Vector3 endPoint(tmp3.x, tmp3.y, tmp3.z);
+        reactphysics3d::Ray ray(startPoint, endPoint);
+
+        // Create an instance of your callback class
+        FuryRaycastCallback callbackObject;
+        //std::cout << "raycast " << i << "\n";
+
+        // Raycast test
+        world()->physicsWorld()->raycast(ray, &callbackObject);
+
+        result.append(callbackObject.m_lastHitFraction);
+
+        glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
+        m_objectsDebugRays[i]->setPosition(tmp4);
+    }
+
+    return result;
+}
+
+glm::vec3 CarObject::getSpeed()
+{
+    rp3d::Vector3 worldSpeed = m_objectBody->physicsBody()->getLinearVelocity();
+    rp3d::Vector3 localSpeed = m_objectBody->physicsBody()->getLocalVector(worldSpeed);
+    return glm::vec3(localSpeed.x, localSpeed.y, localSpeed.z);
+}
+
+float CarObject::getReward()
+{
+//    glm::vec3 localSpeed = getSpeed();
+//    m_reward += localSpeed.x / 23 * 0.03;
+    float tmpReward = m_reward;
+    m_reward = 0;
+    return tmpReward;
+}
+
+int CarObject::getLastTriggerNumber()
+{
+    return m_lastTriggerNumber;
+}
+
+void CarObject::onContact()
+{
+    m_hasContact = true;
+}
+
+void CarObject::onTrigger(int _number)
+{
+    if (m_lastTriggerNumber == 0 && _number == 71)
+    {
+        m_reward -= 20;
+        m_backTriggerCounter++;
+    }
+    else if (m_lastTriggerNumber == 71 && _number == 0)
+    {
+        m_reward += 5;
+        m_timeCounter = 0;
+    }
+    else if (m_lastTriggerNumber < _number)
+    {
+        m_reward += 5;
+        m_timeCounter = 0;
+    }
+    else if (m_lastTriggerNumber > _number)
+    {
+        m_reward -= 20;
+        m_backTriggerCounter++;
+    }
+
+    m_lastTriggerNumber = _number;
+}
+
+void CarObject::resetPosition(const glm::vec3 &_position)
+{
+    m_objectBody->setPosition(_position);
+    rp3d::Transform transform1 = m_objectBody->physicsBody()->getTransform();
+    transform1.setOrientation(rp3d::Quaternion::identity());
+    m_objectBody->physicsBody()->setTransform(transform1);
+    m_objectBody->physicsBody()->setAngularVelocity(rp3d::Vector3(0, 0, 0));
+    m_objectBody->physicsBody()->setLinearVelocity(rp3d::Vector3(0, 0, 0));
+
+    m_objectWheels[0]->setPosition(_position + glm::vec3(2, -0.5, 1));
+    m_objectWheels[1]->setPosition(_position + glm::vec3(2, -0.5, -1));
+    m_objectWheels[2]->setPosition(_position + glm::vec3(-2, -0.5, 1));
+    m_objectWheels[3]->setPosition(_position + glm::vec3(-2, -0.5, -1));
+}
+
+glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
+{
+    glm::vec3 vector = _trigger - m_objectBody->getPosition();
+    vector = glm::normalize(vector);
+    rp3d::Vector3 worldVector(vector.x, vector.y, vector.z);
+    rp3d::Vector3 localVector = m_objectBody->physicsBody()->getLocalVector(worldVector);
+    glm::vec3 speedGlm = getSpeed();
+    rp3d::Vector3 speed(speedGlm.x / 23, speedGlm.y / 23, speedGlm.z / 23);
+
+    m_reward += speed.dot(localVector) * 0.01;
+
+    return glm::vec3(localVector.x, localVector.y, localVector.z);
+}
+
+void CarObject::respawn()
+{
+    rp3d::Vector3 objectPos(m_startPosition.x, m_startPosition.y, m_startPosition.z);
+    rp3d::Quaternion objectOrientation(rp3d::Quaternion::identity());
+    rp3d::Transform objectTransform(objectPos, objectOrientation);
+
+    world()->physicsWorld()->destroyRigidBody(m_objectBody->physicsBody());
+    m_objectBody->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
+    m_objectBody->setPosition(m_startPosition);
+    m_objectBody->physicsBody()->setUserData(m_objectBody);
+
+
+    objectPos = rp3d::Vector3(m_startPosition.x + 2, m_startPosition.y - 0.5, m_startPosition.z + 1);
+    objectTransform = rp3d::Transform(objectPos, objectOrientation);
+    world()->physicsWorld()->destroyRigidBody(m_objectWheels[0]->physicsBody());
+    m_objectWheels[0]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
+    m_objectWheels[0]->setPosition(m_startPosition + glm::vec3(2, -0.5, 1));
+    m_objectWheels[0]->physicsBody()->setUserData(m_objectWheels[0]);
+
+    objectPos = rp3d::Vector3(m_startPosition.x + 2, m_startPosition.y - 0.5, m_startPosition.z - 1);
+    objectTransform = rp3d::Transform(objectPos, objectOrientation);
+    world()->physicsWorld()->destroyRigidBody(m_objectWheels[1]->physicsBody());
+    m_objectWheels[1]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
+    m_objectWheels[1]->setPosition(m_startPosition + glm::vec3(2, -0.5, -1));
+    m_objectWheels[1]->physicsBody()->setUserData(m_objectWheels[1]);
+
+    objectPos = rp3d::Vector3(m_startPosition.x - 2, m_startPosition.y - 0.5, m_startPosition.z + 1);
+    objectTransform = rp3d::Transform(objectPos, objectOrientation);
+    world()->physicsWorld()->destroyRigidBody(m_objectWheels[2]->physicsBody());
+    m_objectWheels[2]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
+    m_objectWheels[2]->setPosition(m_startPosition + glm::vec3(-2, -0.5, 1));
+    m_objectWheels[2]->physicsBody()->setUserData(m_objectWheels[2]);
+
+    objectPos = rp3d::Vector3(m_startPosition.x - 2, m_startPosition.y - 0.5, m_startPosition.z - 1);
+    objectTransform = rp3d::Transform(objectPos, objectOrientation);
+    world()->physicsWorld()->destroyRigidBody(m_objectWheels[3]->physicsBody());
+    m_objectWheels[3]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
+    m_objectWheels[3]->setPosition(m_startPosition + glm::vec3(-2, -0.5, -1));
+    m_objectWheels[3]->physicsBody()->setUserData(m_objectWheels[3]);
+
+    Setup_physics(reactphysics3d::BodyType::DYNAMIC);
+    m_backTriggerCounter = 0;
+    m_hasContact = false;
+    m_timeCounter = 0;
+    m_lastTriggerNumber = 0;
+}
+
+bool CarObject::checkTimeCounter()
+{
+    if (m_timeCounter < 8)
+    {
+        m_timeCounter += 1.0f / 60;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool CarObject::checkBackTriggerCounter()
+{
+    if (m_backTriggerCounter < 2)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool CarObject::checkHasContact()
+{
+    return !m_hasContact;
 }
 
 void CarObject::Setup_physics(reactphysics3d::BodyType type)

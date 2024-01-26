@@ -3,12 +3,20 @@
 
 #include <reactphysics3d/engine/EventListener.h>
 
+class CarObject;
+
 //! Класс прослушивания событий физического движка
 class FuryEventListener : public reactphysics3d::EventListener
 {
 public:
     //! Конструктор
     FuryEventListener();
+
+    /*!
+     * \brief Установка объекта машины
+     * \param[in] _carObject - Объект машины
+     */
+    void setCarObject(CarObject* _carObject);
 
     /*!
      * \brief Вызывается при возникновении некоторых контактов
@@ -21,6 +29,9 @@ public:
      * \param[in] _callbackData - Информация об активации триггера
      */
     void onTrigger(const reactphysics3d::OverlapCallback::CallbackData & _callbackData) override;
+
+private:
+    CarObject* m_carObject;
 };
 
 #endif // FURYEVENTLISTENER_H

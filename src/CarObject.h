@@ -27,6 +27,44 @@ public:
     //! resetKeyInput Сброс кнопок управления
     void resetKeyInput();
 
+    /*!
+     * \brief Установка действия от Бота
+     * \param[in] _action - Действие
+     */
+    void setBotAction(int _action);
+    int getUserAction();
+
+    /*!
+     * \brief Получить значения лучей
+     * \return Возвращает значения лучей
+     */
+    QVector<float> getRays();
+
+    /*!
+     * \brief Получить вектор скорости
+     * \return Возвращает вектор скорости
+     */
+    glm::vec3 getSpeed();
+
+    /*!
+     * \brief Получить размер вознаграждения
+     * \return Возвращает размер вознаграждения
+     */
+    float getReward();
+
+    int getLastTriggerNumber();
+
+    void onContact();
+    void onTrigger(int _number);
+    void resetPosition(const glm::vec3& _position);
+
+    glm::vec3 calcNextTriggerVector(const glm::vec3& _trigger);
+
+    void respawn();
+    bool checkTimeCounter();
+    bool checkBackTriggerCounter();
+    bool checkHasContact();
+
     void Setup_physics(reactphysics3d::BodyType type);
 
     inline const QVector<FuryObject*>& objectsForDraw() const
@@ -76,8 +114,15 @@ private:
     //! Позиция камеры (в локальных координатах)
     glm::vec3 m_cameraLocalPosition;
 
-    int m_forward;
-    int m_right;
+    float m_forward;
+    float m_right;
+
+    int m_lastTriggerNumber;
+    float m_reward;
+    glm::vec3 m_startPosition;
+    float m_timeCounter;
+    int m_backTriggerCounter;
+    bool m_hasContact;
 
 
     /// Дополнительные указатели. НЕ УДАЛЯТЬ!

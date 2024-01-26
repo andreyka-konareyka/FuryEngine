@@ -7,14 +7,29 @@
     <x>0</x>
     <y>0</y>
     <width>1077</width>
-    <height>611</height>
+    <height>626</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Fury Engine :: Car AI</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <property name="leftMargin">
+     <number>6</number>
+    </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -29,196 +44,238 @@
        </property>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>-80</y>
+             <width>576</width>
+             <height>462</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Увеличение камеры</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="cameraZoomSlider">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="minimum">
+               <number>35</number>
+              </property>
+              <property name="maximum">
+               <number>130</number>
+              </property>
+              <property name="value">
+               <number>100</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="carCamXLabel">
+              <property name="text">
+               <string>CarCam.x: 7</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="carCamXSlider">
+              <property name="minimum">
+               <number>5</number>
+              </property>
+              <property name="maximum">
+               <number>30</number>
+              </property>
+              <property name="value">
+               <number>7</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="carCamYLabel">
+              <property name="text">
+               <string>CarCam.y: 3</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="carCamYSlider">
+              <property name="minimum">
+               <number>2</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>3</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="springLenghtLabel">
+              <property name="text">
+               <string>Длина пружин: 0.4</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="springLenghtSlider">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>40</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="springKLabel">
+              <property name="text">
+               <string>Жёсткость пружин: 500</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="springKSlider">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="shadowNearLabel">
+              <property name="text">
+               <string>ShadowNear: 0.1</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="shadowNearSlider">
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="shadowPlaneLabel">
+              <property name="text">
+               <string>ShadowPlane: 70</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="shadowPlaneSlider">
+              <property name="value">
+               <number>60</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="shadowViewSizeLabel">
+              <property name="text">
+               <string>ShadowViewSize: 25</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="shadowViewSizeSlider">
+              <property name="value">
+               <number>15</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="shadowCamDistanceLabel">
+              <property name="text">
+               <string>ShadowCamDistance: 37</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="shadowCamDistanceSlider">
+              <property name="value">
+               <number>64</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="learnSpeedCheckBox">
           <property name="text">
-           <string>Увеличение камеры</string>
+           <string>Ускоренно</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="cameraZoomSlider">
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="minimum">
-           <number>35</number>
-          </property>
-          <property name="maximum">
-           <number>130</number>
-          </property>
-          <property name="value">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::TicksBelow</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="carCamXLabel">
+         <widget class="QPushButton" name="saveModelButton">
           <property name="text">
-           <string>CarCam.x: 7</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="carCamXSlider">
-          <property name="minimum">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <number>30</number>
-          </property>
-          <property name="value">
-           <number>7</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="carCamYLabel">
-          <property name="text">
-           <string>CarCam.y: 3</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="carCamYSlider">
-          <property name="minimum">
-           <number>2</number>
-          </property>
-          <property name="maximum">
-           <number>20</number>
-          </property>
-          <property name="value">
-           <number>3</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="springLenghtLabel">
-          <property name="text">
-           <string>Длина пружин: 0.4</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="springLenghtSlider">
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="value">
-           <number>40</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="springKLabel">
-          <property name="text">
-           <string>Жёсткость пружин: 500</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="springKSlider">
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="value">
-           <number>20</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="shadowNearLabel">
-          <property name="text">
-           <string>ShadowNear: 0.1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="shadowNearSlider">
-          <property name="value">
-           <number>0</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="shadowPlaneLabel">
-          <property name="text">
-           <string>ShadowPlane: 70</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="shadowPlaneSlider">
-          <property name="value">
-           <number>60</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="shadowViewSizeLabel">
-          <property name="text">
-           <string>ShadowViewSize: 25</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="shadowViewSizeSlider">
-          <property name="value">
-           <number>15</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="shadowCamDistanceLabel">
-          <property name="text">
-           <string>ShadowCamDistance: 37</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="shadowCamDistanceSlider">
-          <property name="value">
-           <number>64</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <string>Сохранить модель</string>
           </property>
          </widget>
         </item>

@@ -1,12 +1,19 @@
 #include "FuryEventListener.h"
 
 #include "FuryObject.h"
+#include "CarObject.h"
 
 #include <QDebug>
 
-FuryEventListener::FuryEventListener()
+FuryEventListener::FuryEventListener() :
+    m_carObject(nullptr)
 {
 
+}
+
+void FuryEventListener::setCarObject(CarObject *_carObject)
+{
+    m_carObject = _carObject;
 }
 
 void FuryEventListener::onContact(const CallbackData &_callbackData)
@@ -19,25 +26,25 @@ void FuryEventListener::onContact(const CallbackData &_callbackData)
 
         FuryObject* tempObj = static_cast<FuryObject*>(contactPair.getBody1()->getUserData());
 
-        if (tempObj != nullptr)
-        {
-            qDebug() << "body1" << tempObj->name();
-        }
-        else
-        {
-            qDebug() << "body1" << "nullptr";
-        }
+//        if (tempObj != nullptr)
+//        {
+//            qDebug() << "body1" << tempObj->name();
+//        }
+//        else
+//        {
+//            qDebug() << "body1" << "nullptr";
+//        }
 
         tempObj = static_cast<FuryObject*>(contactPair.getBody2()->getUserData());
 
-        if (tempObj != nullptr)
-        {
-            qDebug() << "body2" << tempObj->name();
-        }
-        else
-        {
-            qDebug() << "body2" << "nullptr";
-        }
+//        if (tempObj != nullptr)
+//        {
+//            qDebug() << "body2" << tempObj->name();
+//        }
+//        else
+//        {
+//            qDebug() << "body2" << "nullptr";
+//        }
 
         // For each contact point of the contact pair
         for (uint c = 0; c < contactPair.getNbContactPoints(); c++) {
@@ -46,12 +53,17 @@ void FuryEventListener::onContact(const CallbackData &_callbackData)
             CollisionCallback::ContactPoint contactPoint = contactPair.getContactPoint(c);
 
             // Get the contact point on the first collider and convert it in world-space
-            reactphysics3d::Vector3 worldPoint = contactPair.getCollider1()->getLocalToWorldTransform()
-                    * contactPoint.getLocalPointOnCollider1();
+//            reactphysics3d::Vector3 worldPoint = contactPair.getCollider1()->getLocalToWorldTransform()
+//                    * contactPoint.getLocalPointOnCollider1();
 
-            qDebug() << worldPoint.x
-                     << worldPoint.y
-                     << worldPoint.z;
+//            qDebug() << worldPoint.x
+//                     << worldPoint.y
+//                     << worldPoint.z;
+
+            if (m_carObject != nullptr)
+            {
+                m_carObject->onContact();
+            }
         }
     }
 }
@@ -92,35 +104,41 @@ void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::Callbac
 
         if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStart)
         {
-            qDebug() << "EventType::OverlapStart";
+//            qDebug() << "EventType::OverlapStart";
             tempObj2->setTextureName("greenCheckBox");
+
+            if (m_carObject != nullptr)
+            {
+                int number = tempObj2->name().split(' ').last().toInt();
+                m_carObject->onTrigger(number);
+            }
         }
         else if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapExit)
         {
-            qDebug() << "EventType::OverlapExit";
+//            qDebug() << "EventType::OverlapExit";
             tempObj2->setTextureName("redCheckBox");
         }
         else
         {
-            qDebug() << "EventType::OverlapStay";
+//            qDebug() << "EventType::OverlapStay";
         }
 
         if (tempObj1 != nullptr)
         {
-            qDebug() << "body1" << tempObj1->name();
+//            qDebug() << "body1" << tempObj1->name();
         }
         else
         {
-            qDebug() << "body1" << "nullptr";
+//            qDebug() << "body1" << "nullptr";
         }
 
         if (tempObj2 != nullptr)
         {
-            qDebug() << "body2" << tempObj2->name();
+//            qDebug() << "body2" << tempObj2->name();
         }
         else
         {
-            qDebug() << "body2" << "nullptr";
+//            qDebug() << "body2" << "nullptr";
         }
     }
 }

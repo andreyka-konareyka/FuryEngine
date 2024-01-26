@@ -37,6 +37,7 @@
 #include "FuryModel.h"
 #include "FuryModelManager.h"
 #include "FuryMaterialManager.h"
+#include "FuryScript.h"
 
 
 #include <QOpenGLWidget>
@@ -87,6 +88,11 @@ public:
 
     inline void setShadowCamDistance(float _shadowCamDistance)
     { m_shadowCamDistance = _shadowCamDistance; }
+
+    inline void setLearnSpeed(int _value)
+    { m_learnSpeed = _value; }
+
+    void saveLearnModel();
 
 signals:
     void setWindowTitleSignal(const QString& _title);
@@ -242,6 +248,9 @@ private:
     QVector<Camera*> m_cameras;
     //! Аккумулятор для обновления физики
     double m_updateAccumulator;
+
+    FuryScript* m_learnScript;
+    int m_learnSpeed;
 };
 
 #endif // TESTRENDER_H

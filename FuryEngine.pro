@@ -13,8 +13,11 @@ UI_DIR = build
 RCC_DIR = build
 
 
-INCLUDEPATH += includes
+INCLUDEPATH += includes \
+               $$(LOCALAPPDATA)/Programs/Python/Python310/include
 LIBS        += -Llibs \
+               -Llibs/boost \
+               -L$$(LOCALAPPDATA)/Programs/Python/Python310/libs \
                -lglew32s \
                -lOpenGL32 \
                -lglu32 \
@@ -38,6 +41,7 @@ SOURCES += \
     src/FuryModelManager.cpp \
     src/FuryObject.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
+    src/FuryScript.cpp \
     src/FurySphereObject.cpp \
     src/FuryTexture.cpp \
     src/FuryTextureManager.cpp \
@@ -62,6 +66,7 @@ HEADERS += \
     src/FuryModelManager.h \
     src/FuryObject.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
+    src/FuryScript.h \
     src/FurySphereObject.h \
     src/FuryTexture.h \
     src/FuryTextureManager.h \
@@ -81,3 +86,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    FuryRecources.qrc

@@ -59,11 +59,16 @@ private slots:
     void onShadowViewSizeSliderSlot();
     void onShadowCamDistanceSliderSlot();
 
+    void onLearnSpeedCheckBoxSlot();
+    void onSaveSlot();
+
 private:
     //! Подготовка интерфейса
     void prepareUi();
     //! Инициализация соединений сигналов и слотов
     void initConnections();
+    //! Загрузить стиль приложения
+    void loadStyle();
 
 private:
     //! Интерфейс

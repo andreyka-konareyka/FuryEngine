@@ -8,6 +8,7 @@
 
 #include "FuryLogger.h"
 #include "TextureLoader.h"
+#include "FuryScript.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 
@@ -47,12 +48,14 @@ TestRender::TestRender(QWidget *_parent) :
     m_textureManager(FuryTextureManager::createInstance()),
     m_modelManager(FuryModelManager::createInstance()),
     m_materialManager(FuryMaterialManager::createInstance()),
-    m_updateAccumulator(0)
+    m_updateAccumulator(0),
+    m_learnScript(new FuryScript),
+    m_learnSpeed(1)
 {
     Debug(ru("Создание рендера"));
 
     connect(this, &QOpenGLWidget::frameSwapped,
-            this, &TestRender::updateGL);
+            this, &TestRender::updateGL, Qt::QueuedConnection);
     setFocusPolicy(Qt::StrongFocus);
 }
 
@@ -170,6 +173,11 @@ void TestRender::setCarSpringLenght(float _lenght)
 void TestRender::setCarSpringK(float _k)
 {
     m_carObject->setSpringK(_k);
+}
+
+void TestRender::saveLearnModel()
+{
+    m_learnScript->saveModel();
 }
 
 void TestRender::mouseMoveEvent(QMouseEvent* _event)
@@ -340,6 +348,7 @@ void TestRender::init() {
         m_testWorld->addObject(tempObjectsForDraw[i]);
     }
 
+    m_eventListener->setCarObject(m_carObject);
 
     // Большой пол
     m_bigFloor = new FuryBoxObject(m_testWorld, glm::vec3(0, -3, 0), 500, 1, 500);
@@ -568,7 +577,10 @@ void TestRender::render()
 
         do_movement();
 
-        updatePhysics();
+        for (int i = 0; i < m_learnSpeed; ++i)
+        {
+            updatePhysics();
+        }
 
 
         m_cameras[1]->setPosition(m_carObject->cameraPosition());
@@ -1349,12 +1361,16 @@ void TestRender::renderPbrSpheres()
 
 void TestRender::updatePhysics()
 {
-    m_updateAccumulator += m_deltaTime;
+//    m_updateAccumulator += m_deltaTime;
     float timeStep = 1.0f / 60.0f;
 
-    while (m_updateAccumulator >= timeStep)
-    {
+//    while (m_updateAccumulator >= timeStep)
+//    {
 
+    // Выполняем 2 тика по 1/60 секунды. Для ИИ получается 1 тик в 1/30 секунды
+//    int iCount = (m_learnSpeed == 1) ? 1 : 2;
+//    for (int i = 0; i < iCount; ++i)
+    {
         m_myFirstParticle->Tick(timeStep);
         m_myFirstParticleSystem->Tick(timeStep);
 
@@ -1366,9 +1382,107 @@ void TestRender::updatePhysics()
         }
 
         m_carObject->tick(timeStep);
+    }
 
+//        m_updateAccumulator -= timeStep;
+//    }
 
-        m_updateAccumulator -= timeStep;
+    QVector<float> observation = m_carObject->getRays();
+
+    glm::vec3 speed = m_carObject->getSpeed();
+    speed /= 23;
+    observation.append(speed.x);
+    observation.append(speed.y);
+    observation.append(speed.z);
+
+    {
+        FuryObject* trigger = nullptr;
+        int nextTriggerNumber = (m_carObject->getLastTriggerNumber() + 1) % 72;
+
+        for (int i = 0; i < m_testWorld->getTransparentObjects().size(); ++i)
+        {
+            FuryObject* object = m_testWorld->getTransparentObjects()[i];
+
+            if (object->name() == QString("Trigger %1").arg(nextTriggerNumber))
+            {
+                trigger = object;
+                break;
+            }
+        }
+
+        if (trigger != nullptr)
+        {
+            const glm::vec3& triggerPos = trigger->getPosition();
+            glm::vec3 direct = m_carObject->calcNextTriggerVector(triggerPos);
+            observation.append(direct.x);
+            observation.append(direct.y);
+            observation.append(direct.z);
+        }
+        else
+        {
+            observation.append(0);
+            observation.append(0);
+            observation.append(0);
+            qDebug() << ru("Ошибка при поиске следующего триггера");
+        }
+    }
+
+    static bool isFirst = true;
+    static float score = 0;
+    static int gameCounter = 0;
+
+    if (isFirst)
+    {
+        int action = m_learnScript->predict(observation);
+        m_carObject->getReward(); // Обнуляем reward
+        m_carObject->setBotAction(action);
+        isFirst = false;
+        return;
+    }
+
+    float carReward = (m_carObject->getReward() - 0.01);
+    score += carReward;
+
+    if (!m_carObject->checkTimeCounter())
+    {
+        qDebug() << "timeout";
+        carReward = -50;
+        m_learnScript->learn(observation, carReward, 1);
+        m_carObject->respawn();
+
+        isFirst = true;
+        qDebug() << "Game:" << gameCounter << "Score:" << score;
+        score = 0;
+        gameCounter++;
+    }
+    else if (!m_carObject->checkBackTriggerCounter())
+    {
+        qDebug() << "back triggers error";
+        carReward = -100;
+        m_learnScript->learn(observation, carReward, 1);
+        m_carObject->respawn();
+
+        isFirst = true;
+        qDebug() << "Game:" << gameCounter << "Score:" << score;
+        score = 0;
+        gameCounter++;
+    }
+    else if (!m_carObject->checkHasContact())
+    {
+        qDebug() << "contact error";
+        carReward = -100;
+        m_learnScript->learn(observation, carReward, 1);
+        m_carObject->respawn();
+
+        isFirst = true;
+        qDebug() << "Game:" << gameCounter << "Score:" << score;
+        score = 0;
+        gameCounter++;
+    }
+    else
+    {
+        int action = m_learnScript->learn(observation, carReward, 0);
+        m_carObject->setBotAction(action);
     }
 }
 

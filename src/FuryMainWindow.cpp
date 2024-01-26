@@ -4,6 +4,7 @@
 #include "FuryLogger.h"
 
 #include <QMessageBox>
+#include <QFile>
 
 FuryMainWindow::FuryMainWindow(QWidget* _parent) :
     QMainWindow(_parent),
@@ -45,7 +46,8 @@ void FuryMainWindow::onCarCameraMoveSliderSlot()
 
 void FuryMainWindow::onSetWindowTitleSlot(const QString &_title)
 {
-    setWindowTitle(_title);
+//    setWindowTitle(_title);
+    m_ui->statusbar->showMessage(_title);
 }
 
 void FuryMainWindow::onSetComputerLoadSlot(int _value)
@@ -95,10 +97,29 @@ void FuryMainWindow::onShadowCamDistanceSliderSlot()
     m_ui->openGLWidget->setShadowCamDistance(value);
 }
 
+void FuryMainWindow::onLearnSpeedCheckBoxSlot()
+{
+    if (m_ui->learnSpeedCheckBox->isChecked())
+    {
+        m_ui->openGLWidget->setLearnSpeed(20);
+    }
+    else
+    {
+        m_ui->openGLWidget->setLearnSpeed(1);
+    }
+}
+
+void FuryMainWindow::onSaveSlot()
+{
+    m_ui->openGLWidget->saveLearnModel();
+}
+
 void FuryMainWindow::prepareUi()
 {
     m_ui->setupUi(this);
     initConnections();
+    loadStyle();
+    m_ui->statusbar->showMessage(ru("Обучаем..."));
 
     m_ui->splitter->setStretchFactor(0, 1);
     m_ui->splitter->setStretchFactor(1, 0);
@@ -135,5 +156,24 @@ void FuryMainWindow::initConnections()
             this, &FuryMainWindow::onShadowViewSizeSliderSlot);
     connect(m_ui->shadowCamDistanceSlider, &QSlider::valueChanged,
             this, &FuryMainWindow::onShadowCamDistanceSliderSlot);
+
+    connect(m_ui->learnSpeedCheckBox, &QCheckBox::stateChanged,
+            this, &FuryMainWindow::onLearnSpeedCheckBoxSlot);
+    connect(m_ui->saveModelButton, &QPushButton::clicked,
+            this, &FuryMainWindow::onSaveSlot);
+}
+
+void FuryMainWindow::loadStyle()
+{
+    QFile styleFile(":qss/FuryStyle");
+
+    if (!styleFile.open(QIODevice::ReadOnly))
+    {
+        Debug(ru("Не удалось загрузить стиль."));
+        return;
+    }
+
+    QString styleStr = styleFile.readAll();
+    setStyleSheet(styleStr);
 }
 
