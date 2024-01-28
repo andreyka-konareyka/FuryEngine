@@ -49,6 +49,9 @@ public:
     inline void setLoaded(bool _loaded = true)
     { m_loaded = _loaded; }
 
+    inline float modelRadius()
+    {  return m_modelRadius; }
+
     void setupMesh();
 
     /*!
@@ -78,6 +81,16 @@ private:
      */
     FuryMesh* processMesh(aiMesh* _mesh, const aiScene* _scene);
 
+    /*!
+     * \brief Вычисление габаритов всей модели по минимальным и максимальным
+     * координанам
+     * \param[in] _vertex - Обрабатываемая вершина
+     */
+    void calculateMinMaxVertex(const glm::vec3& _vertex);
+
+    //! Вычисляет радиус сферы, в которую вписана модель
+    void calculateRadius();
+
 private:
     //! Путь к файлу
     QString m_path;
@@ -85,6 +98,13 @@ private:
     QVector<FuryMesh*> m_meshes;
     //! Директория
     QString m_directory;
+
+    //! Радиус сферы, в которую вписана модель
+    float m_modelRadius;
+    //! Минимальная координата куба, в которую вписана модель
+    glm::vec3 m_minimumVertex;
+    //! Максимальная координата куба, в которую вписана модель
+    glm::vec3 m_maximumVertex;
 
     //! Готова ли модель для использования
     bool m_ready;

@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 
+#include "FuryObject.h"
 
 // GL Includes
 #include <GL/glew.h>
@@ -50,7 +51,26 @@ public:
      * \brief Получить ViewMatrix для OpenGL
      * \return Возвращает ViewMatrix для OpenGL
      */
-    glm::mat4 getViewMatrix();
+    const glm::mat4& getViewMatrix();
+
+    /*!
+     * \brief Получить PerspectiveMatrix для OpenGL
+     * \param[in] _width - Ширина экрана
+     * \param[in] _height - Высота экрана
+     * \param[in] _near - Ближная граница усечённой пирамиды
+     * \param[in] _far - Дальняя граница усечённой пирамиды
+     * \return
+     */
+    const glm::mat4& getPerspectiveMatrix(int _width, int _height,
+                                   float _near, float _far);
+
+
+    /*!
+     * \brief Проверка, находится ли объект как сфера в зоне видимости камеры
+     * \param _object - Объект. Считаем, что он вписан в сферу
+     * \return Возвращает признак того, находится ли объект в зоне видимости
+     */
+    bool sphereInFrustum(FuryObject* _object);
 
     /*!
      * \brief Обработка нажатий клавиатуры
@@ -141,6 +161,9 @@ private:
     GLfloat m_movementSpeed;
     //! Чувствительность мыши
     GLfloat m_mouseSensitivity;
+
+    glm::mat4 m_viewMatrix;
+    glm::mat4 m_perspectiveMatrix;
 };
 
 #endif // CAMERA_H

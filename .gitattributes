@@ -1,2 +1,2 @@
-includes/** linguist-vendored=false
-libs/** linguist-vendored=false
+includes/** linguist-vendored
+libs/** linguist-vendored

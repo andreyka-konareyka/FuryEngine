@@ -5,9 +5,12 @@
 #include "FuryMaterialManager.h"
 
 #include <QFileInfo>
+#include <numeric>
 
 FuryModel::FuryModel(const QString &_path) :
     m_path(_path),
+    m_minimumVertex(std::numeric_limits<float>::max()),
+    m_maximumVertex(std::numeric_limits<float>::min()),
     m_ready(false),
     m_loaded(false)
 {
@@ -75,6 +78,7 @@ bool FuryModel::loadModel()
     m_directory = fileInfo.absolutePath() + "/";
 
     processNode(scene->mRootNode, scene);
+    calculateRadius();
 
     m_loaded = true;
     return true;
@@ -111,6 +115,7 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene)
         vertex.m_position = glm::vec3(_mesh->mVertices[i].x,
                                       _mesh->mVertices[i].y,
                                       _mesh->mVertices[i].z);
+        calculateMinMaxVertex(vertex.m_position);
 
         // Нормаль
         if (_mesh->HasNormals())
@@ -170,4 +175,47 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene)
 
     // Возвращаем созданный меш
     return new FuryMesh(vertices, indices, furyMaterial);
+}
+
+void FuryModel::calculateMinMaxVertex(const glm::vec3 &_vertex)
+{
+    // Смотрим минимальную координату
+    if (_vertex.x < m_minimumVertex.x)
+    {
+        m_minimumVertex.x = _vertex.x;
+    }
+
+    if (_vertex.y < m_minimumVertex.y)
+    {
+        m_minimumVertex.y = _vertex.y;
+    }
+
+    if (_vertex.z < m_minimumVertex.z)
+    {
+        m_minimumVertex.z = _vertex.z;
+    }
+
+    // Смотрим максимальную координату
+    if (_vertex.x > m_maximumVertex.x)
+    {
+        m_maximumVertex.x = _vertex.x;
+    }
+
+    if (_vertex.y > m_maximumVertex.y)
+    {
+        m_maximumVertex.y = _vertex.y;
+    }
+
+    if (_vertex.z > m_maximumVertex.z)
+    {
+        m_maximumVertex.z = _vertex.z;
+    }
+}
+
+void FuryModel::calculateRadius()
+{
+    float radiusMin = glm::length(m_minimumVertex);
+    float radiusMax = glm::length(m_maximumVertex);
+
+    m_modelRadius = std::max(radiusMin, radiusMax);
 }

@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+#include "FuryObject.h"
+#include "FuryModelManager.h"
+
+
 Camera::Camera(glm::vec3 _position, glm::vec3 _up, GLfloat _yaw, GLfloat _pitch) :
     m_position(_position),
     m_front(glm::vec3(0.0f, 0.0f, -1.0f)),
@@ -13,9 +17,51 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _up, GLfloat _yaw, GLfloat _pitch)
     updateCameraVectors();
 }
 
-glm::mat4 Camera::getViewMatrix()
+const glm::mat4 &Camera::getViewMatrix()
 {
-    return glm::lookAt(m_position, m_position + m_front, m_up);
+    m_viewMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
+    return m_viewMatrix;
+}
+
+const glm::mat4 &Camera::getPerspectiveMatrix(int _width, int _height,
+                                       float _near, float _far)
+{
+    m_perspectiveMatrix = glm::perspective(glm::radians(zoom()),
+                                           (float)_width / (float)_height,
+                                           _near, _far);
+    return m_perspectiveMatrix;
+}
+
+bool Camera::sphereInFrustum(FuryObject *_object)
+{
+    glm::vec4 planes[6];
+    glm::mat4 m = glm::transpose(m_perspectiveMatrix * m_viewMatrix);
+    planes[0] = m[3] + m[0];
+    planes[1] = m[3] - m[0];
+    planes[2] = m[3] + m[1];
+    planes[3] = m[3] - m[1];
+    planes[4] = m[3] + m[2];
+    planes[5] = m[3] - m[2];
+
+    FuryModelManager* modelManager = FuryModelManager::instance();
+
+    const glm::vec3& minp = _object->getPosition();
+    const glm::vec3& scales = _object->scales();
+    float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
+    float radius = modelManager->modelByName(_object->modelName())->modelRadius();
+    radius *= maxScale;
+
+    for (int i = 0; i < 6; i++)
+    {
+        float distance = glm::dot(planes[i], glm::vec4(minp.x, minp.y, minp.z, 1.0f));
+
+        if (distance < -radius)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void Camera::processKeyboard(Camera_Movement _direction, GLfloat _deltaTime)

@@ -554,9 +554,20 @@ void TestRender::render()
         renderPbrSpheres();
 
 
-        glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)this->m_width / (float)this->m_height, m_perspective_near, m_perspective_far);
-        glm::mat4 view =  m_testWorld->camera()->getViewMatrix();
 
+        glm::vec4 planes[6];
+        const glm::mat4& projection = m_testWorld->camera()->getPerspectiveMatrix(m_width, m_height, m_perspective_near, m_perspective_far);
+        const glm::mat4& view =  m_testWorld->camera()->getViewMatrix();
+
+        {
+            glm::mat4 m = glm::transpose(projection * view);
+            planes[0] = m[3] + m[0];
+            planes[1] = m[3] - m[0];
+            planes[2] = m[3] + m[1];
+            planes[3] = m[3] - m[1];
+            planes[4] = m[3] + m[2];
+            planes[5] = m[3] - m[2];
+        }
 
         const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
 
@@ -574,6 +585,31 @@ void TestRender::render()
                     }
                 }
 
+                {
+                    bool result = true;
+                    const glm::vec3& minp = renderObject->getPosition();
+                    const glm::vec3& scales = renderObject->scales();
+                    float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
+                    float radius = m_modelManager->modelByName(renderObject->modelName())->modelRadius();
+                    radius *= maxScale;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float distance = glm::dot(planes[i], glm::vec4(minp.x, minp.y, minp.z, 1.0f));
+
+                        if (distance < -(radius * 1))
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+
+                    if (!result)
+                    {
+                        continue;
+                    }
+                }
+
                 shader->Use();
 
 
@@ -583,8 +619,6 @@ void TestRender::render()
 
 
                 // view/projection transformations
-                glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)m_width / (float)m_height, m_perspective_near, m_perspective_far);
-                glm::mat4 view = m_testWorld->camera()->getViewMatrix();
                 shader->setMat4("projection", projection);
                 shader->setMat4("view", view);
 
@@ -663,8 +697,10 @@ void TestRender::render()
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         m_skyboxShader->Use();
-        view = glm::mat4(glm::mat3(m_testWorld->camera()->getViewMatrix())); // remove translation from the view matrix
-        m_skyboxShader->setMat4("view", view);
+        {
+            glm::mat4 view = glm::mat4(glm::mat3(m_testWorld->camera()->getViewMatrix())); // remove translation from the view matrix
+            m_skyboxShader->setMat4("view", view);
+        }
         m_skyboxShader->setMat4("projection", projection);
         // skybox cube
         glBindVertexArray(m_skyboxVAO);
@@ -727,6 +763,31 @@ void TestRender::render()
                     }
                 }
 
+                {
+                    bool result = true;
+                    const glm::vec3& minp = renderObject->getPosition();
+                    const glm::vec3& scales = renderObject->scales();
+                    float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
+                    float radius = m_modelManager->modelByName(renderObject->modelName())->modelRadius();
+                    radius *= maxScale;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float distance = glm::dot(planes[i], glm::vec4(minp.x, minp.y, minp.z, 1.0f));
+
+                        if (distance < -(radius * 1))
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+
+                    if (!result)
+                    {
+                        continue;
+                    }
+                }
+
                 shader->Use();
 
 
@@ -736,8 +797,6 @@ void TestRender::render()
 
 
                 // view/projection transformations
-                glm::mat4 projection = glm::perspective(glm::radians(m_testWorld->camera()->zoom()), (float)m_width / (float)m_height, m_perspective_near, m_perspective_far);
-                glm::mat4 view = m_testWorld->camera()->getViewMatrix();
                 shader->setMat4("projection", projection);
                 shader->setMat4("view", view);
 
