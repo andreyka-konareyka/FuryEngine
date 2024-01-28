@@ -317,41 +317,6 @@ void CarObject::setBotAction(int _action)
     }
 }
 
-int CarObject::getUserAction()
-{
-    if (m_forward == 0 && m_right == 0)
-    {
-        return 0;
-    }
-    if (m_forward == 1 && m_right == 0)
-    {
-        return 1;
-    }
-    if (m_forward == 1 && m_right == 1)
-    {
-        return 2;
-    }
-    if (m_forward == 1 && m_right == -1)
-    {
-        return 3;
-    }
-    if (m_forward == 0 && m_right == 1)
-    {
-        return 4;
-    }
-    if (m_forward == 0 && m_right == -1)
-    {
-        return 5;
-    }
-    if (m_forward == -1 && m_right == 0)
-    {
-        return 6;
-    }
-
-    qDebug() << ru("Неправильное действие от пользователя");
-    return 0;
-}
-
 QVector<float> CarObject::getRays()
 {
     QVector<float> result;
@@ -441,21 +406,6 @@ void CarObject::onTrigger(int _number)
     }
 
     m_lastTriggerNumber = _number;
-}
-
-void CarObject::resetPosition(const glm::vec3 &_position)
-{
-    m_objectBody->setPosition(_position);
-    rp3d::Transform transform1 = m_objectBody->physicsBody()->getTransform();
-    transform1.setOrientation(rp3d::Quaternion::identity());
-    m_objectBody->physicsBody()->setTransform(transform1);
-    m_objectBody->physicsBody()->setAngularVelocity(rp3d::Vector3(0, 0, 0));
-    m_objectBody->physicsBody()->setLinearVelocity(rp3d::Vector3(0, 0, 0));
-
-    m_objectWheels[0]->setPosition(_position + glm::vec3(2, -0.5, 1));
-    m_objectWheels[1]->setPosition(_position + glm::vec3(2, -0.5, -1));
-    m_objectWheels[2]->setPosition(_position + glm::vec3(-2, -0.5, 1));
-    m_objectWheels[3]->setPosition(_position + glm::vec3(-2, -0.5, -1));
 }
 
 glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)

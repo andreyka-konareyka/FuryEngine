@@ -54,14 +54,22 @@ private slots:
     //! Слот изменения жёсткости пружины автомобиля
     void onCarSpringKSliderSlot();
 
+
+    //! Слот изменения near у камеры для теней
     void onShadowNearSliderSlot();
+    //! Слот изменения plane у камеры для теней
     void onShadowPlaneSliderSlot();
+    //! Слот изменения области видимости у камеры для теней
     void onShadowViewSizeSliderSlot();
+    //! Слот изменения удалённости камеры для теней
     void onShadowCamDistanceSliderSlot();
 
+    //! Слот увеличения скорости обучения
     void onLearnSpeedCheckBoxSlot();
+    //! Слот сохранения модели
     void onSaveSlot();
 
+    //! Слот необходимости отображения отладочных объектов
     void onNeedDebugRenderSlot();
 
 private:

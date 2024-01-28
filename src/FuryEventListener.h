@@ -31,6 +31,7 @@ public:
     void onTrigger(const reactphysics3d::OverlapCallback::CallbackData & _callbackData) override;
 
 private:
+    //! Объект машины. Чтобы напрямую отправлять информацию для обучения.
     CarObject* m_carObject;
 };
 

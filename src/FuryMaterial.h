@@ -28,12 +28,24 @@ public:
     FuryMaterial(const glm::vec3& _diffuseColor,
                  const glm::vec3& _specularColor);
 
+    /*!
+     * \brief Установка диффузной текстуры
+     * \param[in] _diffuseTexture - Название диффузной текстуры
+     */
     inline void setDiffuseTexture(const QString& _diffuseTexture)
     { m_diffuseTexture = _diffuseTexture; }
 
+    /*!
+     * \brief Установка текстуры отражений
+     * \param! _specularTexture - Название текстуры отражений
+     */
     inline void setSpecularTexture(const QString& _specularTexture)
     { m_specularTexture = _specularTexture; }
 
+    /*!
+     * \brief Установка текстуры нормалей
+     * \param! _normalTexture - Название текстуры нормалей
+     */
     inline void setNormalTexture(const QString& _normalTexture)
     { m_normalTexture = _normalTexture; }
 

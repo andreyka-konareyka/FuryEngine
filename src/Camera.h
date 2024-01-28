@@ -64,7 +64,6 @@ public:
     const glm::mat4& getPerspectiveMatrix(int _width, int _height,
                                    float _near, float _far);
 
-
     /*!
      * \brief Проверка, находится ли объект как сфера в зоне видимости камеры
      * \param _object - Объект. Считаем, что он вписан в сферу

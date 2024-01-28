@@ -75,9 +75,7 @@ HEADERS += \
     src/ParticleSystem.h \
     src/Shader.h \
     src/TestRender.h \
-    src/TextureLoader.h \
-    src/mesh.h \
-    src/model.h
+    src/TextureLoader.h
 
 FORMS += \
     src/FuryMainWindow.ui

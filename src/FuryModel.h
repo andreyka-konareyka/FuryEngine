@@ -34,30 +34,50 @@ public:
     //! Отрисовка для карты теней
     void drawShadowMap();
 
+    /*!
+     * \brief Получение пути к файлу модели
+     * \return Возвращает путь к файлу модели
+     */
     inline const QString& path() const
     { return m_path; }
 
+    /*!
+     * \brief Получение признак готовности
+     * \return Возвращает признак готовности
+     */
     inline bool isReady() const
     { return m_ready; }
 
+    /*!
+     * \brief Установка признака готовности
+     * \param[in] _ready - Признак готовности
+     */
     inline void setReady(bool _ready = true)
     { m_ready = _ready; }
 
+    /*!
+     * \brief Получение признака загруженности
+     * \return Возвращает признак загруженности
+     */
     inline bool isLoaded() const
     { return m_loaded; }
 
+    /*!
+     * \brief Установка признака загруженности
+     * \param[in] _loaded - Признак загруженности
+     */
     inline void setLoaded(bool _loaded = true)
     { m_loaded = _loaded; }
 
+    /*!
+     * \brief Получение радиуса сферы, в которую вписана модель
+     * \return Возвращает радиус сферы
+     */
     inline float modelRadius()
     {  return m_modelRadius; }
 
+    //! Подключение мешей к OpenGL
     void setupMesh();
-
-    /*!
-     * \brief Загрузить модель из файла
-     * \param[in] _path - Путь к модели
-     */
 
     /*!
      * \brief Загрузить модель из файла

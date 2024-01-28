@@ -23,7 +23,6 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
-#include "model.h"
 #include "Particle.h"
 #include "ParticleSystem.h"
 
