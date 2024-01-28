@@ -62,6 +62,8 @@ private slots:
     void onLearnSpeedCheckBoxSlot();
     void onSaveSlot();
 
+    void onNeedDebugRenderSlot();
+
 private:
     //! Подготовка интерфейса
     void prepareUi();

@@ -114,6 +114,11 @@ void FuryMainWindow::onSaveSlot()
     m_ui->openGLWidget->saveLearnModel();
 }
 
+void FuryMainWindow::onNeedDebugRenderSlot()
+{
+    m_ui->openGLWidget->setNeedDebugRender(m_ui->debugRenderCheckBox->isChecked());
+}
+
 void FuryMainWindow::prepareUi()
 {
     m_ui->setupUi(this);
@@ -161,6 +166,9 @@ void FuryMainWindow::initConnections()
             this, &FuryMainWindow::onLearnSpeedCheckBoxSlot);
     connect(m_ui->saveModelButton, &QPushButton::clicked,
             this, &FuryMainWindow::onSaveSlot);
+
+    connect(m_ui->debugRenderCheckBox, &QCheckBox::stateChanged,
+            this, &FuryMainWindow::onNeedDebugRenderSlot);
 }
 
 void FuryMainWindow::loadStyle()

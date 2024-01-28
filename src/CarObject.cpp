@@ -61,6 +61,7 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
         }
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
+        m_objectsDebugRays.last()->setName("rayCastBall");
     }
 }
 
@@ -303,6 +304,14 @@ void CarObject::setBotAction(int _action)
     case 6:
         m_forward = -1;
         m_right = 0;
+        break;
+    case 7:
+        m_forward = -1;
+        m_right = 1;
+        break;
+    case 8:
+        m_forward = -1;
+        m_right = -1;
     default:
         break;
     }
@@ -385,10 +394,14 @@ glm::vec3 CarObject::getSpeed()
     return glm::vec3(localSpeed.x, localSpeed.y, localSpeed.z);
 }
 
+glm::vec3 CarObject::getAngularSpeed()
+{
+    rp3d::Vector3 angularSpeed = m_objectBody->physicsBody()->getAngularVelocity();
+    return glm::vec3(angularSpeed.x, angularSpeed.y, angularSpeed.z);
+}
+
 float CarObject::getReward()
 {
-//    glm::vec3 localSpeed = getSpeed();
-//    m_reward += localSpeed.x / 23 * 0.03;
     float tmpReward = m_reward;
     m_reward = 0;
     return tmpReward;

@@ -48,6 +48,7 @@ TestRender::TestRender(QWidget *_parent) :
     m_textureManager(FuryTextureManager::createInstance()),
     m_modelManager(FuryModelManager::createInstance()),
     m_materialManager(FuryMaterialManager::createInstance()),
+    m_needDebugRender(true),
     m_updateAccumulator(0),
     m_learnScript(new FuryScript),
     m_learnSpeed(1)
@@ -137,10 +138,9 @@ void TestRender::paintGL()
 
     if (lastFPSUpdate.msecsTo(endTime) >= 200)
     {
-        QString test = QString("FPS: %1; \tRender: %2; \tQt: %3;")
+        QString test = ru("FPS: %1; Эквивалентный FPS: %2")
                 .arg(1000.0 / lastTime.msecsTo(endTime))
-                .arg(startTime.msecsTo(endTime))
-                .arg(lastTime.msecsTo(startTime));
+                .arg(1000.0 / lastTime.msecsTo(endTime) * m_learnSpeed);
         emit setWindowTitleSignal(test);
 
         int computerLoad = 100 * startTime.msecsTo(endTime) / lastTime.msecsTo(endTime);
@@ -566,6 +566,13 @@ void TestRender::render()
             Shader* shader = renderObject->shader();
 
             {
+                if (!m_needDebugRender)
+                {
+                    if (renderObject->name() == "rayCastBall")
+                    {
+                        continue;
+                    }
+                }
 
                 shader->Use();
 
@@ -712,6 +719,13 @@ void TestRender::render()
             Shader* shader = renderObject->shader();
 
             {
+                if (!m_needDebugRender)
+                {
+                    if (renderObject->name().startsWith("Trigger"))
+                    {
+                        continue;
+                    }
+                }
 
                 shader->Use();
 
@@ -974,6 +988,14 @@ void TestRender::renderDepthMap()
                 continue;
             }
 
+            if (!m_needDebugRender)
+            {
+                if (renderObject->name() == "rayCastBall")
+                {
+                    continue;
+                }
+            }
+
             if (renderObject->name() != "carBody")
             {
                 renderObject->drawShadowMap();
@@ -1178,6 +1200,7 @@ void TestRender::updatePhysics()
 //    }
 
 
+
 #define NEED_LEARN 1
 
 #if NEED_LEARN == 1
@@ -1189,6 +1212,12 @@ void TestRender::updatePhysics()
     observation.append(speed.x);
     observation.append(speed.y);
     observation.append(speed.z);
+
+    glm::vec3 angularSpeed = m_carObject->getAngularSpeed();
+    angularSpeed /= 2;
+    observation.append(angularSpeed.x);
+    observation.append(angularSpeed.y);
+    observation.append(angularSpeed.z);
 
     {
         FuryObject* trigger = nullptr;

@@ -94,6 +94,9 @@ public:
 
     void saveLearnModel();
 
+    inline void setNeedDebugRender(bool _need)
+    { m_needDebugRender = _need; }
+
 signals:
     void setWindowTitleSignal(const QString& _title);
     void setComputerLoadSignal(int _value);
@@ -220,6 +223,8 @@ private:
     float m_shadowPlane = 70.f;
     float m_shadowViewSize = 25.f;
     float m_shadowCamDistance = 37;
+
+    bool m_needDebugRender;
 
 private:
     //! Камеры

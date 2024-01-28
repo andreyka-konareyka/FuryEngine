@@ -46,10 +46,11 @@ class ReplayBuffer:
 
         return state, actions, rewards, state_, terminal
 
-def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
+def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims, fc3_dims):
     model = keras.Sequential([
         keras.layers.Dense(fc1_dims, activation='relu'),
         keras.layers.Dense(fc2_dims, activation='relu'),
+        keras.layers.Dense(fc3_dims, activation='relu'),
         keras.layers.Dense(n_actions, activation=None)
     ])
     model.compile(optimizer=Adam(learning_rate=lr), loss='mean_squared_error')
@@ -71,7 +72,7 @@ class Agent:
         self.model_dir = dirName
         self.memory = ReplayBuffer(mem_size, input_dims)
 
-        self.q_eval = build_dqn(lr, n_actions, input_dims, 300, 300)
+        self.q_eval = build_dqn(lr, n_actions, input_dims, 40, 30, 20)
 
         if os.path.exists(self.model_dir):
             print('load model...')
@@ -127,8 +128,8 @@ tf.compat.v1.disable_eager_execution()
 # env = gym.make('LunarLander-v2')
 lr = 0.001
 n_games = 500
-agent = Agent(gamma=0.99, epsilon=1.0, lr=lr, input_dims=[26],
-              n_actions=7, mem_size=1_000_000, batch_size=256,
+agent = Agent(gamma=0.99, epsilon=1.0, lr=lr, input_dims=[29],
+              n_actions=9, mem_size=1_000_000, batch_size=256,
               epsilon_end=0.01)
 
 scores = []
