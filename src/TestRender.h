@@ -154,6 +154,7 @@ private:
     void updatePhysics();
 
     void displayBuffer(GLuint _bufferId);
+    void displayLogo();
 
 
     FuryBoxObject* m_bigFloor;
@@ -192,6 +193,7 @@ private:
     GLuint m_skyboxVAO, m_skyboxVBO;
 
     bool m_is_loading = true;
+    float m_loadingOvertime = 3.0f;
 
     GLuint m_cubemapTexture = 0;
     bool m_cubemap_is_loaded = false;

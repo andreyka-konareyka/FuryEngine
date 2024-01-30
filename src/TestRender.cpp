@@ -280,6 +280,7 @@ void TestRender::InitGL()
 
 
     // Загрузка всех текстур, шейдеров и т.д.
+    m_textureManager->addTexture("textures/FuryEngine_logo_for_dark.png", "Logo");
     init();
 }
 
@@ -316,6 +317,7 @@ void TestRender::init() {
 
     m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 22.5), m_testMaterialShader);
     m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
+    m_testWorld->addObject(m_carObject);
 
     const QVector<FuryObject*>& tempObjectsForDraw = m_carObject->objectsForDraw();
     for (int i = 0; i < tempObjectsForDraw.size(); ++i)
@@ -489,6 +491,7 @@ void TestRender::render()
         if (m_is_loading)
         {
             renderLoadingAndBindData(currentFrame);
+            displayLogo();
             return;
         }
 
@@ -585,6 +588,13 @@ void TestRender::render()
                     }
                 }
 
+
+                if (renderObject->name() == "carBody") // Физическая коробка вокруг машины
+                {
+                    continue;
+                }
+
+
                 {
                     bool result = true;
                     const glm::vec3& minp = renderObject->getPosition();
@@ -630,57 +640,14 @@ void TestRender::render()
                 shader->setMat4("model", model);
 
 
-                if (renderObject->name() != "carBody")
-                {
-                    glm::vec3 lightPos = m_testWorld->camera()->position()
-                                       + m_dirlight_position;
-                    shader->setVec3("lightPos", lightPos);
-                    glActiveTexture(GL_TEXTURE3);
-                    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                glm::vec3 lightPos = m_testWorld->camera()->position()
+                                   + m_dirlight_position;
+                shader->setVec3("lightPos", lightPos);
+                glActiveTexture(GL_TEXTURE3);
+                glBindTexture(GL_TEXTURE_2D, m_depthMap);
 
-                    renderObject->draw();
-                }
-                else
-                {
-                    glm::vec3 lightPos = m_testWorld->camera()->position()
-                                       + m_dirlight_position;
-                    shader->setVec3("lightPos", lightPos);
-                    glActiveTexture(GL_TEXTURE3);
-                    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                renderObject->draw();
 
-
-                    model = renderObject->getOpenGLTransform();
-
-                    glm::mat4 testSubModel = glm::mat4(1.0f);
-
-                    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-                    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-                    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
-
-                    model = model * testSubModel;
-
-                    shader->setMat4("model", model);
-
-                    FuryModel* modelObj = m_modelManager->modelByName("backpack2");
-
-                    if (modelObj->isReady())
-                    {
-                        modelObj->draw(shader);
-                    }
-                    else
-                    {
-                        FuryModel* LOD2 = m_modelManager->modelByName("backpack2LOD2");
-
-                        if (LOD2->isReady())
-                        {
-                            LOD2->draw(shader);
-                        }
-                        else
-                        {
-                            Debug(ru("Модель не готова"));
-                        }
-                    }
-                }
 
                 glBindVertexArray(0);
                 glActiveTexture(GL_TEXTURE0);
@@ -1035,6 +1002,11 @@ void TestRender::renderDepthMap()
         {
             FuryObject* renderObject = testWorldObjects[i];
 
+            if (renderObject->name() == "carBody")
+            {
+                continue;
+            }
+
 
             model = renderObject->getOpenGLTransform();
             model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
@@ -1055,43 +1027,9 @@ void TestRender::renderDepthMap()
                 }
             }
 
-            if (renderObject->name() != "carBody")
-            {
-                renderObject->drawShadowMap();
-            }
-            else
-            {
-                model = renderObject->getOpenGLTransform();
-                glm::mat4 testSubModel = glm::mat4(1.0f);
+            renderObject->drawShadowMap(m_simpleDepthShader);
 
-                testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-                testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-                testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
 
-                model = model * testSubModel;
-
-                m_simpleDepthShader->setMat4("model", model);
-
-                FuryModel* modelObj = m_modelManager->modelByName("backpack2");
-
-                if (modelObj->isReady())
-                {
-                    modelObj->drawShadowMap();
-                }
-                else
-                {
-                    FuryModel* LOD2 = m_modelManager->modelByName("backpack2LOD2");
-
-                    if (LOD2->isReady())
-                    {
-                        LOD2->drawShadowMap();
-                    }
-                    else
-                    {
-                        Debug(ru("Модель не готова"));
-                    }
-                }
-            }
             glBindVertexArray(0);
         }
 
@@ -1155,8 +1093,15 @@ glm::mat4 TestRender::getLightSpaceMatrix()
 
 void TestRender::renderLoadingAndBindData(float _currentFrame)
 {
-    if (m_cubemap_is_loaded) {
-        m_is_loading = false;
+    Q_UNUSED(_currentFrame);
+    static QTime startTime = QTime::currentTime();
+
+    if (m_cubemap_is_loaded)
+    {
+        if (startTime.msecsTo(QTime::currentTime()) > m_loadingOvertime * 1000)
+        {
+            m_is_loading = false;
+        }
     }
 
     if (m_cubemap_is_loaded && (!m_cubemap_bind)) {
@@ -1169,8 +1114,8 @@ void TestRender::renderLoadingAndBindData(float _currentFrame)
     }
 
     // Показываем экран загрузки
-    glm::vec3 color(0.0f, 120.0 / 255.0, 215.0 / 255.0);
-    color = color * (sin(_currentFrame / 1000) * 0.5f + 0.5f);
+    glm::vec3 color(7, 8, 10);
+    color /= 255;
     glClearColor(color.r, color.g, color.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -1251,8 +1196,6 @@ void TestRender::updatePhysics()
         {
             m_testWorld->getAllObjects()[i]->tick(timeStep);
         }
-
-        m_carObject->tick(timeStep);
     }
 
 //        m_updateAccumulator -= timeStep;
@@ -1410,6 +1353,61 @@ void TestRender::displayBuffer(GLuint _bufferId)
     glActiveTexture(GL_TEXTURE0);
     shader->Use();
     glBindTexture(GL_TEXTURE_2D, _bufferId);
+    glBindVertexArray(vaoDebugTexturedRect);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
+void TestRender::displayLogo()
+{
+    static Shader* shader = nullptr;
+    static GLuint vaoDebugTexturedRect = 0;
+
+    if (shader == nullptr)
+    {
+        shader = new Shader("shaders/logoShader.vs", "shaders/logoShader.fs");
+
+        GLfloat buffer_vertices[] = {
+        -1, -1, 0.0f, 1.0f,
+        1, -1, 1.0f, 1.0f,
+        1, 1, 1.0f, 0.01f,
+
+        -1, -1, 0.0f, 1.0f,
+        1, 1, 1.0f, 0.01f,
+        -1, 1, 0.0f, 0.01f,
+        };
+
+        GLuint vboDebugTexturedRect;
+        glGenVertexArrays(1, &vaoDebugTexturedRect);
+        glGenBuffers(1, &vboDebugTexturedRect);
+        glBindBuffer(GL_ARRAY_BUFFER, vboDebugTexturedRect);
+        glBindVertexArray(vaoDebugTexturedRect);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_vertices), buffer_vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+        //normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+        glBindVertexArray(0);
+    }
+
+    float needWidth = 300;
+    float needHeight = 300;
+
+    float logoWidth = needWidth / m_width;
+    float logoHeight = needHeight / m_height;
+
+    static QTime alphaTimer = QTime::currentTime();
+    float deltaTime = alphaTimer.msecsTo(QTime::currentTime()) / 1000.0f;
+    float logoAlpha = std::max(std::sin(deltaTime / m_loadingOvertime * 3.14), 0.0);
+
+    glActiveTexture(GL_TEXTURE0);
+    shader->Use();
+    shader->setVec2("logoScale", glm::vec2(logoWidth, logoHeight));
+    shader->setFloat("logoAlpha", logoAlpha);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("Logo").idOpenGL());
     glBindVertexArray(vaoDebugTexturedRect);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

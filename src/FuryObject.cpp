@@ -74,8 +74,10 @@ void FuryObject::draw()
     }
 }
 
-void FuryObject::drawShadowMap()
+void FuryObject::drawShadowMap(Shader *_shadowShader)
 {
+    Q_UNUSED(_shadowShader);
+
     FuryModel* model = FuryModelManager::instance()->modelByName(m_modelName);
 
     if (model->isReady())

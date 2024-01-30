@@ -198,7 +198,7 @@ void FuryTextureManager::infiniteLoop()
             int width, height;
             unsigned char* data = SOIL_load_image(qUtf8Printable(texture->path()), &width, &height, 0, SOIL_LOAD_RGBA);
 
-            if (width == 0 || height == 0)
+            if (width == 0 || height == 0 || data == 0)
             {
                 Debug(ru("Текстура не загружена: %1").arg(texture->path()));
                 continue;

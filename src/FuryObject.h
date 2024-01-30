@@ -248,8 +248,12 @@ public:
 
     //! Отрисовка объекта
     virtual void draw();
-    //! Отрисовка объекта для карты теней
-    virtual void drawShadowMap();
+
+    /*!
+     * \brief Отрисовка объекта для карты теней
+     * \param[in] _shadowShader - Шейдер для карты теней
+     */
+    virtual void drawShadowMap(Shader* _shadowShader = nullptr);
 
     /*!
      * \brief Установка названия материала

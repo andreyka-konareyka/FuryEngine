@@ -6,5 +6,6 @@
         <file alias="checkbox.png">resources/images/checkbox.png</file>
         <file alias="down_arrow.png">resources/images/down_arrow.png</file>
         <file alias="handle.png">resources/images/handle.png</file>
+        <file alias="icon">resources/images/icon.png</file>
     </qresource>
 </RCC>

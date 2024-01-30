@@ -5,8 +5,7 @@ Makefile
 Makefile.Debug
 Makefile.Release
 build
-debug
-release
 *.user
 FuryEngine_resource.rc
 bin/FuryEngine.pdb
+*.pyc

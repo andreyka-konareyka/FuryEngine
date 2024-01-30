@@ -3,6 +3,8 @@
 Написан с использованием Qt 6.5
 
 Пока совмещён с приложением для обучения Автопилота для автомобиля
+![FuryWindowWithLogo](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f5bf35a4-b0c9-421b-9fb4-3fd5de8ab188)
+
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/d94e6c3a-0da6-4c37-a7d7-6fd3c8f08cf0)
 
 Старый интерфейс:

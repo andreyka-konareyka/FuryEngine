@@ -4,7 +4,9 @@
 #include "FuryWorld.h"
 #include "FuryMaterial.h"
 #include "FuryMaterialManager.h"
+#include "FuryModelManager.h"
 #include "FuryLogger.h"
+#include "Shader.h"
 
 #include <QString>
 
@@ -63,41 +65,21 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
         m_objectsDebugRays.last()->setName("rayCastBall");
     }
+
+    setName("AI_car");
+    setModelName("backpack2LOD2");
+    setShader(m_objectBody->shader());
+    setScales(m_objectBody->scales());
 }
 
 CarObject::~CarObject()
 {
-    if (m_objectBody != nullptr)
-    {
-        delete m_objectBody;
-        m_objectBody = nullptr;
-    }
 
-    for (int i = 0; i < m_objectWheels.size(); ++i)
-    {
-        if (m_objectWheels[i] != nullptr)
-        {
-            delete m_objectWheels[i];
-            m_objectWheels[i] = nullptr;
-        }
-    }
-
-    for (int i = 0; i < m_objectsDebugRays.size(); ++i)
-    {
-        if (m_objectsDebugRays[i] != nullptr)
-        {
-            delete m_objectsDebugRays[i];
-            m_objectsDebugRays[i] = nullptr;
-        }
-    }
 }
 
 void CarObject::tick(double _dt)
 {
-    // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 17, rp3d::Vector3(2, -0.5, 1));
-    // m_objectBody->physicsBody()->applyLocalForceAtLocalPosition(rp3d::Vector3(1, 0, 0.6) * 20, rp3d::Vector3(2, -0.5, -1));
-
-
+    setPosition(m_objectBody->getPosition());
 
     {
         for (int i = 0; i < m_objectWheels.size(); ++i)
@@ -551,4 +533,75 @@ void CarObject::setSpringLenght(float _lenght)
 void CarObject::setSpringK(float _k)
 {
     m_springK = _k;
+}
+
+void CarObject::draw()
+{
+    Shader* shader = m_objectBody->shader();
+    glm::mat4 model = m_objectBody->getOpenGLTransform();
+
+    glm::mat4 testSubModel = glm::mat4(1.0f);
+
+    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+
+    model = model * testSubModel;
+
+    shader->setMat4("model", model);
+    FuryModelManager* modelManager = FuryModelManager::instance();
+    FuryModel* modelObj = modelManager->modelByName("backpack2");
+
+    if (modelObj->isReady())
+    {
+        modelObj->draw(shader);
+    }
+    else
+    {
+        FuryModel* LOD2 = modelManager->modelByName("backpack2LOD2");
+
+        if (LOD2->isReady())
+        {
+            LOD2->draw(shader);
+        }
+        else
+        {
+            Debug(ru("Модель не готова"));
+        }
+    }
+}
+
+void CarObject::drawShadowMap(Shader* _shadowShader)
+{
+    glm::mat4 model = m_objectBody->getOpenGLTransform();
+    glm::mat4 testSubModel = glm::mat4(1.0f);
+    FuryModelManager* modelManager = FuryModelManager::instance();
+
+    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+
+    model = model * testSubModel;
+
+    _shadowShader->setMat4("model", model);
+
+    FuryModel* modelObj = modelManager->modelByName("backpack2");
+
+    if (modelObj->isReady())
+    {
+        modelObj->drawShadowMap();
+    }
+    else
+    {
+        FuryModel* LOD2 = modelManager->modelByName("backpack2LOD2");
+
+        if (LOD2->isReady())
+        {
+            LOD2->drawShadowMap();
+        }
+        else
+        {
+            Debug(ru("Модель не готова"));
+        }
+    }
 }
