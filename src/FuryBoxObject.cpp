@@ -1,9 +1,7 @@
 // GLEW
-#define GLEW_STATIC
+//#define GLEW_STATIC
 #include <GL/glew.h>
 
-// Other Libs
-#include <SOIL.h>
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -198,7 +196,6 @@ Shader* init_shader() {
         int tex_w, tex_h;
         auto data_texture = loader.LoadDataFromFile("textures/box_texture3_orig.png", tex_w, tex_h);
         default_texture_id = loader.BindDataToTexture(data_texture, tex_w, tex_h);
-        // default_texture_id = SOIL_load_OGL_texture("textures/box_texture3_orig.png", SOIL_LOAD_RGBA, 0, SOIL_FLAG_INVERT_Y);
     }
     return default_shader;
 }

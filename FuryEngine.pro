@@ -13,17 +13,31 @@ UI_DIR = build
 RCC_DIR = build
 
 
-INCLUDEPATH += includes \
-               $$(LOCALAPPDATA)/Programs/Python/Python310/include
-LIBS        += -Llibs \
-               -Llibs/boost \
-               -L$$(LOCALAPPDATA)/Programs/Python/Python310/libs \
-               -lglew32s \
-               -lOpenGL32 \
-               -lglu32 \
-               -lSOIL \
-               -lassimp-vc143-mtd \
-               -lreactphysics3d
+INCLUDEPATH += \
+    includes \
+    $$(LOCALAPPDATA)/Programs/Python/Python310/include
+
+
+# Выкрутасы из-за одинаковых названий библиотеки в debug и release
+CONFIG(debug, debug|release) {
+    LIBS        += \
+        -Llibs/reactphysics3d/debug \
+}else {
+    LIBS        += \
+        -Llibs/reactphysics3d/release \
+}
+
+
+LIBS        += \
+    -Llibs \
+    -Llibs/assimp \
+    -Llibs/boost \
+    -Llibs/glew \
+    -L$$(LOCALAPPDATA)/Programs/Python/Python310/libs \
+    -lglew32 \
+    -lOpenGL32 \
+    -lassimp \
+    -lreactphysics3d
 
 
 SOURCES += \

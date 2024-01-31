@@ -4,7 +4,8 @@
 
 #include <string>
 
-#include <SOIL.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include <QMutex>
 #include <QFileInfo>
@@ -196,7 +197,7 @@ void FuryTextureManager::infiniteLoop()
             FuryTexture* texture = m_textureLoadQueue.dequeue();
 
             int width, height;
-            unsigned char* data = SOIL_load_image(qUtf8Printable(texture->path()), &width, &height, 0, SOIL_LOAD_RGBA);
+            unsigned char* data = stbi_load(qUtf8Printable(texture->path()), &width, &height, 0, STBI_rgb_alpha);
 
             if (width == 0 || height == 0 || data == 0)
             {
