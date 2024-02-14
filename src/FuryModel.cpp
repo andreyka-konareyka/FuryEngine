@@ -1,5 +1,6 @@
 #include "FuryModel.h"
 
+#include "Shader.h"
 #include "FuryLogger.h"
 #include "FuryMaterial.h"
 #include "FuryMaterialManager.h"
@@ -32,11 +33,83 @@ FuryModel::~FuryModel()
     }
 }
 
-void FuryModel::draw(Shader *_shader, FuryMaterial *_material)
+bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
+{
+
+    // From glm::decompose in matrix_decompose.inl
+
+    using namespace glm;
+    using T = float;
+
+    mat4 LocalMatrix(transform);
+
+    // Normalize the matrix.
+    if (abs(LocalMatrix[3][3]) <= 0.001)
+        return false;
+
+    // First, isolate perspective.  This is the messiest.
+    if (
+        abs(LocalMatrix[0][3]) >= 0.001 ||
+        abs(LocalMatrix[1][3]) >= 0.001 ||
+        abs(LocalMatrix[2][3]) >= 0.001)
+    {
+        // Clear the perspective partition
+        LocalMatrix[0][3] = LocalMatrix[1][3] = LocalMatrix[2][3] = static_cast<T>(0);
+        LocalMatrix[3][3] = static_cast<T>(1);
+    }
+
+    // Next take care of translation (easy).
+    translation = vec3(LocalMatrix[3]);
+    LocalMatrix[3] = vec4(0, 0, 0, LocalMatrix[3].w);
+
+    vec3 Row[3];
+
+    // Now get scale and shear.
+    for (length_t i = 0; i < 3; ++i)
+        for (length_t j = 0; j < 3; ++j)
+            Row[i][j] = LocalMatrix[i][j];
+
+    // Compute X scale factor and normalize first row.
+    scale.x = length(Row[0]);
+    glm::normalize(Row[0]); // , static_cast<T>(1));
+    scale.y = length(Row[1]);
+    glm::normalize(Row[1]); // , static_cast<T>(1));
+    scale.z = length(Row[2]);
+    glm::normalize(Row[2]); // , static_cast<T>(1));
+
+    rotation.y = asin(-Row[0][2]);
+    if (cos(rotation.y) != 0) {
+        rotation.x = atan2(Row[1][2], Row[2][2]);
+        rotation.z = atan2(Row[0][1], Row[0][0]);
+    }
+    else {
+        rotation.x = atan2(-Row[2][0], Row[1][1]);
+        rotation.z = 0;
+    }
+
+
+    return true;
+}
+
+
+void FuryModel::draw(Shader *_shader, const glm::mat4 &_transformation,
+                     FuryMaterial *_material)
 {
     for (FuryMesh* mesh : m_meshes)
     {
+        glm::mat4 modelMatrix = _transformation * mesh->transformation();
+
+        if (m_path.endsWith("fbx"))
+        {
+            glm::mat4 modelTransform = glm::translate(glm::mat4(1), glm::vec3(0, 10, 0));
+            modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
+            modelMatrix = _transformation * modelTransform * mesh->transformation();
+        }
+
+        _shader->setMat4("model", modelMatrix);
+        _shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
         mesh->draw(_shader, _material);
+
     }
 }
 
@@ -91,7 +164,7 @@ void FuryModel::processNode(aiNode *_node, const aiScene *_scene)
     {
         // Получение меша по индексу
         aiMesh* mesh = _scene->mMeshes[_node->mMeshes[i]];
-        m_meshes.push_back(processMesh(mesh, _scene));
+        m_meshes.push_back(processMesh(mesh, _scene, _node));
     }
 
     // Обработаем меши дочерних мешей
@@ -101,7 +174,32 @@ void FuryModel::processNode(aiNode *_node, const aiScene *_scene)
     }
 }
 
-FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene)
+glm::mat4 AiToGLMMat4(const aiMatrix4x4& in_mat)
+{
+    glm::mat4 tmp;
+    tmp[0][0] = in_mat.a1;
+    tmp[0][1] = in_mat.b1;
+    tmp[0][2] = in_mat.c1;
+    tmp[0][3] = in_mat.d1;
+
+    tmp[1][0] = in_mat.a2;
+    tmp[1][1] = in_mat.b2;
+    tmp[1][2] = in_mat.c2;
+    tmp[1][3] = in_mat.d2;
+
+    tmp[2][0] = in_mat.a3;
+    tmp[2][1] = in_mat.b3;
+    tmp[2][2] = in_mat.c3;
+    tmp[2][3] = in_mat.d3;
+
+    tmp[3][0] = in_mat.a4;
+    tmp[3][1] = in_mat.b4;
+    tmp[3][2] = in_mat.c4;
+    tmp[3][3] = in_mat.d4;
+    return tmp;
+}
+
+FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiNode *_node)
 {
     // Заполнение данных
     QVector<FuryMesh::Vertex> vertices;
@@ -173,8 +271,20 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene)
 
     FuryMaterial* furyMaterial = materialManager->materialByName(materialName);
 
+    glm::mat4 transform = AiToGLMMat4(_node->mTransformation);
+
+    {
+        aiNode* parent = _node->mParent;
+
+        while (parent != _scene->mRootNode)
+        {
+            transform = AiToGLMMat4(parent->mTransformation) * transform;
+            parent = parent->mParent;
+        }
+    }
+
     // Возвращаем созданный меш
-    return new FuryMesh(vertices, indices, furyMaterial);
+    return new FuryMesh(vertices, indices, furyMaterial, transform);
 }
 
 void FuryModel::calculateMinMaxVertex(const glm::vec3 &_vertex)

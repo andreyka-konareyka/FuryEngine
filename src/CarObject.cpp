@@ -538,7 +538,7 @@ void CarObject::setSpringK(float _k)
 void CarObject::draw()
 {
     Shader* shader = m_objectBody->shader();
-    glm::mat4 model = m_objectBody->getOpenGLTransform();
+    glm::mat4 modelMatrix = m_objectBody->getOpenGLTransform();
 
     glm::mat4 testSubModel = glm::mat4(1.0f);
 
@@ -546,15 +546,15 @@ void CarObject::draw()
     testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
     testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
 
-    model = model * testSubModel;
+    modelMatrix = modelMatrix * testSubModel;
 
-    shader->setMat4("model", model);
+    shader->setMat4("model", modelMatrix);
     FuryModelManager* modelManager = FuryModelManager::instance();
     FuryModel* modelObj = modelManager->modelByName("backpack2");
 
     if (modelObj->isReady())
     {
-        modelObj->draw(shader);
+        modelObj->draw(shader, modelMatrix);
     }
     else
     {
@@ -562,7 +562,7 @@ void CarObject::draw()
 
         if (LOD2->isReady())
         {
-            LOD2->draw(shader);
+            LOD2->draw(shader, modelMatrix);
         }
         else
         {
@@ -573,17 +573,20 @@ void CarObject::draw()
 
 void CarObject::drawShadowMap(Shader* _shadowShader)
 {
-    glm::mat4 model = m_objectBody->getOpenGLTransform();
-    glm::mat4 testSubModel = glm::mat4(1.0f);
     FuryModelManager* modelManager = FuryModelManager::instance();
 
-    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
+    if (_shadowShader != nullptr)
+    {
+        glm::mat4 model = m_objectBody->getOpenGLTransform();
+        glm::mat4 testSubModel = glm::mat4(1.0f);
+        testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+        testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+        testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
 
-    model = model * testSubModel;
+        model = model * testSubModel;
+        _shadowShader->setMat4("model", model);
+    }
 
-    _shadowShader->setMat4("model", model);
 
     FuryModel* modelObj = modelManager->modelByName("backpack2");
 

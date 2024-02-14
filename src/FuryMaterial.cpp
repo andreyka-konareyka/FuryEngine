@@ -21,6 +21,11 @@ FuryMaterial::FuryMaterial(const glm::vec3 &_diffuseColor,
 
 }
 
+FuryMaterial::~FuryMaterial()
+{
+
+}
+
 void FuryMaterial::setShaderMaterial(Shader *_shader)
 {
     _shader->Use();
@@ -91,10 +96,6 @@ FuryMaterial *FuryMaterial::createFromAssimp(const aiMaterial *_assimpMaterial,
                                              const QString &_path)
 {
     FuryMaterial* result = new FuryMaterial;
-
-    aiString materialName;
-    _assimpMaterial->Get(AI_MATKEY_NAME, materialName);
-    result->m_name = ru(materialName.C_Str());
 
     aiColor3D diffuseColor;
     _assimpMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
@@ -167,8 +168,7 @@ FuryMaterial *FuryMaterial::createFromAssimp(const aiMaterial *_assimpMaterial,
             }
 
             FuryTextureManager* texManager = FuryTextureManager::instance();
-            texManager->addTextureFromAnotherThread(_path + textureName.C_Str(),
-                                                    loadTextureName);
+            texManager->addTexture(_path + textureName.C_Str(), loadTextureName);
         }
     }
 

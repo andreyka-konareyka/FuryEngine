@@ -54,6 +54,7 @@ SOURCES += \
     src/FuryModel.cpp \
     src/FuryModelManager.cpp \
     src/FuryObject.cpp \
+    src/FuryPbrMaterial.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
     src/FuryScript.cpp \
     src/FurySphereObject.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     src/FuryModel.h \
     src/FuryModelManager.h \
     src/FuryObject.h \
+    src/FuryPbrMaterial.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
     src/FuryScript.h \
     src/FurySphereObject.h \
@@ -88,8 +90,7 @@ HEADERS += \
     src/Particle.h \
     src/ParticleSystem.h \
     src/Shader.h \
-    src/TestRender.h \
-    src/TextureLoader.h
+    src/TestRender.h
 
 FORMS += \
     src/FuryMainWindow.ui

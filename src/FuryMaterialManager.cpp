@@ -3,6 +3,7 @@
 #include "FuryLogger.h"
 #include "FuryException.h"
 #include "FuryMaterial.h"
+#include "FuryPbrMaterial.h"
 
 FuryMaterialManager* FuryMaterialManager::s_instance = nullptr;
 
@@ -70,6 +71,21 @@ FuryMaterial *FuryMaterialManager::createMaterial(const QString &_name)
     Debug(ru("Создан материал: (%1)").arg(_name));
 
     FuryMaterial* material = new FuryMaterial;
+    m_materials.insert(_name, material);
+    return material;
+}
+
+FuryPbrMaterial *FuryMaterialManager::createPbrMaterial(const QString &_name)
+{
+    if (m_materials.contains(_name))
+    {
+        Debug(ru("[ ВНИМАНИЕ ] Материал (%1) уже существовал.").arg(_name));
+        return static_cast<FuryPbrMaterial*>(m_materials.value(_name));
+    }
+
+    Debug(ru("Создан материал: (%1)").arg(_name));
+
+    FuryPbrMaterial* material = new FuryPbrMaterial;
     m_materials.insert(_name, material);
     return material;
 }

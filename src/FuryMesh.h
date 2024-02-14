@@ -37,10 +37,12 @@ public:
      * \param[in] _vertices - Список вершин
      * \param[in] _indices - Список индексов
      * \param[in] _material - Материал
+     * \param[in] _transformation - Матрица трансформации меша относительно родителя
      */
     FuryMesh(const QVector<Vertex>& _vertices,
              const QVector<unsigned int>& _indices,
-             FuryMaterial* _material);
+             FuryMaterial* _material,
+             const glm::mat4& _transformation);
 
     /*!
      * \brief Отрисовка меша с заданным материалом
@@ -55,11 +57,26 @@ public:
     //! Инициализация меша
     void setupMesh();
 
+    /*!
+     * \brief Получить матрицу трансформации меша
+     * \return Возвращает матрицу трансформации меша
+     */
+    inline const glm::mat4& transformation() const
+    { return m_transformation; }
+
+    /*!
+     * \brief Установить матрицу трансформации меша
+     * \param[in] _transformation - Матрица трансформации меша
+     */
+    inline void setTransformation(const glm::mat4& _transformation)
+    { m_transformation = _transformation; }
+
 private:
     //! Список вершин
     QVector<Vertex> m_vertices;
     //! Список индексов
     QVector<unsigned int> m_indices;
+
     //! VAO для OpenGL
     GLuint VAO;
     //! VBO для OpenGL
@@ -69,6 +86,8 @@ private:
 
     //! Материал
     FuryMaterial* m_material;
+    //! Матрица трансформации меша относительно родителя
+    glm::mat4 m_transformation;
 };
 
 #endif // FURYMESH_H

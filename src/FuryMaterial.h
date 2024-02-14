@@ -28,6 +28,9 @@ public:
     FuryMaterial(const glm::vec3& _diffuseColor,
                  const glm::vec3& _specularColor);
 
+    //! Деструктор
+    virtual ~FuryMaterial();
+
     /*!
      * \brief Установка диффузной текстуры
      * \param[in] _diffuseTexture - Название диффузной текстуры
@@ -53,7 +56,7 @@ public:
      * \brief Установить материал в шейдер
      * \param[in] _shader - Шейдер
      */
-    void setShaderMaterial(Shader* _shader);
+    virtual void setShaderMaterial(Shader* _shader);
 
     /*!
      * \brief Создание материала по материалу из Assimp
@@ -64,8 +67,6 @@ public:
                                           const QString& _path);
 
 private:
-    //! Название материала
-    QString m_name;
     //! Рассеянный цвет материала
     glm::vec3 m_diffuseColor;
     //! Зеркальный цвет материала

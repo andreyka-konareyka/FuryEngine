@@ -25,11 +25,13 @@ uniform mat4 lightSpaceMatrix;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
+uniform vec2 textureScales;
+
 void main()
 {
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
     vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
-    vs_out.TexCoords = aTexCoords;
+    vs_out.TexCoords = aTexCoords * textureScales;
 
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 T = normalize(normalMatrix * aTangent);

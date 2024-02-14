@@ -269,6 +269,20 @@ public:
     inline const QString& materialName() const
     { return m_materialName; }
 
+    /*!
+     * \brief Получить масштаб текстуры
+     * \return Возвращает масштаб текстуры
+     */
+    inline const glm::vec2& textureScales() const
+    { return m_textureScales; }
+
+    /*!
+     * \brief Установить масштаб текстуры
+     * \param[in] _textureScales - Масштаб текстуры
+     */
+    inline void setTextureScales(const glm::vec2& _textureScales)
+    { m_textureScales = _textureScales; }
+
 
 protected:
     //! Позиция
@@ -310,6 +324,9 @@ private:
     QString m_modelName;
     //! Название материала объекта
     QString m_materialName;
+
+    //! Масштаб текстур
+    glm::vec2 m_textureScales;
 };
 
 #endif // FURYOBJECT_H

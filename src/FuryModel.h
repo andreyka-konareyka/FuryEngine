@@ -27,9 +27,11 @@ public:
     /*!
      * \brief Отрисовка с заданным материалом
      * \param[in] _shader - Шейдер
+     * \param[in] _transformation - Трансформация модели
      * \param[in] _material - Материал. Если nullptr, то берётся материал из меша
      */
-    void draw(Shader* _shader, FuryMaterial* _material = nullptr);
+    void draw(Shader* _shader, const glm::mat4& _transformation,
+              FuryMaterial* _material = nullptr);
 
     //! Отрисовка для карты теней
     void drawShadowMap();
@@ -99,7 +101,7 @@ private:
      * \param[in] _scene - сцена
      * \return Возвращает fury-меш
      */
-    FuryMesh* processMesh(aiMesh* _mesh, const aiScene* _scene);
+    FuryMesh* processMesh(aiMesh* _mesh, const aiScene* _scene, const aiNode* _node);
 
     /*!
      * \brief Вычисление габаритов всей модели по минимальным и максимальным

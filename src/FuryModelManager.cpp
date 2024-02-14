@@ -133,7 +133,7 @@ void FuryModelManager::stopLoopAndWait()
     while (!m_stopped)
     {
         QThread::msleep(200);
-        Debug("wait stop");
+        Debug("Ожидание завершения потока загрузки моделей");
     }
 }
 

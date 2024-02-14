@@ -1,8 +1,8 @@
 #include "FuryTexture.h"
 
 
-FuryTexture::FuryTexture(GLuint _idOpenGL, const QString &_path) :
-    m_idOpenGL(_idOpenGL),
+FuryTexture::FuryTexture(const QString &_path) :
+    m_idOpenGL(0),
     m_path(_path),
     m_data(nullptr),
     m_width(0),
@@ -13,7 +13,7 @@ FuryTexture::FuryTexture(GLuint _idOpenGL, const QString &_path) :
 
 }
 
-FuryTexture::FuryTexture() : FuryTexture(0, "")
+FuryTexture::FuryTexture() : FuryTexture("")
 {
 
 }

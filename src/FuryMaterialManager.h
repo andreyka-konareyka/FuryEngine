@@ -5,6 +5,7 @@
 #include <QString>
 
 class FuryMaterial;
+class FuryPbrMaterial;
 
 
 //! Класс менеджера материалов
@@ -30,6 +31,13 @@ public:
      * \return Возвращает материал
      */
     FuryMaterial* createMaterial(const QString& _name);
+
+    /*!
+     * \brief Создание PBR материала
+     * \param[in] _name - Название
+     * \return Возвращает PBR материал
+     */
+    FuryPbrMaterial* createPbrMaterial(const QString& _name);
 
     /*!
      * \brief Получение материала по названию

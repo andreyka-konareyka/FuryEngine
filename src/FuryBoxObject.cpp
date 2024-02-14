@@ -8,7 +8,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "FuryBoxObject.h"
-#include "TextureLoader.h"
 #include "Shader.h"
 #include "FuryWorld.h"
 
@@ -17,7 +16,6 @@ void renderCube();
 void createBoxModel();
 Shader* init_shader();
 
-static GLuint default_texture_id = 0;
 static GLuint cubeVAO = 0;
 static GLuint cubeVBO = 0;
 
@@ -187,15 +185,12 @@ void renderCube()
 
 static Shader* default_shader{nullptr};
 
-Shader* init_shader() {
-    if (default_shader == nullptr) {
+Shader* init_shader()
+{
+    if (default_shader == nullptr)
+    {
         default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
     }
-    if (default_texture_id == 0) {
-        TextureLoader loader;
-        int tex_w, tex_h;
-        auto data_texture = loader.LoadDataFromFile("textures/box_texture3_orig.png", tex_w, tex_h);
-        default_texture_id = loader.BindDataToTexture(data_texture, tex_w, tex_h);
-    }
+
     return default_shader;
 }

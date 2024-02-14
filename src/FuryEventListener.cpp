@@ -105,7 +105,8 @@ void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::Callbac
         if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStart)
         {
 //            qDebug() << "EventType::OverlapStart";
-            tempObj2->setTextureName("greenCheckBox");
+//            tempObj2->setTextureName("greenCheckBox");
+            tempObj2->setMaterialName("greenRaceTriggerMaterial");
 
             if (m_carObject != nullptr)
             {
@@ -116,7 +117,8 @@ void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::Callbac
         else if (eventType == reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapExit)
         {
 //            qDebug() << "EventType::OverlapExit";
-            tempObj2->setTextureName("redCheckBox");
+//            tempObj2->setTextureName("redCheckBox");
+            tempObj2->setMaterialName("redRaceTriggerMaterial");
         }
         else
         {

@@ -19,7 +19,8 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
     m_vertexCount(0),
     m_rotate(glm::vec3(0, 0, 0)),
     m_scales(glm::vec3(1, 1, 1)),
-    m_world(_world)
+    m_world(_world),
+    m_textureScales(1, 1)
 {
     rp3d::Vector3 objectPos(m_position.x, m_position.y, m_position.z);
     rp3d::Quaternion objectOrientation(rp3d::Quaternion::identity());
@@ -58,6 +59,10 @@ glm::mat4 FuryObject::getOpenGLTransform() const
 
 void FuryObject::draw()
 {
+    glm::mat4 modelMatrix = getOpenGLTransform();
+    modelMatrix = glm::scale(modelMatrix, scales());
+
+
     FuryMaterialManager* materialManager = FuryMaterialManager::instance();
 
     FuryModel* model = FuryModelManager::instance()->modelByName(m_modelName);
@@ -65,12 +70,12 @@ void FuryObject::draw()
 
     if (materialManager->materialExist(m_materialName))
     {
-        material = FuryMaterialManager::instance()->materialByName(m_materialName);
+        material = materialManager->materialByName(m_materialName);
     }
 
     if (model->isReady())
     {
-        model->draw(m_shader, material);
+        model->draw(m_shader, modelMatrix, material);
     }
 }
 

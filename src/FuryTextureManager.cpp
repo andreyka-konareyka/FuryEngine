@@ -34,7 +34,7 @@ FuryTextureManager::~FuryTextureManager()
         if (iter.value() != nullptr)
         {
             FuryTexture*& texture = iter.value();
-            Debug("Delete texture (" + texture->path() + ")");
+            Debug(ru("Удаление текстуры (%1)").arg(texture->path()));
             delete texture;
             texture = nullptr;
         }
@@ -84,10 +84,7 @@ void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
 
     if (iter == m_textures.constEnd())
     {
-        GLuint textureID = 0;
-        glGenTextures(1, &textureID);
-
-        FuryTexture* texture = new FuryTexture(textureID, _path);
+        FuryTexture* texture = new FuryTexture(_path);
         m_textures.insert(texturePath, texture);
         m_textureLoadQueue.enqueue(texture);
     }
@@ -132,15 +129,18 @@ void FuryTextureManager::loadTexturePart()
 {
     if (!m_textureBindQueue.isEmpty())
     {
+        GLuint textureID = 0;
+        glGenTextures(1, &textureID);
+
         FuryTexture* texture = m_textureBindQueue.dequeue();
-        GLuint textureID = texture->idOpenGL();
+        texture->setIdOpenGL(textureID);
         int width = texture->width();
         int height = texture->height();
         unsigned char* data = texture->data();
 
         if (data == nullptr)
         {
-            Debug("Error while loading texture (" + texture->path() + ")");
+            Debug(ru("Ошибка при загрузке текстуры (%1)").arg(texture->path()));
             return;
         }
 
@@ -161,7 +161,7 @@ void FuryTextureManager::loadTexturePart()
 
         texture->setReady();
 
-        Debug("Texture loaded: (" + texture->path() + ")");
+        Debug(ru("Текстура загружена: (%1)").arg(texture->path()));
     }
 
 
@@ -179,7 +179,7 @@ void FuryTextureManager::stopLoopAndWait()
     while (!m_stopped)
     {
         QThread::msleep(200);
-        Debug("wait stop");
+        Debug("Ожидание завершения потока загрузки текстур");
     }
 }
 
@@ -201,7 +201,7 @@ void FuryTextureManager::infiniteLoop()
 
             if (width == 0 || height == 0 || data == 0)
             {
-                Debug(ru("Текстура не загружена: %1").arg(texture->path()));
+                Debug(ru("Текстура не загружена: (%1)").arg(texture->path()));
                 continue;
             }
 

@@ -61,6 +61,11 @@ void FurySphereObject::Setup_physics(reactphysics3d::BodyType _type)
     collider1->getMaterial().setFrictionCoefficient(0.25);
 }
 
+Shader *FurySphereObject::defaultShader()
+{
+    return initSphereShader();
+}
+
 
 
 

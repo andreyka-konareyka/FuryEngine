@@ -6,10 +6,12 @@
 
 FuryMesh::FuryMesh(const QVector<Vertex> &_vertices,
                    const QVector<unsigned int> &_indices,
-                   FuryMaterial *_material) :
+                   FuryMaterial *_material,
+                   const glm::mat4 &_transformation) :
     m_vertices(_vertices),
     m_indices(_indices),
-    m_material(_material)
+    m_material(_material),
+    m_transformation(_transformation)
 {
 
 }

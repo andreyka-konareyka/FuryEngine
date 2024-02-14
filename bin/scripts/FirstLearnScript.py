@@ -73,12 +73,15 @@ class Agent:
         self.memory = ReplayBuffer(mem_size, input_dims)
 
         self.q_eval = build_dqn(lr, n_actions, input_dims, 40, 30, 20)
+        self.first_learn = True
 
+    """
         if os.path.exists(self.model_dir):
             print('load model...')
             self.load_model()
             self.epsilon = self.eps_min
             print('model loaded')
+    """
 
     def store_transition(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -111,6 +114,16 @@ class Agent:
         self.q_eval.train_on_batch(states, q_target)
 
         self.epsilon = self.epsilon - self.eps_dec if self.epsilon > self.eps_min else self.eps_min
+        
+        
+        if self.first_learn is True:
+            self.first_learn = False
+            
+            if os.path.exists(self.model_dir):
+                print('load model...')
+                self.load_model()
+                self.epsilon = self.eps_min
+                print('model loaded')
 
     def save_model(self):
         self.q_eval.save_weights(self.model_file)

@@ -1,17 +1,15 @@
 #include "TestRender.h"
 
-#include <QTimer>
-#include <QDir>
-
-
-#include <string>
 
 #include "FuryLogger.h"
-#include "TextureLoader.h"
 #include "FuryScript.h"
+#include "FuryPbrMaterial.h"
 
 #include <reactphysics3d/reactphysics3d.h>
+#include <stb_image.h>
 
+#include <QDir>
+#include <QTimer>
 #include <QString>
 #include <QMouseEvent>
 #include <QThread>
@@ -19,14 +17,14 @@
 #include <QMutexLocker>
 #include <QMessageBox>
 
-
 const bool NEED_DRAW_SHADOW = true;
 const bool NEED_DEBUG_SHADOW_MAP = false;
+#define NEED_LEARN 0
 
 
-const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-QVector<QString> pbr_material_names{ "pbr_gold", "pbr_grass", "pbr_iron", "pbr_plastic", "pbr_wall" };
-QString current_pbr_material_name = pbr_material_names[2];
+const unsigned int SHADOW_WIDTH = 1024 * 2, SHADOW_HEIGHT = 1024 * 2;
+QVector<QString> pbr_material_names{ "pbr_gold", "pbr_grass", "pbr_iron", "pbr_plastic", "pbr_wall", "pbr_asphalt" };
+QString current_pbr_material_name = pbr_material_names[0];
 
 glm::vec3 pointLightPositions[] = {
     glm::vec3(0.7f,  0.2f,  2.0f),
@@ -40,6 +38,8 @@ glm::vec3 pointLightPositions[] = {
 void renderSphere();
 void renderCube();
 void renderQuad();
+unsigned int loadTexture(const QString& path);
+
 
 
 
@@ -48,7 +48,7 @@ TestRender::TestRender(QWidget *_parent) :
     m_textureManager(FuryTextureManager::createInstance()),
     m_modelManager(FuryModelManager::createInstance()),
     m_materialManager(FuryMaterialManager::createInstance()),
-    m_needDebugRender(true),
+    m_needDebugRender(false),
     m_updateAccumulator(0),
     m_learnScript(new FuryScript),
     m_learnSpeed(1)
@@ -306,16 +306,13 @@ void TestRender::init() {
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
     m_testWorld->setCamera(m_cameras[0]);
 
-    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(-2, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
 
     //
     // МАШИНА
     //
     m_testMaterialShader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
 
-    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 22.5), m_testMaterialShader);
+    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 30), m_testMaterialShader);
     m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
     m_testWorld->addObject(m_carObject);
 
@@ -333,16 +330,18 @@ void TestRender::init() {
     m_bigFloor->setTextureName("asphalt");
     m_testWorld->addObject(m_bigFloor);
 
-    if (!m_materialManager->materialExist("asphaltMaterial"))
-    {
-        FuryMaterial* mat = m_materialManager->createMaterial("asphaltMaterial");
-        mat->setDiffuseTexture("Diffuse_asphalt");
-    }
+    FuryPbrMaterial* asphaltPbrMaterial = m_materialManager->createPbrMaterial("asphaltPbrMaterial");
+    asphaltPbrMaterial->setAlbedoTexture("asphaltPbr_albedo");
+    asphaltPbrMaterial->setNormalTexture("asphaltPbr_normal");
+    asphaltPbrMaterial->setMetallicTexture("asphaltPbr_metallic");
+    asphaltPbrMaterial->setRoughnessTexture("asphaltPbr_roughness");
+    asphaltPbrMaterial->setAoTexture("asphaltPbr_ao");
 
-    m_bigFloor->setMaterialName("asphaltMaterial");
+    m_bigFloor->setMaterialName("asphaltPbrMaterial");
+    m_bigFloor->setTextureScales(glm::vec2(4, 3) * 100.0f);
 
     // Настройка физики сфер
-    reactphysics3d::Vector3 position(2, 10, 0);
+    reactphysics3d::Vector3 position(0, 10, 0);
     reactphysics3d::Quaternion orientation = reactphysics3d::Quaternion::identity();
     reactphysics3d::Transform transform(position, orientation);
     physics_sphere = our_physicsWorld->createRigidBody(transform);
@@ -357,10 +356,66 @@ void TestRender::init() {
 
     m_skyboxShader = new Shader("skybox.vs", "skybox.fs");
     m_particleShader = new Shader("particle.vs", "particle.fs");
-    m_pbrShader = new Shader("pbr.vs", "pbr.fs");
+    m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
+    m_backgroundShader = new Shader("shaders/pbr/2.2.2.background.vs", "shaders/pbr/2.2.2.background.fs");
     m_simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
     m_bigFloorShader = new Shader("shaders/bigFloorShader.vs", "shaders/bigFloorShader.frag");
-    m_bigFloor->setShader(m_bigFloorShader);
+
+    m_bigFloor->setShader(m_pbrShader);
+
+
+
+    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(-3, 10, 0), 1);
+    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
+    m_testWorld->addObject(testSphere);
+
+    FuryPbrMaterial* firstPbrMaterial = m_materialManager->createPbrMaterial("firstPbrMaterial");
+    firstPbrMaterial->setAlbedoTexture("testPbr_albedo");
+    firstPbrMaterial->setNormalTexture("testPbr_normal");
+    firstPbrMaterial->setMetallicTexture("testPbr_metallic");
+    firstPbrMaterial->setRoughnessTexture("testPbr_roughness");
+    firstPbrMaterial->setAoTexture("testPbr_ao");
+    testSphere->setMaterialName("firstPbrMaterial");
+    testSphere->setShader(m_pbrShader);
+
+    testSphere = new FurySphereObject(m_testWorld, glm::vec3(-6, 10, 0), 1);
+    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
+    m_testWorld->addObject(testSphere);
+
+    FuryPbrMaterial* plasticPbrMaterial = m_materialManager->createPbrMaterial("plasticPbrMaterial");
+    plasticPbrMaterial->setAlbedoTexture("plasticPbr_albedo");
+    plasticPbrMaterial->setNormalTexture("plasticPbr_normal");
+    plasticPbrMaterial->setMetallicTexture("plasticPbr_metallic");
+    plasticPbrMaterial->setRoughnessTexture("plasticPbr_roughness");
+    plasticPbrMaterial->setAoTexture("plasticPbr_ao");
+    testSphere->setMaterialName("plasticPbrMaterial");
+    testSphere->setShader(m_pbrShader);
+
+    testSphere = new FurySphereObject(m_testWorld, glm::vec3(6, 10, 0), 1);
+    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
+    m_testWorld->addObject(testSphere);
+
+    FuryPbrMaterial* ironPbrMaterial = m_materialManager->createPbrMaterial("ironPbrMaterial");
+    ironPbrMaterial->setAlbedoTexture("ironPbr_albedo");
+    ironPbrMaterial->setNormalTexture("ironPbr_normal");
+    ironPbrMaterial->setMetallicTexture("ironPbr_metallic");
+    ironPbrMaterial->setRoughnessTexture("ironPbr_roughness");
+    ironPbrMaterial->setAoTexture("ironPbr_ao");
+    testSphere->setMaterialName("ironPbrMaterial");
+    testSphere->setShader(m_pbrShader);
+
+    testSphere = new FurySphereObject(m_testWorld, glm::vec3(3, 10, 0), 1);
+    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
+    m_testWorld->addObject(testSphere);
+
+    FuryPbrMaterial* grassPbrMaterial = m_materialManager->createPbrMaterial("grassPbrMaterial");
+    grassPbrMaterial->setAlbedoTexture("grassPbr_albedo");
+    grassPbrMaterial->setNormalTexture("grassPbr_normal");
+    grassPbrMaterial->setMetallicTexture("grassPbr_metallic");
+    grassPbrMaterial->setRoughnessTexture("grassPbr_roughness");
+    grassPbrMaterial->setAoTexture("grassPbr_ao");
+    testSphere->setMaterialName("grassPbrMaterial");
+    testSphere->setShader(m_pbrShader);
 
 
     // PBR-материалы
@@ -368,13 +423,8 @@ void TestRender::init() {
 
 
 
-    int win_w, win_h;
-    auto data_win_texture = TextureLoader::LoadDataFromFile("textures/blending_transparent_window.png", win_w, win_h);
-    m_win_texture_id = TextureLoader::BindDataToTexture(data_win_texture, win_w, win_h);
-
-    int smoke_w, smoke_h;
-    auto data_smoke_texture = TextureLoader::LoadDataFromFile("textures/smoke_ver2.png", smoke_w, smoke_h);
-    m_smoke_texture_id = TextureLoader::BindDataToTexture(data_smoke_texture, smoke_w, smoke_h);
+    m_smoke_texture_id = loadTexture("textures/smoke_ver2.png");
+    m_particle_texture_id = loadTexture("awesomeface.png");
 
 
     glm::vec3 part_pos(5, 0, 0);
@@ -399,13 +449,14 @@ void TestRender::init() {
     m_textureManager->addTexture("textures/box_texture3_orig.png", "Diffuse_numbersBoxTexture");
     m_textureManager->addTexture("textures/carBody.png", "carBody");
     m_textureManager->addTexture("textures/rayCastBall.png", "Diffuse_rayCastBall");
-    m_textureManager->addTexture("textures/raceWall.png", "Diffuse_raceWall");
+    m_textureManager->addTexture("textures/box_texture2.png", "Diffuse_raceWall");
     m_textureManager->addTexture("textures/asphalt.png", "Diffuse_asphalt");
     m_textureManager->addTexture("textures/redCheckBox.png", "redCheckBox");
     m_textureManager->addTexture("textures/greenCheckBox.png", "greenCheckBox");
 
     m_modelManager->addModel("objects/car2/LOD2.obj", "backpack2LOD2");
     m_modelManager->addModel("objects/car2/car.obj", "backpack2");
+//    m_modelManager->addModel("objects/backpack_2/b.fbx", "backpack2");
 
     {
         // initShaderInform
@@ -413,7 +464,7 @@ void TestRender::init() {
         QList<Shader*> shaders({
                                    FuryBoxObject::defaultShader(),
                                    m_bigFloorShader,
-                                   testSphere->shader(),
+                                   FurySphereObject::defaultShader(),
                                    m_testMaterialShader
                                });
 
@@ -459,17 +510,9 @@ void TestRender::init() {
 
 
         m_pbrShader->Use();
-
-        m_pbrShader->setVec3("lightPositions[0]", glm::vec3(-10.0f, 10.0f, 10.0f));
         m_pbrShader->setVec3("lightColors[0]", 300.0f, 300.0f, 300.0f);
-        // point light 2
-        m_pbrShader->setVec3("lightPositions[1]", glm::vec3(10.0f, 10.0f, 10.0f));
         m_pbrShader->setVec3("lightColors[1]", 300.0f, 300.0f, 300.0f);
-        // point light 3
-        m_pbrShader->setVec3("lightPositions[2]", glm::vec3(-10.0f, -10.0f, 10.0f));
         m_pbrShader->setVec3("lightColors[2]", 300.0f, 300.0f, 300.0f);
-        // point light 4
-        m_pbrShader->setVec3("lightPositions[3]", glm::vec3(10.0f, -10.0f, 10.0f));
         m_pbrShader->setVec3("lightColors[3]", 300.0f, 300.0f, 300.0f);
     }
 }
@@ -490,7 +533,7 @@ void TestRender::render()
         */
         if (m_is_loading)
         {
-            renderLoadingAndBindData(currentFrame);
+            renderLoading(currentFrame);
             displayLogo();
             return;
         }
@@ -551,7 +594,7 @@ void TestRender::render()
         // 2. рисуем сцену как обычно с тенями (используя карту глубины)
 
         // Clear the colorbuffer
-        glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderPbrSpheres();
@@ -634,17 +677,30 @@ void TestRender::render()
 
                 shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-                glm::mat4 model = renderObject->getOpenGLTransform();
-                model = glm::scale(model, renderObject->scales());	// it's a bit too big for our scene, so scale it down
-
-                shader->setMat4("model", model);
 
 
-                glm::vec3 lightPos = m_testWorld->camera()->position()
-                                   + m_dirlight_position;
-                shader->setVec3("lightPos", lightPos);
-                glActiveTexture(GL_TEXTURE3);
-                glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                shader->setVec2("textureScales", renderObject->textureScales());
+
+
+                if (shader != m_pbrShader)
+                {
+                    glm::vec3 lightPos = m_testWorld->camera()->position()
+                                       + m_dirlight_position;
+                    shader->setVec3("lightPos", lightPos);
+                    glActiveTexture(GL_TEXTURE3);
+                    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                }
+                else
+                {
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+                    glActiveTexture(GL_TEXTURE2);
+                    glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+                    glActiveTexture(GL_TEXTURE8);
+                    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                }
 
                 renderObject->draw();
 
@@ -663,16 +719,14 @@ void TestRender::render()
         */
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        m_skyboxShader->Use();
-        {
-            glm::mat4 view = glm::mat4(glm::mat3(m_testWorld->camera()->getViewMatrix())); // remove translation from the view matrix
-            m_skyboxShader->setMat4("view", view);
-        }
-        m_skyboxShader->setMat4("projection", projection);
+
+        m_backgroundShader->Use();
+        m_backgroundShader->setMat4("projection", projection);
+        m_backgroundShader->setMat4("view", view);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
         // skybox cube
         glBindVertexArray(m_skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
@@ -780,32 +834,13 @@ void TestRender::render()
                 glm::vec3 lightPos = m_testWorld->camera()->position()
                                    + m_dirlight_position;
                 shader->setVec3("lightPos", lightPos);
-
-
-
-                GLuint texture_id = m_textureManager->textureByName(renderObject->textureName()).idOpenGL();
-
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, texture_id);
-                glUniform1i(glGetUniformLocation(shader->Program, "diffuse_texture"), 0);
-                glActiveTexture(GL_TEXTURE1);
+                glActiveTexture(GL_TEXTURE3);
                 glBindTexture(GL_TEXTURE_2D, m_depthMap);
-                glUniform1i(glGetUniformLocation(shader->Program, "shadowMap"), 1);
 
-                GLuint renderVAO = renderObject->VAO();
-                glBindVertexArray(renderVAO);
+                renderObject->draw();
 
-                if (renderObject->isDrawElements())
-                {
-                    glDrawElements(renderObject->renderType(), renderObject->vertexCount(), GL_UNSIGNED_INT, 0);
-                }
-                else
-                {
-                    glDrawArrays(renderObject->renderType(), 0, renderObject->vertexCount());
-                }
+
                 glBindVertexArray(0);
-
-
                 glActiveTexture(GL_TEXTURE0);
 
             }
@@ -823,155 +858,218 @@ void TestRender::render()
 
 void TestRender::createPBRTextures()
 {
-    glCullFace(GL_FRONT);
+    glDisable(GL_CULL_FACE);
+    glClearColor(1, 1, 1, 1.0f);
 
     // pbr: setup framebuffer
-    // ----------------------
-    unsigned int captureFBO;
-    unsigned int captureRBO;
-    glGenFramebuffers(1, &captureFBO);
-    glGenRenderbuffers(1, &captureRBO);
+        // ----------------------
+        unsigned int captureFBO;
+        unsigned int captureRBO;
+        glGenFramebuffers(1, &captureFBO);
+        glGenRenderbuffers(1, &captureRBO);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-
-    // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
-    // ----------------------------------------------------------------------------------------------
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-    glm::mat4 captureViews[] =
-    {
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-    };
-
-    // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
-    // --------------------------------------------------------------------------------
-    glGenTextures(1, &m_irradianceMap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-
-    // pbr: solve diffuse integral by convolution to create an irradiance (cube)map.
-    // -----------------------------------------------------------------------------
-    Shader irradianceShader("2.2.2.cubemap.vs", "2.2.2.irradiance_convolution.fs");
-    irradianceShader.Use();
-    irradianceShader.setInt("environmentMap", 0);
-    irradianceShader.setMat4("projection", captureProjection);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
-
-    glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        irradianceShader.setMat4("view", captureViews[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_irradianceMap, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        renderCube();
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-
-
-    Shader prefilterShader("2.2.2.cubemap.vs", "2.2.2.prefilter.fs");
-    glGenTextures(1, &m_prefilterMap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // be sure to set minification filter to mip_linear
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-    // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
-    // ----------------------------------------------------------------------------------------------------
-    prefilterShader.Use();
-    prefilterShader.setInt("environmentMap", 0);
-    prefilterShader.setMat4("projection", captureProjection);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapTexture);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    unsigned int maxMipLevels = 5;
-    for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
-    {
-        // reisze framebuffer according to mip-level size.
-        unsigned int mipWidth = (unsigned int)(128 * std::pow(0.5, mip));
-        unsigned int mipHeight = (unsigned int)(128 * std::pow(0.5, mip));
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-        glViewport(0, 0, mipWidth, mipHeight);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-        float roughness = (float)mip / (float)(maxMipLevels - 1);
-        prefilterShader.setFloat("roughness", roughness);
+        // pbr: load the HDR environment map
+        // ---------------------------------
+        stbi_set_flip_vertically_on_load(true);
+        int width, height;
+        float *data = stbi_loadf("textures/hdr/newport_loft3.hdr", &width, &height, 0, STBI_rgb);
+        unsigned int hdrTexture;
+        if (data)
+        {
+            glGenTextures(1, &hdrTexture);
+            glBindTexture(GL_TEXTURE_2D, hdrTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data); // note how we specify the texture's data value to be float
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Failed to load HDR image." << std::endl;
+        }
+
+        // pbr: setup cubemap to render to and attach to framebuffer
+        // ---------------------------------------------------------
+        glGenTextures(1, &m_envCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
         for (unsigned int i = 0; i < 6; ++i)
         {
-            prefilterShader.setMat4("view", captureViews[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_prefilterMap, mip);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // enable pre-filter mipmap sampling (combatting visible dots artifact)
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
+        // ----------------------------------------------------------------------------------------------
+        glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+        glm::mat4 captureViews[] =
+        {
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+        };
+
+        // pbr: convert HDR equirectangular environment map to cubemap equivalent
+        // ----------------------------------------------------------------------
+        Shader equirectangularToCubemapShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.equirectangular_to_cubemap.fs");
+        equirectangularToCubemapShader.Use();
+        equirectangularToCubemapShader.setInt("equirectangularMap", 0);
+        equirectangularToCubemapShader.setMat4("projection", captureProjection);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+
+        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            equirectangularToCubemapShader.setMat4("view", captureViews[i]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_envCubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             renderCube();
         }
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // then let OpenGL generate mipmaps from first mip face (combatting visible dots artifact)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+        // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
+        // --------------------------------------------------------------------------------
+        glGenTextures(1, &m_irradianceMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+
+        // pbr: solve diffuse integral by convolution to create an irradiance (cube)map.
+        // -----------------------------------------------------------------------------
+        Shader irradianceShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.irradiance_convolution.fs");
+        irradianceShader.Use();
+        irradianceShader.setInt("environmentMap", 0);
+        irradianceShader.setMat4("projection", captureProjection);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+
+        glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            irradianceShader.setMat4("view", captureViews[i]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_irradianceMap, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            renderCube();
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // pbr: create a pre-filter cubemap, and re-scale capture FBO to pre-filter scale.
+        // --------------------------------------------------------------------------------
+        glGenTextures(1, &m_prefilterMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // be sure to set minification filter to mip_linear
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+        // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
+        // ----------------------------------------------------------------------------------------------------
+        Shader prefilterShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.prefilter.fs");
+        prefilterShader.Use();
+        prefilterShader.setInt("environmentMap", 0);
+        prefilterShader.setMat4("projection", captureProjection);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        unsigned int maxMipLevels = 5;
+        for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+        {
+            // reisze framebuffer according to mip-level size.
+            unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+            unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+            glViewport(0, 0, mipWidth, mipHeight);
+
+            float roughness = (float)mip / (float)(maxMipLevels - 1);
+            prefilterShader.setFloat("roughness", roughness);
+            for (unsigned int i = 0; i < 6; ++i)
+            {
+                prefilterShader.setMat4("view", captureViews[i]);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_prefilterMap, mip);
+
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                renderCube();
+            }
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // pbr: generate a 2D LUT from the BRDF equations used.
+        // ----------------------------------------------------
+        glGenTextures(1, &m_brdfLUTTexture);
+
+        // pre-allocate enough memory for the LUT texture.
+        glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+        // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUTTexture, 0);
+
+        glViewport(0, 0, 512, 512);
+
+        Shader brdfShader("shaders/pbr/2.2.2.brdf.vs", "shaders/pbr/2.2.2.brdf.fs");
+        brdfShader.Use();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_BLEND);
+        renderQuad();
+        glEnable(GL_BLEND);
 
 
-
-    // pbr: generate a 2D LUT from the BRDF equations used.
-    // ----------------------------------------------------
-    Shader brdfShader("2.2.2.brdf.vs", "2.2.2.brdf.fs");
-    glGenTextures(1, &m_brdfLUTTexture);
-
-    // pre-allocate enough memory for the LUT texture.
-    glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
-    // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUTTexture, 0);
-
-    glViewport(0, 0, 512, 512);
-
-    brdfShader.Use();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    renderQuad();
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
 }
 
 void TestRender::renderDepthMap()
@@ -1091,26 +1189,14 @@ glm::mat4 TestRender::getLightSpaceMatrix()
     return lightProjection * lightView;
 }
 
-void TestRender::renderLoadingAndBindData(float _currentFrame)
+void TestRender::renderLoading(float _currentFrame)
 {
     Q_UNUSED(_currentFrame);
     static QTime startTime = QTime::currentTime();
 
-    if (m_cubemap_is_loaded)
+    if (startTime.msecsTo(QTime::currentTime()) > m_loadingOvertime * 1000)
     {
-        if (startTime.msecsTo(QTime::currentTime()) > m_loadingOvertime * 1000)
-        {
-            m_is_loading = false;
-        }
-    }
-
-    if (m_cubemap_is_loaded && (!m_cubemap_bind)) {
-        QTime t_start = QTime::currentTime();
-        // Когда текстура загружена в память, мы её подключаем к openGL
-        m_cubemapTexture = TextureLoader::BindDataToCubemap(m_data_array, m_width_array, m_height_array);
-        m_cubemap_bind = true;
-        QTime t_end = QTime::currentTime();
-        Debug((ru("Кубическая карта:") + QString::number(t_start.msecsTo(t_end) / 1000.0)).toUtf8().constData());
+        m_is_loading = false;
     }
 
     // Показываем экран загрузки
@@ -1130,6 +1216,7 @@ void TestRender::renderPbrSpheres()
     m_pbrShader->setMat4("projection", projection);
     m_pbrShader->setMat4("view", view);
     m_pbrShader->setVec3("camPos", m_testWorld->camera()->position());
+    m_pbrShader->setVec2("textureScales", glm::vec2(2, 3));
 
 
 
@@ -1153,6 +1240,16 @@ void TestRender::renderPbrSpheres()
     model = glm::scale(model, glm::vec3(1, 1, 1));	// it's a bit too big for our scene, so scale it down
 
     m_pbrShader->setMat4("model", model);
+    m_pbrShader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+
+    glm::vec3 tempPosition = m_dirlight_position;
+    tempPosition *= 3;
+    tempPosition += glm::vec3(physics_sphere_position.x, physics_sphere_position.y, physics_sphere_position.z);
+
+    m_pbrShader->setVec3("lightPositions[0]", tempPosition);
+    m_pbrShader->setVec3("lightPositions[1]", tempPosition);
+    m_pbrShader->setVec3("lightPositions[2]", tempPosition);
+    m_pbrShader->setVec3("lightPositions[3]", tempPosition);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
@@ -1162,15 +1259,15 @@ void TestRender::renderPbrSpheres()
     glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_gold_albedo_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("m_gold_albedo_texture_id").idOpenGL());
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, m_gold_norm_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("m_gold_norm_texture_id").idOpenGL());
     glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, m_gold_metallic_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("m_gold_metallic_texture_id").idOpenGL());
     glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_2D, m_gold_roughness_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("m_gold_roughness_texture_id").idOpenGL());
     glActiveTexture(GL_TEXTURE7);
-    glBindTexture(GL_TEXTURE_2D, m_gold_ao_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("m_gold_ao_texture_id").idOpenGL());
 
     renderSphere();
 }
@@ -1202,8 +1299,6 @@ void TestRender::updatePhysics()
 //    }
 
 
-
-#define NEED_LEARN 1
 
 #if NEED_LEARN == 1
 
@@ -1438,30 +1533,46 @@ void TestRender::do_movement()
 
 void TestRender::loadPBR()
 {
-    int part_w, part_h;
-    auto data_particle_texture = TextureLoader::LoadDataFromFile("awesomeface.png", part_w, part_h);
-    m_particle_texture_id = TextureLoader::BindDataToTexture(data_particle_texture, part_w, part_h);
+    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/albedo.png", "m_gold_albedo_texture_id");
+    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/normal.png", "m_gold_norm_texture_id");
+    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/metallic.png", "m_gold_metallic_texture_id");
+    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/roughness.png", "m_gold_roughness_texture_id");
+    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/ao.png", "m_gold_ao_texture_id");
 
-    int gold_albedo_w, gold_albedo_h;
-    auto data_gold_texture = TextureLoader::LoadDataFromFile("textures/" + current_pbr_material_name + "/albedo.png", gold_albedo_w, gold_albedo_h);
-    m_gold_albedo_texture_id = TextureLoader::BindDataToTexture(data_gold_texture, gold_albedo_w, gold_albedo_h);
+    int newTextureNum = 4; // wall
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "testPbr_albedo");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "testPbr_normal");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "testPbr_metallic");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "testPbr_roughness");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "testPbr_ao");
 
-    int gold_norm_w, gold_norm_h;
-    data_gold_texture = TextureLoader::LoadDataFromFile("textures/" + current_pbr_material_name + "/normal.png", gold_norm_w, gold_norm_h);
-    m_gold_norm_texture_id = TextureLoader::BindDataToTexture(data_gold_texture, gold_norm_w, gold_norm_h);
+    newTextureNum = 5; // asphalt
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "asphaltPbr_albedo");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "asphaltPbr_normal");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "asphaltPbr_metallic");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "asphaltPbr_roughness");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "asphaltPbr_ao");
 
-    int gold_metallic_w, gold_metallic_h;
-    data_gold_texture = TextureLoader::LoadDataFromFile("textures/" + current_pbr_material_name + "/metallic.png", gold_metallic_w, gold_metallic_h);
-    m_gold_metallic_texture_id = TextureLoader::BindDataToTexture(data_gold_texture, gold_metallic_w, gold_metallic_h);
+    newTextureNum = 1; // grass
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "grassPbr_albedo");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "grassPbr_normal");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "grassPbr_metallic");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "grassPbr_roughness");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "grassPbr_ao");
 
-    int gold_roughness_w, gold_roughness_h;
-    data_gold_texture = TextureLoader::LoadDataFromFile("textures/" + current_pbr_material_name + "/roughness.png", gold_roughness_w, gold_roughness_h);
-    m_gold_roughness_texture_id = TextureLoader::BindDataToTexture(data_gold_texture, gold_roughness_w, gold_roughness_h);
+    newTextureNum = 2; // iron
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "ironPbr_albedo");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "ironPbr_normal");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "ironPbr_metallic");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "ironPbr_roughness");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "ironPbr_ao");
 
-    int gold_ao_w, gold_ao_h;
-    data_gold_texture = TextureLoader::LoadDataFromFile("textures/" + current_pbr_material_name + "/ao.png", gold_ao_w, gold_ao_h);
-    m_gold_ao_texture_id = TextureLoader::BindDataToTexture(data_gold_texture, gold_ao_w, gold_ao_h);
-
+    newTextureNum = 3; // plastic
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "plasticPbr_albedo");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "plasticPbr_normal");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "plasticPbr_metallic");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "plasticPbr_roughness");
+    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "plasticPbr_ao");
 
     m_pbrShader->Use();
     m_pbrShader->setInt("irradianceMap", 0);
@@ -1472,6 +1583,7 @@ void TestRender::loadPBR()
     m_pbrShader->setInt("metallicMap", 5);
     m_pbrShader->setInt("roughnessMap", 6);
     m_pbrShader->setInt("aoMap", 7);
+    m_pbrShader->setInt("shadowMap", 8);
     glUseProgram(0);
 }
 
@@ -1530,30 +1642,6 @@ void TestRender::initSkyboxModel()
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-
-
-    std::thread(
-        [&]()
-        {
-            QVector<QString> faces
-            {
-                "textures/skybox/right.jpg",
-                "textures/skybox/left.jpg",
-                "textures/skybox/top.jpg",
-                "textures/skybox/bottom.jpg",
-                "textures/skybox/front.jpg",
-                "textures/skybox/back.jpg"
-            };
-
-            for (unsigned int i = 0; i < faces.size(); i++) {
-                m_width_array.push_back(0);
-                m_height_array.push_back(0);
-                m_data_array.push_back(TextureLoader::LoadDataFromFile(faces[i], m_width_array[i], m_height_array[i]));
-            }
-            m_cubemap_is_loaded = true;
-        }
-    ).detach();
 }
 
 void TestRender::initDepthMapFBO()
@@ -1846,27 +1934,28 @@ void TestRender::initRaceMap()
 
     for (int i = 0; i < wallPos.size(); ++i)
     {
-        wallPos[i].x *= 15;
-        wallPos[i].z *= 15;
-        wallSize[i] *= 15;
+        wallPos[i].x *= 20;
+        wallPos[i].z *= 20;
+        wallSize[i] *= 20;
         wallRotate[i] *= 3.14f/2;
         FuryBoxObject* wall = new FuryBoxObject(m_testWorld,
                                                 wallPos[i],
                                                 glm::vec3(wallSize[i], 2.5, 0.5),
                                                 glm::vec3(0, wallRotate[i], 0));
         wall->setName("raceWall");
+        wall->setTextureScales(glm::vec2(wallSize[i], 3));
         wall->Setup_physics(reactphysics3d::BodyType::STATIC);
         wall->physicsBody()->setUserData(wall);
-        wall->setTextureName("raceWall");
         m_testWorld->addObject(wall);
 
-        if (!m_materialManager->materialExist("raceWallMaterial"))
-        {
-            FuryMaterial* mat = m_materialManager->createMaterial("raceWallMaterial");
-            mat->setDiffuseTexture("Diffuse_raceWall");
-        }
+//        if (!m_materialManager->materialExist("raceWallMaterial"))
+//        {
+//            FuryMaterial* mat = m_materialManager->createMaterial("raceWallMaterial");
+//            mat->setDiffuseTexture("Diffuse_raceWall");
+//        }
 
-        wall->setMaterialName("raceWallMaterial");
+        wall->setMaterialName("firstPbrMaterial");
+        wall->setShader(m_pbrShader);
     }
 
 
@@ -2118,18 +2207,29 @@ void TestRender::initRaceMap()
 
     for (int i = 0; i < checkBoxPos.size(); ++i)
     {
-        checkBoxPos[i].x *= 15;
-        checkBoxPos[i].z *= 15;
+        checkBoxPos[i].x *= 20;
+        checkBoxPos[i].z *= 20;
         checkBoxRot[i] *= 3.14f/2;
 
         FuryBoxObject* object = new FuryBoxObject(m_testWorld,
                                                   checkBoxPos[i],
-                                                  glm::vec3(13, 2.5, 0.5),
+                                                  glm::vec3(20 - 2, 2.5, 0.5),
                                                   glm::vec3(0, checkBoxRot[i], 0));
-        object->setTextureName("redCheckBox");
+//        object->setTextureName("redCheckBox");
         object->setName(QString("Trigger %1").arg(i));
         object->Setup_physics(reactphysics3d::BodyType::STATIC);
         object->physicsBody()->getCollider(0)->setIsTrigger(true);
+
+        if (!m_materialManager->materialExist("redRaceTriggerMaterial"))
+        {
+            FuryMaterial* mat = m_materialManager->createMaterial("redRaceTriggerMaterial");
+            mat->setDiffuseTexture("redCheckBox");
+
+            mat = m_materialManager->createMaterial("greenRaceTriggerMaterial");
+            mat->setDiffuseTexture("greenCheckBox");
+        }
+
+        object->setMaterialName("redRaceTriggerMaterial");
         m_testWorld->addTransparentObject(object);
     }
 }
@@ -2264,4 +2364,34 @@ void renderQuad()
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
+}
+
+unsigned int loadTexture(const QString& path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height;
+    unsigned char *data = stbi_load(qUtf8Printable(path), &width, &height, 0, STBI_rgb_alpha);
+
+    if (data)
+    {
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << qUtf8Printable(path) << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }

@@ -41,6 +41,12 @@ public:
      * \param[in] _type - Тип физического тела
      */
     void Setup_physics(reactphysics3d::BodyType _type);
+
+    /*!
+     * \brief Получение шейдера по умолчанию
+     * \return Возвращает шейдер по умолчанию
+     */
+    static Shader* defaultShader();
 };
 
 

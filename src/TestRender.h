@@ -146,7 +146,7 @@ private:
     void renderDepthMap();
     glm::mat4 getLightSpaceMatrix();
 
-    void renderLoadingAndBindData(float _currentFrame);
+    void renderLoading(float _currentFrame);
     void renderPbrSpheres();
 
     void updatePhysics();
@@ -163,29 +163,26 @@ private:
     Shader* m_skyboxShader;
     Shader* m_particleShader;
     Shader* m_pbrShader;
+    Shader* m_backgroundShader;
     Shader* m_simpleDepthShader;
     Shader* m_bigFloorShader;
     Shader* m_testMaterialShader;
+    Shader* m_brdfShader;
 
     GLuint m_particle_texture_id;
-    GLuint m_gold_albedo_texture_id;
-    GLuint m_gold_norm_texture_id;
-    GLuint m_gold_metallic_texture_id;
-    GLuint m_gold_roughness_texture_id;
-    GLuint m_gold_ao_texture_id;
 
     unsigned int m_irradianceMap = 0;
     unsigned int m_prefilterMap;
-    unsigned int m_brdfLUTTexture;
+    unsigned int m_brdfLUTTexture = 0;
+
+    GLuint m_hdrTexture = 0;
+    GLuint m_envCubemap = 0;
 
 
-    GLuint m_win_texture_id;
     GLuint m_smoke_texture_id;
     Particle* m_myFirstParticle;
     ParticleSystem* m_myFirstParticleSystem;
 
-
-    bool m_cubemap_bind = false;
 
 
     GLuint m_skyboxVAO, m_skyboxVBO;
@@ -193,11 +190,6 @@ private:
     bool m_is_loading = true;
     float m_loadingOvertime = 3.0f;
 
-    GLuint m_cubemapTexture = 0;
-    bool m_cubemap_is_loaded = false;
-    QVector<unsigned char*> m_data_array;
-    QVector<int> m_width_array;
-    QVector<int> m_height_array;
 
     GLuint m_depthMapFBO;
     GLuint m_depthMap;

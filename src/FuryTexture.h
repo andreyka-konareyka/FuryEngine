@@ -14,10 +14,9 @@ class FuryTexture {
 public:
     /*!
     * \brief Конструктор
-    * \param[in] _idOpenGL - Идентификатор текстуры в OpenGL
     * \param[in] _path - Путь к файлу
     */
-    FuryTexture(GLuint _idOpenGL, const QString& _path);
+    FuryTexture(const QString& _path);
 
     //! Конструктор по умолчанию
     FuryTexture();
@@ -30,6 +29,13 @@ public:
     */
     inline GLuint idOpenGL() const
     { return m_idOpenGL; }
+
+    /*!
+     * \brief Установить идентификатор текстуры в OpenGL
+     * \param[in] _idOpenGL - Идентификатор текстуры в OpenGL
+     */
+    inline void setIdOpenGL(GLuint _idOpenGL)
+    { m_idOpenGL = _idOpenGL; }
 
     /*!
     * \brief Получить путь к файлу
