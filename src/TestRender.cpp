@@ -4,6 +4,7 @@
 #include "FuryLogger.h"
 #include "FuryScript.h"
 #include "FuryPbrMaterial.h"
+#include "FuryRussianLocalKeyMapper.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <stb_image.h>
@@ -51,7 +52,8 @@ TestRender::TestRender(QWidget *_parent) :
     m_needDebugRender(false),
     m_updateAccumulator(0),
     m_learnScript(new FuryScript),
-    m_learnSpeed(1)
+    m_learnSpeed(1),
+    m_russianKeyMapper(new FuryRussianLocalKeyMapper)
 {
     Debug(ru("Создание рендера"));
 
@@ -215,11 +217,17 @@ void TestRender::mousePressEvent(QMouseEvent *_event)
 
 void TestRender::keyPressEvent(QKeyEvent *_event)
 {
-    m_keys[_event->key()] = true;
+    int keyCode = m_russianKeyMapper->mapLocalKeyToLatin(_event->key());
+    if (keyCode == 0)
+    {
+        keyCode = _event->key();
+    }
+
+    m_keys[keyCode] = true;
 
     if (m_testWorld->camera() == m_cameras[1])
     { // Если камера машины
-        m_carObject->keyPressEvent(_event->key());
+        m_carObject->keyPressEvent(keyCode);
     }
 
 
@@ -239,11 +247,17 @@ void TestRender::keyPressEvent(QKeyEvent *_event)
 
 void TestRender::keyReleaseEvent(QKeyEvent *_event)
 {
-    m_keys[_event->key()] = false;
+    int keyCode = m_russianKeyMapper->mapLocalKeyToLatin(_event->key());
+    if (keyCode == 0)
+    {
+        keyCode = _event->key();
+    }
+
+    m_keys[keyCode] = false;
 
     if (m_testWorld->camera() == m_cameras[1])
     { // Если камера машины
-        m_carObject->keyReleaseEvent(_event->key());
+        m_carObject->keyReleaseEvent(keyCode);
     }
 }
 
@@ -637,7 +651,7 @@ void TestRender::render()
                     continue;
                 }
 
-
+                if (renderObject->name() != "rayCastBall")
                 {
                     bool result = true;
                     const glm::vec3& minp = renderObject->getPosition();
@@ -707,6 +721,17 @@ void TestRender::render()
 
                 glBindVertexArray(0);
                 glActiveTexture(GL_TEXTURE0);
+
+
+                if (renderObject->name() == "rayCastBall")
+                { // Отрисовка лучей у машины
+                    glm::vec3 direct = m_carObject->getPosition() - renderObject->getPosition();
+                    direct /= renderObject->scales().x;
+                    glBegin(GL_LINES);
+                    glVertex3d(0, 0, 0);
+                    glVertex3d(direct.x, direct.y, direct.z);
+                    glEnd();
+                }
 
             }
         }
@@ -1274,11 +1299,14 @@ void TestRender::renderPbrSpheres()
 
 void TestRender::updatePhysics()
 {
-//    m_updateAccumulator += m_deltaTime;
     float timeStep = 1.0f / 60.0f;
 
-//    while (m_updateAccumulator >= timeStep)
-//    {
+#if NEED_LEARN == 0
+    m_updateAccumulator += m_deltaTime;
+
+    while (m_updateAccumulator >= timeStep)
+    {
+#endif
 
     // Выполняем 2 тика по 1/60 секунды. Для ИИ получается 1 тик в 1/30 секунды
 //    int iCount = (m_learnSpeed == 1) ? 1 : 2;
@@ -1295,8 +1323,10 @@ void TestRender::updatePhysics()
         }
     }
 
-//        m_updateAccumulator -= timeStep;
-//    }
+#if NEED_LEARN == 0
+        m_updateAccumulator -= timeStep;
+    }
+#endif
 
 
 

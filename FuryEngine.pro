@@ -43,6 +43,7 @@ LIBS        += \
 SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
+    src/FuryBaseLocalKeyMapper.cpp \
     src/FuryBoxObject.cpp \
     src/FuryEventListener.cpp \
     src/FuryException.cpp \
@@ -56,6 +57,7 @@ SOURCES += \
     src/FuryObject.cpp \
     src/FuryPbrMaterial.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
+    src/FuryRussianLocalKeyMapper.cpp \
     src/FuryScript.cpp \
     src/FurySphereObject.cpp \
     src/FuryTexture.cpp \
@@ -69,6 +71,7 @@ SOURCES += \
 HEADERS += \
     src/Camera.h \
     src/CarObject.h \
+    src/FuryBaseLocalKeyMapper.h \
     src/FuryBoxObject.h \
     src/FuryEventListener.h \
     src/FuryException.h \
@@ -82,6 +85,7 @@ HEADERS += \
     src/FuryObject.h \
     src/FuryPbrMaterial.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
+    src/FuryRussianLocalKeyMapper.h \
     src/FuryScript.h \
     src/FurySphereObject.h \
     src/FuryTexture.h \

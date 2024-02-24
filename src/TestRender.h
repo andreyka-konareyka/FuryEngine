@@ -35,6 +35,7 @@
 #include "FuryModelManager.h"
 #include "FuryMaterialManager.h"
 #include "FuryScript.h"
+#include "FuryBaseLocalKeyMapper.h"
 
 
 #include <QOpenGLWidget>
@@ -225,6 +226,9 @@ private:
 
     FuryScript* m_learnScript;
     int m_learnSpeed;
+
+    //! Отображатель кодов русских клавиш на латинские
+    FuryBaseLocalKeyMapper* m_russianKeyMapper;
 };
 
 #endif // TESTRENDER_H
