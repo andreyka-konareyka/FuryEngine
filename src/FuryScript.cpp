@@ -17,7 +17,7 @@ FuryScript::FuryScript()
 
     Py_Initialize();
     try {
-        object o_firstModule = import("scripts.FirstLearnScript");
+        object o_firstModule = import("scripts.learn_script");
         m_module = new object(o_firstModule);
     }
     catch (error_already_set) {
@@ -50,7 +50,7 @@ int FuryScript::predict(const QVector<float> _observation)
     return 0;
 }
 
-int FuryScript::learn(const QVector<float> _observation, float _reward, int _done)
+int FuryScript::learn(const QVector<float> _observation, float _reward)
 {
     try
     {
@@ -62,7 +62,7 @@ int FuryScript::learn(const QVector<float> _observation, float _reward, int _don
         }
 
         object o_funcLearn = m_module->attr("learnFunc");
-        object result = o_funcLearn(pythonList, _reward, _done);
+        object result = o_funcLearn(pythonList, _reward);
 
         int resultAction = extract<int>(result);
         return resultAction;

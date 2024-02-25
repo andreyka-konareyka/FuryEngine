@@ -32,10 +32,9 @@ public:
      * \brief Обучение ИИ
      * \param[in] _observation - Новое наблюдение
      * \param[in] _reward - Награда за предыдущее действие
-     * \param[in] _done - Признак завершения игры
      * \return Возвращает предсказанное действие для нового наблюдения
      */
-    int learn(const QVector<float> _observation, float _reward, int _done);
+    int learn(const QVector<float> _observation, float _reward);
 
     //! Сохранение модели
     void saveModel();

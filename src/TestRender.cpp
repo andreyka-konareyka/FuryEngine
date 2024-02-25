@@ -20,7 +20,7 @@
 
 const bool NEED_DRAW_SHADOW = true;
 const bool NEED_DEBUG_SHADOW_MAP = false;
-#define NEED_LEARN 0
+#define NEED_LEARN 1
 
 
 const unsigned int SHADOW_WIDTH = 1024 * 2, SHADOW_HEIGHT = 1024 * 2;
@@ -1398,7 +1398,7 @@ void TestRender::updatePhysics()
     {
         qDebug() << "timeout";
         carReward = -50;
-        m_learnScript->learn(observation, carReward, 1);
+        m_learnScript->learn(observation, carReward);
         m_carObject->respawn();
 
         isFirst = true;
@@ -1410,7 +1410,7 @@ void TestRender::updatePhysics()
     {
         qDebug() << "back triggers error";
         carReward = -100;
-        m_learnScript->learn(observation, carReward, 1);
+        m_learnScript->learn(observation, carReward);
         m_carObject->respawn();
 
         isFirst = true;
@@ -1422,7 +1422,7 @@ void TestRender::updatePhysics()
     {
         qDebug() << "contact error";
         carReward = -100;
-        m_learnScript->learn(observation, carReward, 1);
+        m_learnScript->learn(observation, carReward);
         m_carObject->respawn();
 
         isFirst = true;
@@ -1432,7 +1432,7 @@ void TestRender::updatePhysics()
     }
     else
     {
-        int action = m_learnScript->learn(observation, carReward, 0);
+        int action = m_learnScript->learn(observation, carReward);
         m_carObject->setBotAction(action);
     }
 

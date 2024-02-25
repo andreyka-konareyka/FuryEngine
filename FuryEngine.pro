@@ -15,7 +15,7 @@ RCC_DIR = build
 
 INCLUDEPATH += \
     includes \
-    $$(LOCALAPPDATA)/Programs/Python/Python310/include
+    $$(LOCALAPPDATA)/Programs/Python/Python36/include
 
 
 # Выкрутасы из-за одинаковых названий библиотеки в debug и release
@@ -33,7 +33,8 @@ LIBS        += \
     -Llibs/assimp \
     -Llibs/boost \
     -Llibs/glew \
-    -L$$(LOCALAPPDATA)/Programs/Python/Python310/libs \
+    -L$$(LOCALAPPDATA)/Programs/Python/Python36 \
+    -L$$(LOCALAPPDATA)/Programs/Python/Python36/libs \
     -lglew32 \
     -lOpenGL32 \
     -lassimp \

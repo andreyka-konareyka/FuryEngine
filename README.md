@@ -1,10 +1,14 @@
 # FuryEngine
 3D-движок для обучения ИИ.
 В данный момент находится в разработке.
-### Готовность: 32.74%
+### Готовность: 37.29%
 
 Пока совмещён с приложением для обучения Автопилота для автомобиля
 ![FuryWindowWithLogo](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f5bf35a4-b0c9-421b-9fb4-3fd5de8ab188)
+### При обучении 2000 FPS (частота тиков)
+![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/74fab76a-29a5-4426-bc95-83dafd1cbbc2)
+![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/4de1f318-2382-41e8-adbd-e4284fd7d36d)
+### Графическая составляющая
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/988430e7-8262-4e0c-8df8-2440f7630e60)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f8c5af31-91b2-4b69-9a9c-79b5c36138c1)
 
@@ -24,8 +28,8 @@
 * Assimp (загрузка моделей)
 * stb_image (загрузка текстур)
 * ReactPhysics3D (симуляция физики)
-* python 3.10
-* boost/python (связывание python с C++)
+* Python 3.6 + TensorFlow 1.12
+* boost/python (связывание Python с C++)
 
 ### Старый интерфейс:
 
