@@ -368,22 +368,22 @@ void CarObject::onTrigger(int _number)
 {
     if (m_lastTriggerNumber == 0 && _number == 71)
     {
-        m_reward -= 20;
+        m_reward -= 0.2f;
         m_backTriggerCounter++;
     }
     else if (m_lastTriggerNumber == 71 && _number == 0)
     {
-        m_reward += 5;
+        m_reward += 0.19f;
         m_timeCounter = 0;
     }
     else if (m_lastTriggerNumber < _number)
     {
-        m_reward += 5;
+        m_reward += 0.19f;
         m_timeCounter = 0;
     }
     else if (m_lastTriggerNumber > _number)
     {
-        m_reward -= 20;
+        m_reward -= 0.2f;
         m_backTriggerCounter++;
     }
 
@@ -399,7 +399,7 @@ glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
     glm::vec3 speedGlm = getSpeed();
     rp3d::Vector3 speed(speedGlm.x / 23, speedGlm.y / 23, speedGlm.z / 23);
 
-    m_reward += speed.dot(localVector) * 0.01;
+    m_reward += speed.dot(localVector) * 0.1;
 
     return glm::vec3(localVector.x, localVector.y, localVector.z);
 }

@@ -95,6 +95,9 @@ public:
     inline void setNeedDebugRender(bool _need)
     { m_needDebugRender = _need; }
 
+    //! Сохранить историю счёта в играх
+    void saveScoreList();
+
 signals:
     void setWindowTitleSignal(const QString& _title);
     void setComputerLoadSignal(int _value);
@@ -226,6 +229,7 @@ private:
 
     FuryScript* m_learnScript;
     int m_learnSpeed;
+    QList<float> m_scoreList;
 
     //! Отображатель кодов русских клавиш на латинские
     FuryBaseLocalKeyMapper* m_russianKeyMapper;

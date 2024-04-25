@@ -17,8 +17,8 @@ session = tf.InteractiveSession()
 # Brain maps from observation to Q values for different actions.
 # Here it is a done using a multi layer perceptron with 2 hidden
 # layers
-brain = MLP([observation_size,], [200, 200, num_actions], 
-            [tf.tanh, tf.tanh, tf.identity])
+brain = MLP([observation_size,], [30, 20, num_actions], # [30, 20, num_actions]
+            [tf.nn.relu, tf.nn.relu, tf.identity])
 
 # The optimizer to use. Here we use RMSProp as recommended
 # by the publication
@@ -26,8 +26,8 @@ optimizer = tf.train.RMSPropOptimizer(learning_rate= 0.001, decay=0.9)
 
 # DiscreteDeepQ object
 current_controller = DiscreteDeepQ((observation_size,), num_actions, brain, optimizer, session,
-                                   discount_rate=0.99, exploration_period=5000, max_experience=10000, 
-                                   store_every_nth=4, train_every_nth=4)
+                                   discount_rate=0.99, exploration_period=5000, max_experience=3000, 
+                                   store_every_nth=1, train_every_nth=1, minibatch_size=32)
 
 
 if os.path.exists(MODEL_SAVE_DIR):
@@ -42,12 +42,16 @@ last_observation = None
 
 def learnFunc(_observation, _reward):
     global last_observation, last_action
-    _observation = np.array(_observation)
+    if _observation is not None:
+        _observation = np.array(_observation)
 
     if last_observation is not None:
         current_controller.store(last_observation, last_action, _reward, _observation)
 
-    action = current_controller.action(_observation)
+    if _observation is not None:
+        action = current_controller.action(_observation)
+    else:
+        action = 1
     # global_simulation.perform_action(action)
 
     with tf.device("/cpu:0"):

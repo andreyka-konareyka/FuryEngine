@@ -20,6 +20,11 @@ FuryMainWindow::~FuryMainWindow()
     delete m_ui;
 }
 
+void FuryMainWindow::closeEvent(QCloseEvent */*_event*/)
+{
+    m_ui->openGLWidget->saveScoreList();
+}
+
 void FuryMainWindow::onAboutQtSlot()
 {
     QMessageBox::aboutQt(this);

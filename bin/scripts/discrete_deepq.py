@@ -221,6 +221,7 @@ class DiscreteDeepQ(object):
 
             # sample experience.
             samples   = random.sample(range(len(self.experience)), self.minibatch_size)
+            # samples = range(len(self.experience) - self.minibatch_size, len(self.experience))
             samples   = [self.experience[i] for i in samples]
 
             # bach states
@@ -290,6 +291,10 @@ class DiscreteDeepQ(object):
             pickle.dump(state, f)
 
         print('done in {} s'.format(time.time() - saving_started))
+        print(list(map(lambda x: self.s.run(x), self.q_network.variables())))
+        print()
+        print()
+        print(self.s.run(self.action_scores, {self.observation: self.experience[-1][0][np.newaxis,:]}))
 
     def restore(self, save_dir, debug=False):
         # deepq state

@@ -23,6 +23,13 @@ public:
     //! Деструктор
     ~FuryMainWindow();
 
+protected:
+    /*!
+     * \brief Закрытие окна
+     * \param[in] _event - Событие
+     */
+    void closeEvent(QCloseEvent* _event);
+
 private slots:
     //! Слот Об Qt
     void onAboutQtSlot();

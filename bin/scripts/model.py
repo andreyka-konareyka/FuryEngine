@@ -25,7 +25,10 @@ class Layer(object):
                         -1.0 / math.sqrt(input_size), 1.0 / math.sqrt(input_size))
                 W_var = tf.get_variable(W_name, (input_size, output_size), initializer=W_initializer)
                 self.Ws.append(W_var)
-            self.b = tf.get_variable("b", (output_size,), initializer=tf.constant_initializer(0))
+            # self.b = tf.get_variable("b", (output_size,), initializer=tf.constant_initializer(0))
+            b_initializer =  tf.random_uniform_initializer(
+                        -1.0 / math.sqrt(output_size,), 1.0 / math.sqrt(output_size,))
+            self.b = tf.get_variable("b", (output_size,), initializer=b_initializer)
 
     def __call__(self, xs):
         if type(xs) != list:

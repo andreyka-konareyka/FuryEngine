@@ -182,6 +182,26 @@ void TestRender::saveLearnModel()
     m_learnScript->saveModel();
 }
 
+void TestRender::saveScoreList()
+{
+    saveLearnModel();
+
+    QFile file("scoresList.txt");
+
+    if (file.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&file);
+
+        foreach (float score, m_scoreList)
+        {
+            stream << score << '\n';
+        }
+
+        file.close();
+        qDebug() << "score list saved";
+    }
+}
+
 void TestRender::mouseMoveEvent(QMouseEvent* _event)
 {
     if (m_testWorld->camera() == m_cameras[1])
@@ -1391,48 +1411,51 @@ void TestRender::updatePhysics()
         return;
     }
 
-    float carReward = (m_carObject->getReward() - 0.01);
+    float carReward = (m_carObject->getReward() - 0.001);
     score += carReward;
 
     if (!m_carObject->checkTimeCounter())
     {
         qDebug() << "timeout";
-        carReward = -50;
-        m_learnScript->learn(observation, carReward);
+        carReward = -0.15;
+        m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
+        m_scoreList.append(score);
         score = 0;
         gameCounter++;
     }
     else if (!m_carObject->checkBackTriggerCounter())
     {
         qDebug() << "back triggers error";
-        carReward = -100;
-        m_learnScript->learn(observation, carReward);
+        carReward = -0.3;
+        m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
+        m_scoreList.append(score);
         score = 0;
         gameCounter++;
     }
     else if (!m_carObject->checkHasContact())
     {
         qDebug() << "contact error";
-        carReward = -100;
-        m_learnScript->learn(observation, carReward);
+        carReward = -0.3;
+        m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
+        m_scoreList.append(score);
         score = 0;
         gameCounter++;
     }
     else
     {
-        int action = m_learnScript->learn(observation, carReward);
+        int action = m_learnScript->learn(observation, carReward, false);
         m_carObject->setBotAction(action);
     }
 

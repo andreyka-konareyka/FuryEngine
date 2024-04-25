@@ -50,7 +50,7 @@ int FuryScript::predict(const QVector<float> _observation)
     return 0;
 }
 
-int FuryScript::learn(const QVector<float> _observation, float _reward)
+int FuryScript::learn(const QVector<float> _observation, float _reward, bool _stop)
 {
     try
     {
@@ -61,8 +61,19 @@ int FuryScript::learn(const QVector<float> _observation, float _reward)
             pythonList.append(_observation[i]);
         }
 
+        object inputObservation;
+
+        if (!_stop)
+        {
+            inputObservation = pythonList;
+        }
+        else
+        {
+            inputObservation = object();
+        }
+
         object o_funcLearn = m_module->attr("learnFunc");
-        object result = o_funcLearn(pythonList, _reward);
+        object result = o_funcLearn(inputObservation, _reward);
 
         int resultAction = extract<int>(result);
         return resultAction;
