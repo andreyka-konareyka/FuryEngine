@@ -483,6 +483,7 @@ void TestRender::init() {
     m_textureManager->addTexture("textures/box_texture3_orig.png", "Diffuse_numbersBoxTexture");
     m_textureManager->addTexture("textures/carBody.png", "carBody");
     m_textureManager->addTexture("textures/rayCastBall.png", "Diffuse_rayCastBall");
+    m_textureManager->addTexture("textures/greenRay.png", "Diffuse_greenRay");
     m_textureManager->addTexture("textures/box_texture2.png", "Diffuse_raceWall");
     m_textureManager->addTexture("textures/asphalt.png", "Diffuse_asphalt");
     m_textureManager->addTexture("textures/redCheckBox.png", "redCheckBox");
@@ -1411,13 +1412,12 @@ void TestRender::updatePhysics()
         return;
     }
 
-    float carReward = (m_carObject->getReward() - 0.001);
-    score += carReward;
+    float carReward = (m_carObject->getReward());
 
     if (!m_carObject->checkTimeCounter())
     {
         qDebug() << "timeout";
-        carReward = -0.15;
+        carReward = -1;
         m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
@@ -1427,10 +1427,10 @@ void TestRender::updatePhysics()
         score = 0;
         gameCounter++;
     }
-    else if (!m_carObject->checkBackTriggerCounter())
+    if (!m_carObject->checkBackTriggerCounter())
     {
         qDebug() << "back triggers error";
-        carReward = -0.3;
+        carReward -= 0.1;
         m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
@@ -1443,7 +1443,7 @@ void TestRender::updatePhysics()
     else if (!m_carObject->checkHasContact())
     {
         qDebug() << "contact error";
-        carReward = -0.3;
+        carReward -= 0.1;
         m_learnScript->learn(observation, carReward, true);
         m_carObject->respawn();
 
@@ -1455,6 +1455,7 @@ void TestRender::updatePhysics()
     }
     else
     {
+        score += carReward;
         int action = m_learnScript->learn(observation, carReward, false);
         m_carObject->setBotAction(action);
     }

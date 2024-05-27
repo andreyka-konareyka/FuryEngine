@@ -60,6 +60,9 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
         {
             FuryMaterial* mat = materialManager->createMaterial("rayCastBall");
             mat->setDiffuseTexture("Diffuse_rayCastBall");
+
+            mat = materialManager->createMaterial("greenRay");
+            mat->setDiffuseTexture("Diffuse_greenRay");
         }
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
@@ -320,15 +323,30 @@ QVector<float> CarObject::getRays()
 
         // Create an instance of your callback class
         FuryRaycastCallback callbackObject;
-        //std::cout << "raycast " << i << "\n";
+
+        {
+            callbackObject.m_needTriggerNumber = (m_lastTriggerNumber + 1) % 72;
+        }
 
         // Raycast test
         world()->physicsWorld()->raycast(ray, &callbackObject);
 
         result.append(callbackObject.m_lastHitFraction);
+        result.append((callbackObject.m_needTriggered) ? 1.0f : -1.0f);
 
         glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
         m_objectsDebugRays[i]->setPosition(tmp4);
+
+        {
+            if (callbackObject.m_needTriggered)
+            {
+                m_objectsDebugRays[i]->setMaterialName("greenRay");
+            }
+            else
+            {
+                m_objectsDebugRays[i]->setMaterialName("rayCastBall");
+            }
+        }
     }
 
     return result;
@@ -368,22 +386,22 @@ void CarObject::onTrigger(int _number)
 {
     if (m_lastTriggerNumber == 0 && _number == 71)
     {
-        m_reward -= 0.2f;
+        m_reward -= 0.1f;
         m_backTriggerCounter++;
     }
     else if (m_lastTriggerNumber == 71 && _number == 0)
     {
-        m_reward += 0.19f;
+        m_reward += 0.1f;
         m_timeCounter = 0;
     }
     else if (m_lastTriggerNumber < _number)
     {
-        m_reward += 0.19f;
+        m_reward += 0.1f;
         m_timeCounter = 0;
     }
     else if (m_lastTriggerNumber > _number)
     {
-        m_reward -= 0.2f;
+        m_reward -= 0.1f;
         m_backTriggerCounter++;
     }
 
@@ -399,7 +417,15 @@ glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
     glm::vec3 speedGlm = getSpeed();
     rp3d::Vector3 speed(speedGlm.x / 23, speedGlm.y / 23, speedGlm.z / 23);
 
-    m_reward += speed.dot(localVector) * 0.1;
+    float tmp = speed.dot(localVector) * 0.05;
+    if (tmp < 0)
+    {
+        m_reward += tmp * 1.2;
+    }
+    else
+    {
+        m_reward += tmp;
+    }
 
     return glm::vec3(localVector.x, localVector.y, localVector.z);
 }
@@ -453,7 +479,7 @@ void CarObject::respawn()
 
 bool CarObject::checkTimeCounter()
 {
-    if (m_timeCounter < 8)
+    if (m_timeCounter < 18)
     {
         m_timeCounter += 1.0f / 60;
         return true;
@@ -466,17 +492,25 @@ bool CarObject::checkTimeCounter()
 
 bool CarObject::checkBackTriggerCounter()
 {
-    if (m_backTriggerCounter < 2)
+    if (m_backTriggerCounter < 3)
     {
         return true;
     }
 
+    m_backTriggerCounter = 0;
     return false;
 }
 
 bool CarObject::checkHasContact()
 {
-    return !m_hasContact;
+    if (m_hasContact)
+    {
+        m_hasContact = false;
+        return false;
+    }
+
+    return true;
+//    return !m_hasContact;
 }
 
 void CarObject::Setup_physics(reactphysics3d::BodyType type)
