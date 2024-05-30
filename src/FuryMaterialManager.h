@@ -47,11 +47,26 @@ public:
     FuryMaterial* materialByName(const QString& _name);
 
     /*!
+     * \brief Удаление материала
+     * \param[in] _name - Название
+     */
+    void deleteMaterial(const QString& _name);
+
+    /*!
      * \brief Проверка существования материала
      * \param[in] _name - Название
      * \return Возвращает признак существования такого материала
      */
     bool materialExist(const QString& _name);
+
+    /*!
+     * \brief Получение названий всех материалов
+     * \return Возвращает список наименований
+     */
+    QList<QString> allMaterialNames() const;
+
+    //! Сохранение материалов
+    void saveMaterials();
 
 private:
     //! Конструктор

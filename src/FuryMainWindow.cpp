@@ -2,6 +2,7 @@
 #include "ui_FuryMainWindow.h"
 
 #include "FuryLogger.h"
+#include "FuryMaterialEditDialog.h"
 
 #include <QMessageBox>
 #include <QFile>
@@ -124,6 +125,12 @@ void FuryMainWindow::onNeedDebugRenderSlot()
     m_ui->openGLWidget->setNeedDebugRender(m_ui->debugRenderCheckBox->isChecked());
 }
 
+void FuryMainWindow::onMaterialEditSlot()
+{
+    FuryMaterialEditDialog dialog(this);
+    dialog.exec();
+}
+
 void FuryMainWindow::prepareUi()
 {
     m_ui->setupUi(this);
@@ -174,6 +181,9 @@ void FuryMainWindow::initConnections()
 
     connect(m_ui->debugRenderCheckBox, &QCheckBox::stateChanged,
             this, &FuryMainWindow::onNeedDebugRenderSlot);
+
+    connect(m_ui->pbMaterialEdit, &QPushButton::clicked,
+            this, &FuryMainWindow::onMaterialEditSlot);
 }
 
 void FuryMainWindow::loadStyle()

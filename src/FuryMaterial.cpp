@@ -92,6 +92,35 @@ void FuryMaterial::setShaderMaterial(Shader *_shader)
     }
 }
 
+QJsonObject FuryMaterial::toJson() const
+{
+    QJsonObject result;
+
+    result["diffuseColor"] = QString("(%1, %2, %3)")
+                                    .arg(m_diffuseColor.r)
+                                    .arg(m_diffuseColor.g)
+                                    .arg(m_diffuseColor.b);
+    result["specularColor"] = QString("(%1, %2, %3)")
+                                    .arg(m_specularColor.r)
+                                    .arg(m_specularColor.g)
+                                    .arg(m_specularColor.b);
+    result["ambientColor"] = QString("(%1, %2, %3)")
+                                    .arg(m_ambientColor.r)
+                                    .arg(m_ambientColor.g)
+                                    .arg(m_ambientColor.b);
+
+    result["twoSided"] = m_twoSided;
+    result["shadingModel"] = m_shadingModel;
+    result["blendFunc"] = m_blendFunc;
+    result["opacity"] = m_opacity;
+
+    result["diffuseTexture"] = m_diffuseTexture;
+    result["specularTexture"] = m_specularTexture;
+    result["normalTexture"] = m_normalTexture;
+
+    return result;
+}
+
 FuryMaterial *FuryMaterial::createFromAssimp(const aiMaterial *_assimpMaterial,
                                              const QString &_path)
 {

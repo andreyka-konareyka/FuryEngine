@@ -5,6 +5,9 @@
 #include "FuryMaterial.h"
 #include "FuryPbrMaterial.h"
 
+#include <QFile>
+#include <QJsonDocument>
+
 FuryMaterialManager* FuryMaterialManager::s_instance = nullptr;
 
 
@@ -100,7 +103,47 @@ FuryMaterial *FuryMaterialManager::materialByName(const QString &_name)
     return m_defaultMaterial;
 }
 
+void FuryMaterialManager::deleteMaterial(const QString &_name)
+{
+    if (!m_materials.contains(_name))
+    {
+        Debug(ru("[ ВНИМАНИЕ ] Попытка удаления несуществующего материала (%1)")
+              .arg(_name));
+        return;
+    }
+
+    FuryMaterial* material = m_materials.value(_name);
+    delete material;
+    m_materials.remove(_name);
+}
+
 bool FuryMaterialManager::materialExist(const QString &_name)
 {
     return m_materials.contains(_name);
+}
+
+QList<QString> FuryMaterialManager::allMaterialNames() const
+{
+    return m_materials.keys();
+}
+
+void FuryMaterialManager::saveMaterials()
+{
+    for (QMap<QString, FuryMaterial*>::Iterator iter = m_materials.begin(); iter != m_materials.end(); ++iter)
+    {
+        if (iter.value() != nullptr)
+        {
+            QFile file("tmpFolder/" + iter.key() + ".json");
+
+            if (!file.open(QIODevice::WriteOnly))
+            {
+                qDebug() << ru("Не удалось сохранить файл (%1)").arg(iter.key());
+                continue;
+            }
+
+            QJsonDocument document(iter.value()->toJson());
+            file.write(document.toJson());
+            file.close();
+        }
+    }
 }

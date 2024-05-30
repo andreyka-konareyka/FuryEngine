@@ -1,6 +1,7 @@
 #ifndef FURYMATERIAL_H
 #define FURYMATERIAL_H
 
+#include <QJsonObject>
 #include <QString>
 #include <QList>
 #include <QPair>
@@ -40,23 +41,54 @@ public:
 
     /*!
      * \brief Установка текстуры отражений
-     * \param! _specularTexture - Название текстуры отражений
+     * \param[in] _specularTexture - Название текстуры отражений
      */
     inline void setSpecularTexture(const QString& _specularTexture)
     { m_specularTexture = _specularTexture; }
 
     /*!
      * \brief Установка текстуры нормалей
-     * \param! _normalTexture - Название текстуры нормалей
+     * \param[in] _normalTexture - Название текстуры нормалей
      */
     inline void setNormalTexture(const QString& _normalTexture)
     { m_normalTexture = _normalTexture; }
+
+
+    inline const QString& diffuseTexture() const
+    { return m_diffuseTexture; }
+
+    inline const QString& specularTexture() const
+    { return m_specularTexture; }
+
+    inline const QString& normalTexture() const
+    { return m_normalTexture; }
+
+    inline const glm::vec3& diffuseColor() const
+    { return m_diffuseColor; }
+
+    inline void setDiffuseColor(const glm::vec3& _color)
+    { m_diffuseColor = _color; }
+
+    inline const glm::vec3& specularColor() const
+    { return m_specularColor; }
+
+    inline bool twoSided() const
+    { return m_twoSided; }
+
+    inline float opacity() const
+    { return m_opacity; }
 
     /*!
      * \brief Установить материал в шейдер
      * \param[in] _shader - Шейдер
      */
     virtual void setShaderMaterial(Shader* _shader);
+
+    /*!
+     * \brief Перевод в JSON объект
+     * \return Возвращает JSON объект
+     */
+    virtual QJsonObject toJson() const;
 
     /*!
      * \brief Создание материала по материалу из Assimp

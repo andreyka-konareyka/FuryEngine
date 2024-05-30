@@ -20,7 +20,7 @@
 
 const bool NEED_DRAW_SHADOW = true;
 const bool NEED_DEBUG_SHADOW_MAP = false;
-#define NEED_LEARN 1
+#define NEED_LEARN 0
 
 
 const unsigned int SHADOW_WIDTH = 1024 * 2, SHADOW_HEIGHT = 1024 * 2;
@@ -51,7 +51,12 @@ TestRender::TestRender(QWidget *_parent) :
     m_materialManager(FuryMaterialManager::createInstance()),
     m_needDebugRender(false),
     m_updateAccumulator(0),
+
+    #if NEED_LEARN == 1
     m_learnScript(new FuryScript),
+    #else
+    m_learnScript(nullptr),
+    #endif
     m_learnSpeed(1),
     m_russianKeyMapper(new FuryRussianLocalKeyMapper)
 {
@@ -179,7 +184,9 @@ void TestRender::setCarSpringK(float _k)
 
 void TestRender::saveLearnModel()
 {
+#if NEED_LEARN == 1
     m_learnScript->saveModel();
+#endif
 }
 
 void TestRender::saveScoreList()
@@ -345,8 +352,9 @@ void TestRender::init() {
     // МАШИНА
     //
     m_testMaterialShader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
+    m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
 
-    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 30), m_testMaterialShader);
+    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 30), m_pbrShader);
     m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
     m_testWorld->addObject(m_carObject);
 
@@ -390,7 +398,6 @@ void TestRender::init() {
 
     m_skyboxShader = new Shader("skybox.vs", "skybox.fs");
     m_particleShader = new Shader("particle.vs", "particle.fs");
-    m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
     m_backgroundShader = new Shader("shaders/pbr/2.2.2.background.vs", "shaders/pbr/2.2.2.background.fs");
     m_simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
     m_bigFloorShader = new Shader("shaders/bigFloorShader.vs", "shaders/bigFloorShader.frag");
@@ -1632,11 +1639,11 @@ void TestRender::loadPBR()
     m_pbrShader->setInt("irradianceMap", 0);
     m_pbrShader->setInt("prefilterMap", 1);
     m_pbrShader->setInt("brdfLUT", 2);
-    m_pbrShader->setInt("albedoMap", 3);
-    m_pbrShader->setInt("normalMap", 4);
-    m_pbrShader->setInt("metallicMap", 5);
-    m_pbrShader->setInt("roughnessMap", 6);
-    m_pbrShader->setInt("aoMap", 7);
+    m_pbrShader->setInt("material.albedoMap", 3);
+    m_pbrShader->setInt("material.normalMap", 4);
+    m_pbrShader->setInt("material.metallicMap", 5);
+    m_pbrShader->setInt("material.roughnessMap", 6);
+    m_pbrShader->setInt("material.aoMap", 7);
     m_pbrShader->setInt("shadowMap", 8);
     glUseProgram(0);
 }

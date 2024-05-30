@@ -51,6 +51,7 @@ SOURCES += \
     src/FuryLogger.cpp \
     src/FuryMainWindow.cpp \
     src/FuryMaterial.cpp \
+    src/FuryMaterialEditDialog.cpp \
     src/FuryMaterialManager.cpp \
     src/FuryMesh.cpp \
     src/FuryModel.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     src/FuryLogger.h \
     src/FuryMainWindow.h \
     src/FuryMaterial.h \
+    src/FuryMaterialEditDialog.h \
     src/FuryMaterialManager.h \
     src/FuryMesh.h \
     src/FuryModel.h \
@@ -98,7 +100,8 @@ HEADERS += \
     src/TestRender.h
 
 FORMS += \
-    src/FuryMainWindow.ui
+    src/FuryMainWindow.ui \
+    src/FuryMaterialEditDialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

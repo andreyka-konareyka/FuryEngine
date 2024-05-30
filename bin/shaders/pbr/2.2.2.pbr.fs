@@ -5,12 +5,28 @@ in vec3 WorldPos;
 in vec3 Normal;
 in vec4 FragPosLightSpace;
 
+
 // material parameters
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D aoMap;
+struct Material {
+    sampler2D albedoMap;
+    sampler2D normalMap;
+    sampler2D metallicMap;
+    sampler2D roughnessMap;
+    sampler2D aoMap;
+
+    int albedoEnabled;
+    int normalEnabled;
+    int metallicEnabled;
+    int roughnessEnabled;
+    int aoEnabled;
+
+    vec3 albedoColor;
+    float metallic;
+    float roughness;
+    float ao;
+    float opacity;
+};
+uniform Material material;
 
 // IBL
 uniform samplerCube irradianceMap;
@@ -29,7 +45,7 @@ uniform vec3 camPos;
 
 struct DirLight {
     vec3 direction;
-	
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -37,6 +53,17 @@ struct DirLight {
 uniform DirLight dirLight;
 
 const float PI = 3.14159265359;
+
+
+
+//! --- Получение данных материала ---
+vec4 getAlbedo(vec2 texCoords);
+vec3 getNormal(vec2 texCoords);
+vec4 getMetallic(vec2 texCoords);
+vec4 getRoughness(vec2 texCoords);
+vec4 getAo(vec2 texCoords);
+
+
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
@@ -44,19 +71,26 @@ const float PI = 3.14159265359;
 // technique somewhere later in the normal mapping tutorial.
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
+    if (material.normalEnabled != 0)
+    {
+        vec3 tangentNormal = getNormal(TexCoords).xyz * 2.0 - 1.0;
 
-    vec3 Q1  = dFdx(WorldPos);
-    vec3 Q2  = dFdy(WorldPos);
-    vec2 st1 = dFdx(TexCoords);
-    vec2 st2 = dFdy(TexCoords);
+        vec3 Q1  = dFdx(WorldPos);
+        vec3 Q2  = dFdy(WorldPos);
+        vec2 st1 = dFdx(TexCoords);
+        vec2 st2 = dFdy(TexCoords);
 
-    vec3 N   = normalize(Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
+        vec3 N   = normalize(Normal);
+        vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+        vec3 B  = -normalize(cross(N, T));
+        mat3 TBN = mat3(T, B, N);
 
-    return normalize(TBN * tangentNormal);
+        return normalize(TBN * tangentNormal);
+    }
+    else
+    {
+        return normalize(Normal);
+    }
 }
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -149,12 +183,12 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 }
 // ----------------------------------------------------------------------------
 void main()
-{		
+{
     // material properties
-    vec3 albedo = pow(texture(albedoMap, TexCoords).rgb, vec3(2.2));
-    float metallic = texture(metallicMap, TexCoords).r;
-    float roughness = texture(roughnessMap, TexCoords).r;
-    float ao = texture(aoMap, TexCoords).r;
+    vec3 albedo = pow(getAlbedo(TexCoords).rgb, vec3(2.2));
+    float metallic = getMetallic(TexCoords).r;
+    float roughness = getRoughness(TexCoords).r;
+    float ao = getAo(TexCoords).r;
        
     // input lighting data
     vec3 N = getNormalFromMap();
@@ -195,7 +229,7 @@ void main()
         // multiply kD by the inverse metalness such that only non-metals 
         // have diffuse lighting, or a linear blend if partly metal (pure metals
         // have no diffuse light).
-        kD *= 1.0 - metallic;	                
+        kD *= 1.0 - metallic;
             
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);        
@@ -209,7 +243,7 @@ void main()
     
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	  
+    kD *= 1.0 - metallic;
     
     vec3 irradiance = texture(irradianceMap, N).rgb;
     vec3 diffuse      = irradiance * albedo;
@@ -222,15 +256,74 @@ void main()
 
     vec3 ambient = (kD * diffuse + specular) * ao;
     
-	float shadow = ShadowCalculation(FragPosLightSpace);
-	shadow *= 0.75;
-    vec3 color = ambient + Lo;
-	color = color * (1.0 - shadow);
+    float shadow = ShadowCalculation(FragPosLightSpace);
+    shadow *= 0.75;
+    vec4 color = vec4(ambient + Lo, getAlbedo(TexCoords).a);
+    color.rgb = color.rgb * (1.0 - shadow);
 
     // HDR tonemapping
-    color = color / (color + vec3(1.0));
+    color.rgb = color.rgb / (color.rgb + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    color.rgb = pow(color.rgb, vec3(1.0/2.2));
 
-    FragColor = vec4(color , 1.0);
+    FragColor = color;
+    //FragColor = vec4(color , 1.0);
+}
+
+
+
+
+//! --- Получение данных материала ---
+
+vec4 getAlbedo(vec2 texCoords)
+{
+    if (material.albedoEnabled == 0)
+    {
+        return vec4(material.albedoColor, material.opacity);
+    }
+
+    return texture(material.albedoMap, texCoords);
+}
+
+vec3 getNormal(vec2 texCoords)
+{
+    if (material.normalEnabled == 0)
+    {
+        return vec3(0.5, 0.5, 1);
+    }
+
+    return texture(material.normalMap, texCoords).xyz;
+}
+
+vec4 getMetallic(vec2 texCoords)
+{
+    if (material.metallicEnabled == 0)
+    {
+        float m = material.metallic;
+        return vec4(m, m, m, 1);
+    }
+
+    return texture(material.metallicMap, texCoords);
+}
+
+vec4 getRoughness(vec2 texCoords)
+{
+    if (material.roughnessEnabled == 0)
+    {
+        float r = material.roughness;
+        return vec4(r, r, r, 1);
+    }
+
+    return texture(material.roughnessMap, texCoords);
+}
+
+vec4 getAo(vec2 texCoords)
+{
+    if (material.aoEnabled == 0)
+    {
+        float ao = material.ao;
+        return vec4(ao, ao, ao, 1);
+    }
+
+    return texture(material.aoMap, texCoords);
 }

@@ -79,6 +79,9 @@ private slots:
     //! Слот необходимости отображения отладочных объектов
     void onNeedDebugRenderSlot();
 
+    //! Слот открытия редактора материалов
+    void onMaterialEditSlot();
+
 private:
     //! Подготовка интерфейса
     void prepareUi();

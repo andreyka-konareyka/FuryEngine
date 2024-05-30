@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "FuryLogger.h"
 #include "FuryMaterial.h"
+#include "FuryPbrMaterial.h"
 #include "FuryMaterialManager.h"
 
 #include <QFileInfo>
@@ -260,13 +261,19 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
     // Обработка материала
     FuryMaterialManager* materialManager = FuryMaterialManager::instance();
     aiMaterial* material = _scene->mMaterials[_mesh->mMaterialIndex];
-    QString materialName = "Model:" + ru(material->GetName().C_Str());
+    QString materialName = "Model." + ru(material->GetName().C_Str());
 
     if (!materialManager->materialExist(materialName))
     {
         FuryMaterial* modelMaterial = FuryMaterial::createFromAssimp(material, m_directory);
-        FuryMaterial* material = materialManager->createMaterial(materialName);
-        *material = *modelMaterial;
+//        FuryMaterial* material = materialManager->createMaterial(materialName);
+//        *material = *modelMaterial;
+
+        FuryPbrMaterial* pbrMat = FuryPbrMaterial::createFromMaterial(modelMaterial);
+        FuryPbrMaterial* mat = materialManager->createPbrMaterial(materialName);
+        *mat = *pbrMat;
+        delete pbrMat;
+        delete modelMaterial;
     }
 
     FuryMaterial* furyMaterial = materialManager->materialByName(materialName);

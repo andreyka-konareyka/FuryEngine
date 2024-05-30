@@ -48,7 +48,7 @@
        </property>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0,0,0">
         <property name="leftMargin">
          <number>6</number>
         </property>
@@ -290,6 +290,13 @@
          <widget class="QPushButton" name="saveModelButton">
           <property name="text">
            <string>Сохранить модель</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbMaterialEdit">
+          <property name="text">
+           <string>Редактор материалов</string>
           </property>
          </widget>
         </item>
