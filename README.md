@@ -9,7 +9,8 @@
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/74fab76a-29a5-4426-bc95-83dafd1cbbc2)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/4de1f318-2382-41e8-adbd-e4284fd7d36d)
 ### Графическая составляющая
-![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/988430e7-8262-4e0c-8df8-2440f7630e60)
+![2](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/c093d1cd-d4d2-4882-b146-627a8567a61f)
+![1](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/badb4fe3-8dbf-4395-afdd-3b23d26412a2)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f8c5af31-91b2-4b69-9a9c-79b5c36138c1)
 
 ## Возможности
@@ -33,6 +34,7 @@
 
 ### Старый интерфейс:
 
+![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/988430e7-8262-4e0c-8df8-2440f7630e60)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/d94e6c3a-0da6-4c37-a7d7-6fd3c8f08cf0)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f12d42f9-73e7-48fd-8768-f887c6447573)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/c113a710-815a-4cea-a08f-87087057195d)
