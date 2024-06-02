@@ -91,6 +91,9 @@ TestRender::~TestRender()
         m_eventListener = nullptr;
     }
 
+    Debug(ru("Удаление менеджера материалов..."));
+    FuryMaterialManager::deleteInstance();
+
     Debug(ru("Остановка текстурного менеджера..."));
     m_textureManager->stopLoopAndWait();
     FuryTextureManager::deleteInstance();
@@ -98,9 +101,6 @@ TestRender::~TestRender()
     Debug(ru("Остановка менеджера моделей..."));
     m_modelManager->stopLoopAndWait();
     FuryModelManager::deleteInstance();
-
-    Debug(ru("Удаление менеджера материалов..."));
-    FuryMaterialManager::deleteInstance();
 }
 
 void TestRender::initializeGL()
@@ -167,7 +167,7 @@ void TestRender::setCameraZoomValue(int _value)
     }
 }
 
-void TestRender::setCarCameraPos(int _x, int _y)
+void TestRender::setCarCameraPos(float _x, float _y)
 {
     m_carObject->setLocalCameraPosition(_x, _y);
 }

@@ -28,11 +28,8 @@ void FuryMaterialEditDialog::onMaterialChoiceSlot()
 
     if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(m_currentMaterial); pbr != NULL)
     {
-        qDebug() << pbr->albedoTexture();
-
         const glm::vec3& rawColor = pbr->albedoColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
-        qDebug() << color;
 
         m_ui->slMetallic->setValue(pbr->metallic() * 100);
         m_ui->slRough->setValue(pbr->roughness() * 100);
@@ -40,10 +37,8 @@ void FuryMaterialEditDialog::onMaterialChoiceSlot()
     }
     else if (m_currentMaterial != NULL)
     {
-        qDebug() << m_currentMaterial->diffuseTexture();
         const glm::vec3& rawColor = m_currentMaterial->diffuseColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
-        qDebug() << color;
 
     }
 
@@ -61,22 +56,21 @@ void FuryMaterialEditDialog::onColorClickedSlot()
 
     if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(m_currentMaterial); pbr != NULL)
     {
-        qDebug() << pbr->albedoTexture();
-
         const glm::vec3& rawColor = pbr->albedoColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
-        qDebug() << color;
     }
     else if (m_currentMaterial != NULL)
     {
-        qDebug() << m_currentMaterial->diffuseTexture();
         const glm::vec3& rawColor = m_currentMaterial->diffuseColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
-        qDebug() << color;
 
     }
     QColorDialog dialog(color);
-    dialog.exec();
+    if (dialog.exec() == QDialog::Rejected)
+    {
+        return;
+    }
+
     color = dialog.selectedColor();
 
     if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(m_currentMaterial); pbr != NULL)

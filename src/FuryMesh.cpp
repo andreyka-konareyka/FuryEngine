@@ -2,15 +2,16 @@
 
 #include "Shader.h"
 #include "FuryMaterial.h"
+#include "FuryMaterialManager.h"
 
 
 FuryMesh::FuryMesh(const QVector<Vertex> &_vertices,
                    const QVector<unsigned int> &_indices,
-                   FuryMaterial *_material,
+                   const QString &_material,
                    const glm::mat4 &_transformation) :
     m_vertices(_vertices),
     m_indices(_indices),
-    m_material(_material),
+    m_materialName(_material),
     m_transformation(_transformation)
 {
 
@@ -21,7 +22,9 @@ void FuryMesh::draw(Shader *_shader, FuryMaterial *_material)
     // Установка материала
     if (_material == nullptr)
     {
-        m_material->setShaderMaterial(_shader);
+        FuryMaterialManager* manager = FuryMaterialManager::instance();
+        FuryMaterial* myMaterial = manager->materialByName(m_materialName);
+        myMaterial->setShaderMaterial(_shader);
     }
     else
     {

@@ -91,6 +91,13 @@ public:
     virtual QJsonObject toJson() const;
 
     /*!
+     * \brief Перевод из JSON объекта
+     * \param[in] _object - JSON объект
+     * \return Возвращает материал
+     */
+    static FuryMaterial* fromJson(const QJsonObject& _object);
+
+    /*!
      * \brief Создание материала по материалу из Assimp
      * \param[in] _assimpMaterial - Материал Assimp
      * \return Возвращает материал по материалу из Assimp

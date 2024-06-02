@@ -28,7 +28,7 @@ const GLfloat YAW = -90.0f;
 const GLfloat PITCH = 0.0f;
 const GLfloat SPEED = 8.0f; // 2.0f - default
 const GLfloat SENSITIVTY = 0.25f;
-const GLfloat ZOOM = 100.0f;
+const GLfloat ZOOM = 90.0f;
 
 
 //! Класс камеры игрового пространства

@@ -6,6 +6,8 @@
 #include "Shader.h"
 #include "FuryTextureManager.h"
 
+#include <QDir>
+
 FuryMaterial::FuryMaterial() :
     FuryMaterial(glm::vec3(1, 1, 1),
                  glm::vec3(1, 1, 1))
@@ -95,6 +97,7 @@ void FuryMaterial::setShaderMaterial(Shader *_shader)
 QJsonObject FuryMaterial::toJson() const
 {
     QJsonObject result;
+    result["materialType"] = "FuryMaterial";
 
     result["diffuseColor"] = QString("(%1, %2, %3)")
                                     .arg(m_diffuseColor.r)
@@ -117,6 +120,70 @@ QJsonObject FuryMaterial::toJson() const
     result["diffuseTexture"] = m_diffuseTexture;
     result["specularTexture"] = m_specularTexture;
     result["normalTexture"] = m_normalTexture;
+
+    FuryTextureManager* manager = FuryTextureManager::instance();
+    QDir dir = QDir::current();
+    result["diffusePath"] = dir.relativeFilePath(manager->pathByName(m_diffuseTexture));
+    result["specularPath"] = dir.relativeFilePath(manager->pathByName(m_specularTexture));
+    result["normalPath"] = dir.relativeFilePath(manager->pathByName(m_normalTexture));
+
+    return result;
+}
+
+FuryMaterial *FuryMaterial::fromJson(const QJsonObject &_object)
+{
+    FuryMaterial* result = new FuryMaterial;
+
+    QString diffuseColor = _object["diffuseColor"].toString();
+    diffuseColor.remove("(");
+    diffuseColor.remove(")");
+    diffuseColor.remove(" ");
+    float r1 = diffuseColor.section(",", 0, 0).toFloat();
+    float g1 = diffuseColor.section(",", 1, 1).toFloat();
+    float b1 = diffuseColor.section(",", 2, 2).toFloat();
+    result->setDiffuseColor(glm::vec3(r1, g1, b1));
+
+    QString specularColor = _object["specularColor"].toString();
+    specularColor.remove("(");
+    specularColor.remove(")");
+    specularColor.remove(" ");
+    float r2 = specularColor.section(",", 0, 0).toFloat();
+    float g2 = specularColor.section(",", 1, 1).toFloat();
+    float b2 = specularColor.section(",", 2, 2).toFloat();
+    result->m_specularColor = glm::vec3(r2, g2, b2);
+
+    QString ambientColor = _object["ambientColor"].toString();
+    ambientColor.remove("(");
+    ambientColor.remove(")");
+    ambientColor.remove(" ");
+    float r3 = ambientColor.section(",", 0, 0).toFloat();
+    float g3 = ambientColor.section(",", 1, 1).toFloat();
+    float b3 = ambientColor.section(",", 2, 2).toFloat();
+    result->m_ambientColor = glm::vec3(r3, g3, b3);
+
+    result->m_twoSided = _object["twoSided"].toBool();
+    result->m_shadingModel = _object["shadingModel"].toInt();
+    result->m_blendFunc = _object["blendFunc"].toInt();
+    result->m_opacity = _object["opacity"].toDouble();
+
+    result->m_diffuseTexture = _object["diffuseTexture"].toString();
+    result->m_specularTexture = _object["specularTexture"].toString();
+    result->m_normalTexture = _object["normalTexture"].toString();
+
+    FuryTextureManager* manager = FuryTextureManager::instance();
+
+    if (QString path = _object["diffusePath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->m_diffuseTexture);
+    }
+    if (QString path = _object["specularPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->m_specularTexture);
+    }
+    if (QString path = _object["normalPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->m_normalTexture);
+    }
 
     return result;
 }

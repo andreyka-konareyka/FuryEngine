@@ -60,6 +60,13 @@ public:
     */
     const FuryTexture& textureByPath(const QString &_path) const;
 
+    /*!
+     * \brief Получить путь по названию
+     * \param[in] _name - Название
+     * \return Возвращает путь
+     */
+    QString pathByName(const QString& _name) const;
+
     //! Загрузить часть текстур
     void loadTexturePart();
 

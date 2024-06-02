@@ -265,18 +265,19 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
 
     if (!materialManager->materialExist(materialName))
     {
-        FuryMaterial* modelMaterial = FuryMaterial::createFromAssimp(material, m_directory);
-//        FuryMaterial* material = materialManager->createMaterial(materialName);
-//        *material = *modelMaterial;
+        if (!materialManager->tryLoadMaterial(materialName))
+        {
+            FuryMaterial* modelMaterial = FuryMaterial::createFromAssimp(material, m_directory);
+//            FuryMaterial* material = materialManager->createMaterial(materialName);
+//            *material = *modelMaterial;
 
-        FuryPbrMaterial* pbrMat = FuryPbrMaterial::createFromMaterial(modelMaterial);
-        FuryPbrMaterial* mat = materialManager->createPbrMaterial(materialName);
-        *mat = *pbrMat;
-        delete pbrMat;
-        delete modelMaterial;
+            FuryPbrMaterial* pbrMat = FuryPbrMaterial::createFromMaterial(modelMaterial);
+            FuryPbrMaterial* mat = materialManager->createPbrMaterial(materialName);
+            *mat = *pbrMat;
+            delete pbrMat;
+            delete modelMaterial;
+        }
     }
-
-    FuryMaterial* furyMaterial = materialManager->materialByName(materialName);
 
     glm::mat4 transform = AiToGLMMat4(_node->mTransformation);
 
@@ -291,7 +292,7 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
     }
 
     // Возвращаем созданный меш
-    return new FuryMesh(vertices, indices, furyMaterial, transform);
+    return new FuryMesh(vertices, indices, materialName, transform);
 }
 
 void FuryModel::calculateMinMaxVertex(const glm::vec3 &_vertex)

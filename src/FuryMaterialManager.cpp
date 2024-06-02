@@ -19,6 +19,7 @@ FuryMaterialManager::FuryMaterialManager() :
 
 FuryMaterialManager::~FuryMaterialManager()
 {
+//    saveMaterials();
     Debug(ru("Удаление менеджера материалов"));
 
     for (QMap<QString, FuryMaterial*>::Iterator iter = m_materials.begin(); iter != m_materials.end(); ++iter)
@@ -127,13 +128,48 @@ QList<QString> FuryMaterialManager::allMaterialNames() const
     return m_materials.keys();
 }
 
+bool FuryMaterialManager::tryLoadMaterial(const QString &_name)
+{
+    QFile file("materials/" + _name + ".json");
+
+    if (!file.exists() || !file.open(QIODevice::ReadOnly))
+    {
+        return false;
+    }
+
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    QJsonObject object = document.object();
+    QString type = object["materialType"].toString();
+    FuryMaterial* mat = NULL;
+
+    if (type == "FuryMaterial")
+    {
+        mat = FuryMaterial::fromJson(object);
+    }
+    else if (type == "FuryPbrMaterial")
+    {
+        mat = FuryPbrMaterial::fromJson(object);
+    }
+
+    if (mat == NULL)
+    {
+        return false;
+    }
+
+
+    Debug(ru("Импортирован материал: (%1)").arg(_name));
+    m_materials.insert(_name, mat);
+
+    return true;
+}
+
 void FuryMaterialManager::saveMaterials()
 {
     for (QMap<QString, FuryMaterial*>::Iterator iter = m_materials.begin(); iter != m_materials.end(); ++iter)
     {
         if (iter.value() != nullptr)
         {
-            QFile file("tmpFolder/" + iter.key() + ".json");
+            QFile file("materials/" + iter.key() + ".json");
 
             if (!file.open(QIODevice::WriteOnly))
             {

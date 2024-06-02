@@ -1,0 +1,19 @@
+{
+    "albedoColor": "(0.6, 0.6, 0.6)",
+    "albedoPath": "objects/car2/logo.jpg",
+    "albedoTexture": "Diffuse_logo.jpg",
+    "ao": 1,
+    "aoPath": "",
+    "aoTexture": "",
+    "materialType": "FuryPbrMaterial",
+    "metallic": 0,
+    "metallicPath": "",
+    "metallicTexture": "",
+    "normalPath": "",
+    "normalTexture": "",
+    "opacity": 1,
+    "roughness": 1,
+    "roughnessPath": "",
+    "roughnessTexture": "",
+    "twoSided": false
+}

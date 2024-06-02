@@ -21,7 +21,7 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
     m_cameraLocalViewPoint(0, 2, 0),
-    m_cameraLocalPosition(-7, 3, 0),
+    m_cameraLocalPosition(-7, 2, 0),
     m_forward(0),
     m_right(0),
     m_lastTriggerNumber(0),
@@ -553,7 +553,7 @@ glm::vec3 CarObject::cameraViewPoint() const
     return glm::vec3(worldPoint.x, worldPoint.y + m_cameraLocalViewPoint.y, worldPoint.z);
 }
 
-void CarObject::setLocalCameraPosition(int _x, int _y)
+void CarObject::setLocalCameraPosition(float _x, float _y)
 {
     m_cameraLocalPosition.x = -_x;
     m_cameraLocalPosition.y = _y;

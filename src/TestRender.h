@@ -69,7 +69,7 @@ public:
      * \param[in] _x - Координата x
      * \param[in] _y - Координата y
      */
-    void setCarCameraPos(int _x, int _y);
+    void setCarCameraPos(float _x, float _y);
 
     void setCarSpringLenght(float _lenght);
     void setCarSpringK(float _k);

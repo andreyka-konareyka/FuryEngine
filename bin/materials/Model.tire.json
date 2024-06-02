@@ -1,0 +1,19 @@
+{
+    "albedoColor": "(0.184314, 0.184314, 0.184314)",
+    "albedoPath": "",
+    "albedoTexture": "",
+    "ao": 0.4300000071525574,
+    "aoPath": "",
+    "aoTexture": "",
+    "materialType": "FuryPbrMaterial",
+    "metallic": 1,
+    "metallicPath": "",
+    "metallicTexture": "",
+    "normalPath": "objects/car2/tire22.jpg",
+    "normalTexture": "Height_tire22.jpg",
+    "opacity": 1,
+    "roughness": 1,
+    "roughnessPath": "",
+    "roughnessTexture": "",
+    "twoSided": false
+}

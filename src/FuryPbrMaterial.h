@@ -178,6 +178,13 @@ public:
     QJsonObject toJson() const override;
 
     /*!
+     * \brief Перевод из JSON объекта
+     * \param[in] _object - JSON объект
+     * \return Возвращает материал
+     */
+    static FuryPbrMaterial* fromJson(const QJsonObject& _object);
+
+    /*!
      * \brief Создание PBR-материала из обычного
      * \param[in] _material - Обычный материал
      * \return Возвращает PBR-материал

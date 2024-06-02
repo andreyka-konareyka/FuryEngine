@@ -125,6 +125,18 @@ const FuryTexture& FuryTextureManager::textureByPath(const QString& _path) const
     return *(textureIter.value());
 }
 
+QString FuryTextureManager::pathByName(const QString &_name) const
+{
+    QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
+
+    if (pathIter == m_nameToPath.constEnd())
+    {
+        return "";
+    }
+
+    return pathIter.value();
+}
+
 void FuryTextureManager::loadTexturePart()
 {
     if (!m_textureBindQueue.isEmpty())

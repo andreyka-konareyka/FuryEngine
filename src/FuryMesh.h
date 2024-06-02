@@ -41,7 +41,7 @@ public:
      */
     FuryMesh(const QVector<Vertex>& _vertices,
              const QVector<unsigned int>& _indices,
-             FuryMaterial* _material,
+             const QString& _material,
              const glm::mat4& _transformation);
 
     /*!
@@ -85,7 +85,7 @@ private:
     GLuint EBO;
 
     //! Материал
-    FuryMaterial* m_material;
+    QString m_materialName;
     //! Матрица трансформации меша относительно родителя
     glm::mat4 m_transformation;
 };

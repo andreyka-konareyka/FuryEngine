@@ -3,6 +3,8 @@
 #include "Shader.h"
 #include "FuryTextureManager.h"
 
+#include <QDir>
+
 FuryPbrMaterial::FuryPbrMaterial() :
     m_albedoColor(glm::vec3(1, 1, 1)),
     m_metallic(0),
@@ -89,14 +91,15 @@ void FuryPbrMaterial::setShaderMaterial(Shader *_shader)
 QJsonObject FuryPbrMaterial::toJson() const
 {
     QJsonObject result;
+    result["materialType"] = "FuryPbrMaterial";
 
     result["albedoColor"] = QString("(%1, %2, %3)")
                                     .arg(m_albedoColor.r)
                                     .arg(m_albedoColor.g)
                                     .arg(m_albedoColor.b);
 
-    result["m_metallic"] = m_metallic;
-    result["m_roughness"] = m_roughness;
+    result["metallic"] = m_metallic;
+    result["roughness"] = m_roughness;
     result["ao"] = m_ao;
 
     result["albedoTexture"] = m_albedoTexture;
@@ -107,6 +110,66 @@ QJsonObject FuryPbrMaterial::toJson() const
 
     result["twoSided"] = m_twoSided;
     result["opacity"] = m_opacity;
+
+    FuryTextureManager* manager = FuryTextureManager::instance();
+    QDir dir = QDir::current();
+    result["albedoPath"] = dir.relativeFilePath(manager->pathByName(m_albedoTexture));
+    result["normalPath"] = dir.relativeFilePath(manager->pathByName(m_normalTexture));
+    result["metallicPath"] = dir.relativeFilePath(manager->pathByName(m_metallicTexture));
+    result["roughnessPath"] = dir.relativeFilePath(manager->pathByName(m_roughnessTexture));
+    result["aoPath"] = dir.relativeFilePath(manager->pathByName(m_aoTexture));
+
+    return result;
+}
+
+FuryPbrMaterial *FuryPbrMaterial::fromJson(const QJsonObject &_object)
+{
+    FuryPbrMaterial* result = new FuryPbrMaterial;
+
+    QString albedoColor = _object["albedoColor"].toString();
+    albedoColor.remove("(");
+    albedoColor.remove(")");
+    albedoColor.remove(" ");
+    float r = albedoColor.section(",", 0, 0).toFloat();
+    float g = albedoColor.section(",", 1, 1).toFloat();
+    float b = albedoColor.section(",", 2, 2).toFloat();
+    result->setAlbedoColor(glm::vec3(r, g, b));
+
+    result->setMetallic(_object["metallic"].toDouble());
+    result->setRoughness(_object["roughness"].toDouble());
+    result->setAo(_object["ao"].toDouble());
+
+    result->setAlbedoTexture(_object["albedoTexture"].toString());
+    result->setNormalTexture(_object["normalTexture"].toString());
+    result->setMetallicTexture(_object["metallicTexture"].toString());
+    result->setRoughnessTexture(_object["roughnessTexture"].toString());
+    result->setAoTexture(_object["aoTexture"].toString());
+
+    result->setTwoSided(_object["twoSided"].toBool());
+    result->setOpacity(_object["opacity"].toDouble());
+
+    FuryTextureManager* manager = FuryTextureManager::instance();
+
+    if (QString path = _object["albedoPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->albedoTexture());
+    }
+    if (QString path = _object["normalPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->normalTexture());
+    }
+    if (QString path = _object["metallicPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->metallicTexture());
+    }
+    if (QString path = _object["roughnessPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->roughnessTexture());
+    }
+    if (QString path = _object["aoPath"].toString(); !path.isEmpty())
+    {
+        manager->addTexture(path, result->aoTexture());
+    }
 
     return result;
 }

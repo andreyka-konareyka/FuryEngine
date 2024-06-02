@@ -152,7 +152,7 @@ public:
      * \param[in] _x - Координата x
      * \param[in] _y - Координата y
      */
-    void setLocalCameraPosition(int _x, int _y);
+    void setLocalCameraPosition(float _x, float _y);
 
     /*!
      * \brief Установка длины пружин

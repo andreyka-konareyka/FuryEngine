@@ -1,0 +1,19 @@
+{
+    "albedoColor": "(0, 0, 0)",
+    "albedoPath": "",
+    "albedoTexture": "",
+    "ao": 1,
+    "aoPath": "",
+    "aoTexture": "",
+    "materialType": "FuryPbrMaterial",
+    "metallic": 0.8899999856948853,
+    "metallicPath": "",
+    "metallicTexture": "",
+    "normalPath": "",
+    "normalTexture": "",
+    "opacity": 1,
+    "roughness": 1,
+    "roughnessPath": "",
+    "roughnessTexture": "",
+    "twoSided": false
+}

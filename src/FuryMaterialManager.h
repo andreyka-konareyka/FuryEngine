@@ -65,6 +65,13 @@ public:
      */
     QList<QString> allMaterialNames() const;
 
+    /*!
+     * \brief Попытка загрузить материал из JSON
+     * \param[in] _name - Название материала
+     * \return Возвращает признак успеха.
+     */
+    bool tryLoadMaterial(const QString& _name);
+
     //! Сохранение материалов
     void saveMaterials();
 

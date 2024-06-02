@@ -34,12 +34,13 @@ void FuryMainWindow::onAboutQtSlot()
 void FuryMainWindow::onZoomSliderMoveSlot(int _value)
 {
     m_ui->openGLWidget->setCameraZoomValue(_value);
+    m_ui->lbCameraZoom->setText(ru("Увеличение камеры: %1").arg(_value));
 }
 
 void FuryMainWindow::onCarCameraMoveSliderSlot()
 {
-    int x = m_ui->carCamXSlider->value();
-    int y = m_ui->carCamYSlider->value();
+    float x = m_ui->carCamXSlider->value() / 10.0f;
+    float y = m_ui->carCamYSlider->value() / 10.0f;
 
     QString camX = QString("CarCam.x: %1").arg(x);
     QString camY = QString("CarCam.y: %1").arg(y);
