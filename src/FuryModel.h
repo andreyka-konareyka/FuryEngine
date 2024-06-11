@@ -33,8 +33,12 @@ public:
     void draw(Shader* _shader, const glm::mat4& _transformation,
               FuryMaterial* _material = nullptr);
 
-    //! Отрисовка для карты теней
-    void drawShadowMap();
+    /*!
+     * \brief Отрисовка для карты теней
+     * \param[in] _shader - Шейдер
+     * \param[in] _transformation - Трансформация модели
+     */
+    void drawShadowMap(Shader* _shader, const glm::mat4& _transformation);
 
     /*!
      * \brief Получение пути к файлу модели
@@ -78,6 +82,13 @@ public:
     inline float modelRadius()
     {  return m_modelRadius; }
 
+    /*!
+     * \brief Получение мешей модели
+     * \return Возвращает меши модели
+     */
+    inline const QVector<FuryMesh*>& meshes() const
+    { return m_meshes; }
+
     //! Подключение мешей к OpenGL
     void setupMesh();
 
@@ -109,6 +120,16 @@ private:
      * \param[in] _vertex - Обрабатываемая вершина
      */
     void calculateMinMaxVertex(const glm::vec3& _vertex);
+
+    /*!
+     * \brief Вычисление габаритов меша
+     * \param[in] _vertex - Обрабатываемая вершина
+     * \param[out] _minVertex - Минимальная координата куба, в которую вписан меш
+     * \param[out] _maxVertex - Максимальная координата куба, в которую вписан меш
+     */
+    void calculateMinMaxForMesh(const glm::vec3& _vertex,
+                                glm::vec3& _minVertex,
+                                glm::vec3& _maxVertex);
 
     //! Вычисляет радиус сферы, в которую вписана модель
     void calculateRadius();

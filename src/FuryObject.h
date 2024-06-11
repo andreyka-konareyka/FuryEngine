@@ -73,55 +73,6 @@ public:
     void setPosition(const glm::vec3& _position);
 
     /*!
-     * \brief Получение VAO
-     * \return Возвращает VAO
-     */
-    inline GLuint VAO() const
-    { return m_VAO; }
-
-    /*!
-     * \brief Получение VBO
-     * \return Возвращает VBO
-     */
-    inline GLuint VBO() const
-    { return m_VBO; }
-
-    /*!
-     * \brief Получение количества вершин
-     * \return Возвращает количество вершин
-     */
-    inline unsigned int vertexCount() const
-    { return m_vertexCount; }
-
-    /*!
-     * \brief Получение типа рендера
-     * \return Возвращает тип рендера
-     */
-    inline unsigned int renderType() const
-    { return m_renderType; }
-
-    /*!
-     * \brief Установка типа рендера
-     * \param[in] _renderType - Тип рендера
-     */
-    inline void setRenderType(int _renderType)
-    { m_renderType = _renderType; }
-
-    /*!
-     * \brief Используется ли glDrawElements()
-     * \return Возвращает, используется ли glDrawElements()
-     */
-    inline bool isDrawElements() const
-    { return m_isDrawElements; }
-
-    /*!
-     * \brief Установить флаг, используется ли glDrawElements()
-     * \param[in] _isDrawElements - используется ли glDrawElements()
-     */
-    inline void setIsDrawElements(bool _isDrawElements)
-    { m_isDrawElements = _isDrawElements; }
-
-    /*!
      * \brief Получение шейдера
      * \return Возвращает шейдер
      */
@@ -150,20 +101,6 @@ public:
     { m_physicsBody = _physicsBody; }
 
     /*!
-     * \brief Получение название текстуры
-     * \return Возвращает название текстуры
-     */
-    inline const QString& textureName() const
-    { return m_textureName; }
-
-    /*!
-     * \brief Установка названия текстуры
-     * \param[in] _textureName - Название текстуры
-     */
-    inline void setTextureName(const QString& _textureName)
-    { m_textureName = _textureName; }
-
-    /*!
      * \brief Получение вращения объекта
      * \return Возвращает вращение объекта
      */
@@ -176,20 +113,6 @@ public:
      */
     inline void setRotate(const glm::vec3& _rotate)
     { m_rotate = _rotate; }
-
-    /*!
-     * \brief Получение угла вращения
-     * \return Возвращает угол вращения
-     */
-    inline float angle() const
-    { return m_angle; }
-
-    /*!
-     * \brief Установка угла вращения
-     * \param[in] _angle - Угол вращения
-     */
-    inline void setAngle(float _angle)
-    { m_angle = _angle; }
 
     /*!
      * \brief Получение масштабы по осям
@@ -246,14 +169,19 @@ public:
     inline const QString& modelName() const
     { return m_modelName; }
 
-    //! Отрисовка объекта
-    virtual void draw();
+    /*!
+     * \brief Установка трансформации для модели
+     * \param[in] _modelTransform - Матрица трансформации
+     */
+    inline void setModelTransform(const glm::mat4& _modelTransform)
+    { m_modelTransform = _modelTransform; }
 
     /*!
-     * \brief Отрисовка объекта для карты теней
-     * \param[in] _shadowShader - Шейдер для карты теней
+     * \brief Получить трансформацию модели
+     * \return Возвращает матрицу трансформации
      */
-    virtual void drawShadowMap(Shader* _shadowShader = nullptr);
+    inline const glm::mat4& modelTransform() const
+    { return m_modelTransform; }
 
     /*!
      * \brief Установка названия материала
@@ -288,30 +216,14 @@ protected:
     //! Позиция
     glm::vec3 m_position;
 
-    //! VAO для OpenGL
-    GLuint m_VAO = 0;
-    //! VBO для OpenGL
-    GLuint m_VBO = 0;
-    //! Количество вершин
-    unsigned int m_vertexCount;
-
 private:
     //! Шейдер
-    Shader* m_shader{ nullptr };
+    Shader* m_shader = nullptr;
     //! Физическое тело
     reactphysics3d::RigidBody* m_physicsBody = nullptr;
 
-    //! Тип рендера
-    int m_renderType = GL_TRIANGLES;
-    //! Признак использования glDrawElements()
-    bool m_isDrawElements = false;
-
-    //! Название текстуры
-    QString m_textureName = "defaultBoxTexture";
     //! Вращение объекта
     glm::vec3 m_rotate;
-    //! Угол вращения
-    float m_angle;
     //! Масштабы по осям
     glm::vec3 m_scales;
 
@@ -322,6 +234,8 @@ private:
     FuryWorld* m_world;
     //! Название модели для отображения
     QString m_modelName;
+    //! Трансформация для модели
+    glm::mat4 m_modelTransform;
     //! Название материала объекта
     QString m_materialName;
 

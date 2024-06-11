@@ -10,6 +10,7 @@
 #include <QVector>
 
 
+class FuryModel;
 class FuryMaterial;
 class Shader;
 
@@ -34,15 +35,21 @@ public:
 
     /*!
      * \brief Конструктор
+     * \param[in] _parentModel - Родительская модель
      * \param[in] _vertices - Список вершин
      * \param[in] _indices - Список индексов
      * \param[in] _material - Материал
      * \param[in] _transformation - Матрица трансформации меша относительно родителя
+     * \param[in] _minVertex - Минимальная вершина куба, в который вписан меш
+     * \param[in] _maxVertex - Максимальная вершина куба, в который вписан меш
      */
-    FuryMesh(const QVector<Vertex>& _vertices,
+    FuryMesh(FuryModel* _parentModel,
+             const QVector<Vertex>& _vertices,
              const QVector<unsigned int>& _indices,
              const QString& _material,
-             const glm::mat4& _transformation);
+             const glm::mat4& _transformation,
+             const glm::vec3& _minVertex,
+             const glm::vec3& _maxVertex);
 
     /*!
      * \brief Отрисовка меша с заданным материалом
@@ -71,7 +78,29 @@ public:
     inline void setTransformation(const glm::mat4& _transformation)
     { m_transformation = _transformation; }
 
+    /*!
+     * \brief Получить родительскую модель
+     * \return Возвращает родительскую модель
+     */
+    inline FuryModel* parentModel() const
+    { return m_parentModel; }
+
+    /*!
+     * \brief Получить название материала
+     * \return Возвращает название материала
+     */
+    inline const QString& materialName() const
+    { return m_materialName; }
+
+    /*!
+     * \brief Получить центр меша
+     * \return Возвращает центр меша
+     */
+    glm::vec3 meshCenter() const;
+
 private:
+    FuryModel* m_parentModel;
+
     //! Список вершин
     QVector<Vertex> m_vertices;
     //! Список индексов
@@ -88,6 +117,11 @@ private:
     QString m_materialName;
     //! Матрица трансформации меша относительно родителя
     glm::mat4 m_transformation;
+
+    //! Минимальная координата куба, в которую вписана модель
+    glm::vec3 m_minimumVertex;
+    //! Максимальная координата куба, в которую вписана модель
+    glm::vec3 m_maximumVertex;
 };
 
 #endif // FURYMESH_H

@@ -166,15 +166,6 @@ public:
      */
     void setSpringK(float _k);
 
-    //! Отрисовка объекта
-    void draw() override;
-
-    /*!
-     * \brief Отрисовка объекта для карты теней
-     * \param[in] _shadowShader - Шейдер для карты теней
-     */
-    void drawShadowMap(Shader* _shadowShader = nullptr) override;
-
 private:
     //! Коробка - тело. Нужна для коллизий. Вместо него отображается модель автомобиля.
     FuryBoxObject* m_objectBody;

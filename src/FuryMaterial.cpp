@@ -38,7 +38,7 @@ void FuryMaterial::setShaderMaterial(Shader *_shader)
     _shader->setInt("material.textureDiffuse", 0);
     _shader->setInt("material.textureSpecular", 1);
     _shader->setInt("material.textureNormal", 2);
-    _shader->setInt("shadowMap", 3);
+    _shader->setInt("shadowMap", 8);
 
     bool diffuseTextureEnabled = false;
     bool specularTextureEnabled = false;

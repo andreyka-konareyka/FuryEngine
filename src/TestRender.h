@@ -116,7 +116,6 @@ private slots:
 private:
     int m_width;
     int m_height;
-    const char* m_title;
     float m_deltaTime;
     float m_lastFrame;
     float lastX;
@@ -134,16 +133,13 @@ private:
 
 private:
     reactphysics3d::PhysicsCommon* own_physicsCommon;
-    reactphysics3d::PhysicsWorld* our_physicsWorld;
-    reactphysics3d::RigidBody* physics_sphere;
-
     FuryEventListener* m_eventListener;
 
 
     void loadPBR();
     void initSkyboxModel();
     void initDepthMapFBO();
-    void initRaceMap();
+    void loadRaceMapFromJson();
 
     void createPBRTextures();
 
@@ -151,7 +147,6 @@ private:
     glm::mat4 getLightSpaceMatrix();
 
     void renderLoading(float _currentFrame);
-    void renderPbrSpheres();
 
     void updatePhysics();
 
@@ -164,13 +159,10 @@ private:
     FuryWorld* m_testWorld;
 
 
-    Shader* m_skyboxShader;
     Shader* m_particleShader;
     Shader* m_pbrShader;
     Shader* m_backgroundShader;
     Shader* m_simpleDepthShader;
-    Shader* m_bigFloorShader;
-    Shader* m_testMaterialShader;
     Shader* m_brdfShader;
 
     GLuint m_particle_texture_id;
@@ -179,7 +171,6 @@ private:
     unsigned int m_prefilterMap;
     unsigned int m_brdfLUTTexture = 0;
 
-    GLuint m_hdrTexture = 0;
     GLuint m_envCubemap = 0;
 
 
@@ -203,10 +194,6 @@ private:
 
     float m_perspective_near = 0.1f;
     float m_perspective_far = 300.f;
-
-    glm::vec3 m_dirLightAmbient = glm::vec3(0.35f, 0.35f, 0.35f);
-    glm::vec3 m_dirLightDiffuse = glm::vec3(0.8f, 0.8f, 0.8f);
-    glm::vec3 m_dirLightSpecular = glm::vec3(0.5f, 0.5f, 0.5f);
 
 
     FuryTextureManager* m_textureManager;

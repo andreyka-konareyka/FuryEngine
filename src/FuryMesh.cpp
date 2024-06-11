@@ -1,18 +1,24 @@
 #include "FuryMesh.h"
 
 #include "Shader.h"
+#include "FuryModel.h"
 #include "FuryMaterial.h"
 #include "FuryMaterialManager.h"
 
 
-FuryMesh::FuryMesh(const QVector<Vertex> &_vertices,
+FuryMesh::FuryMesh(FuryModel *_parentModel, const QVector<Vertex> &_vertices,
                    const QVector<unsigned int> &_indices,
                    const QString &_material,
-                   const glm::mat4 &_transformation) :
+                   const glm::mat4 &_transformation,
+                   const glm::vec3 &_minVertex,
+                   const glm::vec3 &_maxVertex) :
+    m_parentModel(_parentModel),
     m_vertices(_vertices),
     m_indices(_indices),
     m_materialName(_material),
-    m_transformation(_transformation)
+    m_transformation(_transformation),
+    m_minimumVertex(_minVertex),
+    m_maximumVertex(_maxVertex)
 {
 
 }
@@ -84,4 +90,10 @@ void FuryMesh::setupMesh()
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*)offsetof(Vertex, m_bitangent));
     glBindVertexArray(0);
+}
+
+glm::vec3 FuryMesh::meshCenter() const
+{
+    glm::vec3 center = (m_minimumVertex + m_maximumVertex) / 2.0f;
+    return center;
 }

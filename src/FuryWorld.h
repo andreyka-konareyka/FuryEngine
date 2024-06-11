@@ -37,12 +37,6 @@ public:
     void addObject(FuryObject* _object);
 
     /*!
-     * \brief Добавить полупрозрачный объект
-     * \param[in] _object - Полупрозрачный объект
-     */
-    void addTransparentObject(FuryObject* _object);
-
-    /*!
      * \brief Установка камеры
      * \param[in] _camera - Камера
      */
@@ -56,12 +50,6 @@ public:
      * \return Возвращает все непрозрачные объекты
      */
     const QVector<FuryObject*>& getObjects();
-
-    /*!
-     * \brief Получить все полупрозрачные объекты
-     * \return Возвращает все полупрозрачные объекты
-     */
-    const QVector<FuryObject*>& getTransparentObjects();
 
     /*!
      * \brief Получить все объекты
@@ -100,11 +88,6 @@ private:
     Camera* m_currentCamera;
     //! Список непрозрачный объектов
     QVector<FuryObject*> m_objects;
-    //! Список прозрачных объектов
-    QVector<FuryObject*> m_transparentObjects;
-
-    //! Список всех объектов
-    QVector<FuryObject*> m_allObjects;
 };
 
 #endif // WORLD_H

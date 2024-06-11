@@ -1,10 +1,6 @@
 #include "FuryObject.h"
 
 #include "FuryWorld.h"
-#include "FuryModel.h"
-#include "FuryModelManager.h"
-#include "FuryMaterial.h"
-#include "FuryMaterialManager.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 
@@ -16,10 +12,10 @@ FuryObject::FuryObject(FuryWorld *_world) :
 
 FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
     m_position(_position),
-    m_vertexCount(0),
     m_rotate(glm::vec3(0, 0, 0)),
     m_scales(glm::vec3(1, 1, 1)),
     m_world(_world),
+    m_modelTransform(1),
     m_textureScales(1, 1)
 {
     rp3d::Vector3 objectPos(m_position.x, m_position.y, m_position.z);
@@ -55,38 +51,4 @@ glm::mat4 FuryObject::getOpenGLTransform() const
                      rawMatrix[4], rawMatrix[5], rawMatrix[6], rawMatrix[7],
                      rawMatrix[8], rawMatrix[9], rawMatrix[10], rawMatrix[11],
                      rawMatrix[12], rawMatrix[13], rawMatrix[14], rawMatrix[15]);
-}
-
-void FuryObject::draw()
-{
-    glm::mat4 modelMatrix = getOpenGLTransform();
-    modelMatrix = glm::scale(modelMatrix, scales());
-
-
-    FuryMaterialManager* materialManager = FuryMaterialManager::instance();
-
-    FuryModel* model = FuryModelManager::instance()->modelByName(m_modelName);
-    FuryMaterial* material = nullptr;
-
-    if (materialManager->materialExist(m_materialName))
-    {
-        material = materialManager->materialByName(m_materialName);
-    }
-
-    if (model->isReady())
-    {
-        model->draw(m_shader, modelMatrix, material);
-    }
-}
-
-void FuryObject::drawShadowMap(Shader *_shadowShader)
-{
-    Q_UNUSED(_shadowShader);
-
-    FuryModel* model = FuryModelManager::instance()->modelByName(m_modelName);
-
-    if (model->isReady())
-    {
-        model->drawShadowMap();
-    }
 }

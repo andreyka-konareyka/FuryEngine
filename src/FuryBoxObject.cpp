@@ -43,15 +43,12 @@ FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, cons
     setScales(_scales);
 
     createBoxModel();
-    m_VAO = cubeVAO;
-    m_VBO = cubeVBO;
-    m_vertexCount = 36;
 
     setModelName("cube");
 
 
     const rp3d::Vector3& pos = physicsBody()->getTransform().getPosition();
-    rp3d::Quaternion rot = rp3d::Quaternion::fromEulerAngles(rotate().x, rotate().y, rotate().z);
+    rp3d::Quaternion rot = rp3d::Quaternion::fromEulerAngles(_rotate.x, _rotate.y, _rotate.z);
     rp3d::Transform transform(pos, rot);
     physicsBody()->setTransform(transform);
 }
@@ -78,19 +75,124 @@ Shader *FuryBoxObject::defaultShader()
     return init_shader();
 }
 
+QJsonObject FuryBoxObject::toJson()
+{
+    QJsonObject result;
+
+    result["name"] = name();
+    result["position"] = QString("(%1; %2; %3)").arg(m_position.x)
+                                                .arg(m_position.y)
+                                                .arg(m_position.z);
+
+    result["scales"] = QString("(%1; %2; %3)").arg(scales().x)
+                                              .arg(scales().y)
+                                              .arg(scales().z);
+
+    result["rotate"] = QString("(%1; %2; %3)").arg(rotate().x)
+                                              .arg(rotate().y)
+                                              .arg(rotate().z);
+
+    result["textureScales"] = QString("(%1; %2)").arg(textureScales().x)
+                                                 .arg(textureScales().y);
+
+    if (physicsBody()->getType() == rp3d::BodyType::STATIC)
+    {
+        result["physicsType"] = "STATIC";
+    }
+    else if (physicsBody()->getType() == rp3d::BodyType::DYNAMIC)
+    {
+        result["physicsType"] = "DYNAMIC";
+    }
+    else if (physicsBody()->getType() == rp3d::BodyType::KINEMATIC)
+    {
+        result["physicsType"] = "KINEMATIC";
+    }
+
+    result["isTrigger"] = physicsBody()->getCollider(0)->getIsTrigger();
+
+    result["materialName"] = materialName();
+
+    return result;
+}
+
+FuryBoxObject *FuryBoxObject::fromJson(const QJsonObject &_object, FuryWorld *_world)
+{
+    QString name = _object["name"].toString();
+    QString materialName = _object["materialName"].toString();
+
+    QString posStr = _object["position"].toString();
+    posStr.remove("(");
+    posStr.remove(")");
+    posStr.remove(" ");
+
+    glm::vec3 position(posStr.section(";", 0, 0).toFloat(),
+                       posStr.section(";", 1, 1).toFloat(),
+                       posStr.section(";", 2, 2).toFloat());
+
+    QString scalesStr = _object["scales"].toString();
+    scalesStr.remove("(");
+    scalesStr.remove(")");
+    scalesStr.remove(" ");
+
+    glm::vec3 scales(scalesStr.section(";", 0, 0).toFloat(),
+                     scalesStr.section(";", 1, 1).toFloat(),
+                     scalesStr.section(";", 2, 2).toFloat());
+
+    QString rotateStr = _object["rotate"].toString();
+    rotateStr.remove("(");
+    rotateStr.remove(")");
+    rotateStr.remove(" ");
+
+    glm::vec3 rotate(rotateStr.section(";", 0, 0).toFloat(),
+                     rotateStr.section(";", 1, 1).toFloat(),
+                     rotateStr.section(";", 2, 2).toFloat());
+
+
+    QString tsStr = _object["textureScales"].toString();
+    tsStr.remove("(");
+    tsStr.remove(")");
+    tsStr.remove(" ");
+
+    glm::vec2 textureScales(tsStr.section(";", 0, 0).toFloat(),
+                            tsStr.section(";", 1, 1).toFloat());
+
+    QString physTypeStr = _object["physicsType"].toString();
+    rp3d::BodyType physicsType = rp3d::BodyType::STATIC;
+    if (physTypeStr == "STATIC")
+    {
+        physicsType = rp3d::BodyType::STATIC;
+    }
+    else if (physTypeStr == "DYNAMIC")
+    {
+        physicsType = rp3d::BodyType::DYNAMIC;
+    }
+    else if (physTypeStr == "KINEMATIC")
+    {
+        physicsType = rp3d::BodyType::KINEMATIC;
+    }
+
+    bool isTrigger = _object["isTrigger"].toBool();
+
+    FuryBoxObject* result = new FuryBoxObject(_world, position, scales, rotate);
+    result->setName(name);
+    result->setMaterialName(materialName);
+    result->setTextureScales(textureScales);
+    result->Setup_physics(physicsType);
+
+    if (isTrigger)
+    {
+        result->physicsBody()->getCollider(0)->setIsTrigger(true);
+    }
+
+    return result;
+}
+
 void FuryBoxObject::tick(double /*dt*/)
 {
     const reactphysics3d::Transform& physics_box_transform = physicsBody()->getTransform();
     const reactphysics3d::Vector3& physics_box_position = physics_box_transform.getPosition();
-    const reactphysics3d::Quaternion& physics_box_rotate = physics_box_transform.getOrientation();
-
-    rp3d::decimal angle;
-    rp3d::Vector3 axis;
-    physics_box_rotate.getRotationAngleAxis(angle, axis);
 
     this->m_position = glm::vec3(physics_box_position.x, physics_box_position.y, physics_box_position.z);
-    setRotate(glm::vec3(axis.x, axis.y, axis.z));
-    setAngle(angle);
 }
 
 
@@ -183,13 +285,14 @@ void renderCube()
 }
 
 
-static Shader* default_shader{nullptr};
+static Shader* default_shader = nullptr;
 
 Shader* init_shader()
 {
     if (default_shader == nullptr)
     {
-        default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
+//        default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
+        default_shader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
     }
 
     return default_shader;

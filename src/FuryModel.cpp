@@ -100,9 +100,9 @@ void FuryModel::draw(Shader *_shader, const glm::mat4 &_transformation,
     {
         glm::mat4 modelMatrix = _transformation * mesh->transformation();
 
-        if (m_path.endsWith("fbx"))
+        if (m_path.toLower().endsWith("fbx"))
         {
-            glm::mat4 modelTransform = glm::translate(glm::mat4(1), glm::vec3(0, 10, 0));
+            glm::mat4 modelTransform = glm::mat4(1);
             modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
             modelMatrix = _transformation * modelTransform * mesh->transformation();
         }
@@ -114,10 +114,21 @@ void FuryModel::draw(Shader *_shader, const glm::mat4 &_transformation,
     }
 }
 
-void FuryModel::drawShadowMap()
+void FuryModel::drawShadowMap(Shader *_shader, const glm::mat4 &_transformation)
 {
     for (FuryMesh* mesh : m_meshes)
     {
+        glm::mat4 modelMatrix = _transformation * mesh->transformation();
+
+        if (m_path.toLower().endsWith("fbx"))
+        {
+            glm::mat4 modelTransform = glm::mat4(1);
+            modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
+            modelMatrix = _transformation * modelTransform * mesh->transformation();
+        }
+
+        _shader->setMat4("model", modelMatrix);
+        _shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
         mesh->drawShadowMap();
     }
 }
@@ -206,6 +217,9 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
     QVector<FuryMesh::Vertex> vertices;
     QVector<unsigned int> indices;
 
+    glm::vec3 meshMinVertex(std::numeric_limits<float>::max());
+    glm::vec3 meshMaxVertex(std::numeric_limits<float>::min());
+
     // Обходим вершины
     for (unsigned int i = 0; i < _mesh->mNumVertices; i++)
     {
@@ -215,6 +229,7 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
                                       _mesh->mVertices[i].y,
                                       _mesh->mVertices[i].z);
         calculateMinMaxVertex(vertex.m_position);
+        calculateMinMaxForMesh(vertex.m_position, meshMinVertex, meshMaxVertex);
 
         // Нормаль
         if (_mesh->HasNormals())
@@ -292,7 +307,8 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
     }
 
     // Возвращаем созданный меш
-    return new FuryMesh(vertices, indices, materialName, transform);
+    return new FuryMesh(this, vertices, indices, materialName, transform,
+                        meshMinVertex, meshMaxVertex);
 }
 
 void FuryModel::calculateMinMaxVertex(const glm::vec3 &_vertex)
@@ -327,6 +343,43 @@ void FuryModel::calculateMinMaxVertex(const glm::vec3 &_vertex)
     if (_vertex.z > m_maximumVertex.z)
     {
         m_maximumVertex.z = _vertex.z;
+    }
+}
+
+void FuryModel::calculateMinMaxForMesh(const glm::vec3 &_vertex,
+                                       glm::vec3 &_minVertex,
+                                       glm::vec3 &_maxVertex)
+{
+    // Смотрим минимальную координату
+    if (_vertex.x < _minVertex.x)
+    {
+        _minVertex.x = _vertex.x;
+    }
+
+    if (_vertex.y < _minVertex.y)
+    {
+        _minVertex.y = _vertex.y;
+    }
+
+    if (_vertex.z < _minVertex.z)
+    {
+        _minVertex.z = _vertex.z;
+    }
+
+    // Смотрим максимальную координату
+    if (_vertex.x > _maxVertex.x)
+    {
+        _maxVertex.x = _vertex.x;
+    }
+
+    if (_vertex.y > _maxVertex.y)
+    {
+        _maxVertex.y = _vertex.y;
+    }
+
+    if (_vertex.z > _maxVertex.z)
+    {
+        _maxVertex.z = _vertex.z;
     }
 }
 

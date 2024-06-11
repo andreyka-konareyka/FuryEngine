@@ -2,10 +2,8 @@
 
 #include "FuryRaycastCallback.h"
 #include "FuryWorld.h"
-#include "FuryMaterial.h"
+#include "FuryPbrMaterial.h"
 #include "FuryMaterialManager.h"
-#include "FuryModelManager.h"
-#include "FuryLogger.h"
 #include "Shader.h"
 
 #include <QString>
@@ -31,46 +29,58 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_backTriggerCounter(0),
     m_hasContact(false)
 {
-    m_objectBody = new FuryBoxObject(world(), _position, 6, 1, 3);
+    m_objectBody = new FuryBoxObject(world(), _position, 6.5, 1, 3);
     m_objectsForDraw.push_back(m_objectBody);
 
-    m_objectBody->setTextureName("carBody");
     m_objectBody->setName("carBody");
     m_objectBody->setShader(_shader);
+    m_objectBody->setModelName("backpack2");
+    {
+        glm::mat4 testSubModel = glm::mat4(1.0f);
+        testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+        testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+        testSubModel = glm::scale(testSubModel, glm::vec3(1.5 / 3,
+                                                          1.5,
+                                                          1.5 / 6.5));
+        m_objectBody->setModelTransform(testSubModel);
+    }
 
     float sphereRadius = 0.1f;
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, 1), sphereRadius));
-    m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
+    m_objectWheels.last()->setShader(_shader);
+    m_objectsForDraw.push_back(m_objectWheels.last());
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, -1), sphereRadius));
-    m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
+    m_objectWheels.last()->setShader(_shader);
+    m_objectsForDraw.push_back(m_objectWheels.last());
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, 1), sphereRadius));
-    m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
+    m_objectWheels.last()->setShader(_shader);
+    m_objectsForDraw.push_back(m_objectWheels.last());
     m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, -1), sphereRadius));
-    m_objectsForDraw.push_back(m_objectWheels[m_objectWheels.size() - 1]);
+    m_objectWheels.last()->setShader(_shader);
+    m_objectsForDraw.push_back(m_objectWheels.last());
 
     for (int i = 0; i < rayCount; ++i)
     {
         m_objectsDebugRays.push_back(new FurySphereObject(world(), _position + glm::vec3(30, 0, 0), 0.25));
-        m_objectsDebugRays.last()->setTextureName("Diffuse_rayCastBall");
         m_objectsForDraw.push_back(m_objectsDebugRays.last());
 
         FuryMaterialManager* materialManager = FuryMaterialManager::instance();
 
         if (!FuryMaterialManager::instance()->materialExist("rayCastBall"))
         {
-            FuryMaterial* mat = materialManager->createMaterial("rayCastBall");
-            mat->setDiffuseTexture("Diffuse_rayCastBall");
+            FuryPbrMaterial* mat = materialManager->createPbrMaterial("rayCastBall");
+            mat->setAlbedoTexture("Diffuse_rayCastBall");
 
-            mat = materialManager->createMaterial("greenRay");
-            mat->setDiffuseTexture("Diffuse_greenRay");
+            mat = materialManager->createPbrMaterial("greenRay");
+            mat->setAlbedoTexture("Diffuse_greenRay");
         }
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
         m_objectsDebugRays.last()->setName("rayCastBall");
+        m_objectsDebugRays.last()->setShader(_shader);
     }
 
     setName("AI_car");
-    setModelName("backpack2LOD2");
     setShader(m_objectBody->shader());
     setScales(m_objectBody->scales());
 }
@@ -84,131 +94,98 @@ void CarObject::tick(double _dt)
 {
     setPosition(m_objectBody->getPosition());
 
+    for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        for (int i = 0; i < m_objectWheels.size(); ++i)
+        glm::vec3 tmp1 = m_objectWheels[i]->getPosition();
+        // Create the ray
+        reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
+        reactphysics3d::Vector3 endPoint = m_objectWheels[i]->physicsBody()->getWorldPoint(reactphysics3d::Vector3(0, -m_springLenght, 0));
+        reactphysics3d::Ray ray(startPoint, endPoint);
+
+        // Create an instance of your callback class
+        FuryRaycastCallback callbackObject;
+
+        // Raycast test
+        world()->physicsWorld()->raycast(ray, &callbackObject);
+
+        if (abs(1 - callbackObject.m_lastHitFraction) <= rp3d::MACHINE_EPSILON)
         {
-            glm::vec3 tmp1 = m_objectWheels[i]->getPosition();
-            reactphysics3d::Vector3 tmp2 = m_objectWheels[i]->physicsBody()->getWorldPoint(reactphysics3d::Vector3(0, -m_springLenght, 0));
-            glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
-            // Create the ray
-            reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
-            reactphysics3d::Vector3 endPoint(tmp3.x, tmp3.y, tmp3.z);
-            reactphysics3d::Ray ray(startPoint, endPoint);
+            m_lastSuspentionLenght[i] = m_springLenght;
+            continue;
+        }
 
-            // Create an instance of your callback class
-            FuryRaycastCallback callbackObject;
-            //std::cout << "raycast " << i << "\n";
+        float currentLenght = m_springLenght * callbackObject.m_lastHitFraction;
 
-            // Raycast test
-            world()->physicsWorld()->raycast(ray, &callbackObject);
-
-            if (abs(1 - callbackObject.m_lastHitFraction) <= rp3d::MACHINE_EPSILON)
-            {
-                m_lastSuspentionLenght[i] = m_springLenght;
-                continue;
-            }
-
-            float currentLenght = m_springLenght * callbackObject.m_lastHitFraction;
-
-            float deltaX = m_springLenght - currentLenght;
-            float forceValue = m_springK * deltaX;
+        float deltaX = m_springLenght - currentLenght;
+        float forceValue = m_springK * deltaX;
 
 
-            float damperK = 20;
-            forceValue += (m_lastSuspentionLenght[i] - currentLenght) / _dt * damperK;
+        float damperK = 20;
+        forceValue += (m_lastSuspentionLenght[i] - currentLenght) / _dt * damperK;
 
 
-            m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(callbackObject.m_lastNormal * forceValue, startPoint);
-            m_lastSuspentionLenght[i] = currentLenght;
+        m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(callbackObject.m_lastNormal * forceValue, startPoint);
+        m_lastSuspentionLenght[i] = currentLenght;
 
 
 
-            rp3d::Transform oldTransform = m_objectWheels[i]->physicsBody()->getTransform();
+        rp3d::Transform oldTransform = m_objectWheels[i]->physicsBody()->getTransform();
 
-            rp3d::Vector3 forward(1, 0, 0);
-            rp3d::Vector3 right(0, 0, 1);
+        rp3d::Vector3 forward(1, 0, 0);
+        rp3d::Vector3 right(0, 0, 1);
 
-            if (i < 2 && m_right != 0)
-            {
-                rp3d::Quaternion rotation = rp3d::Quaternion::fromEulerAngles(0, m_right * (-3.14 / 6), 0);
-                rp3d::Transform transform(oldTransform.getPosition(), oldTransform.getOrientation() * rotation);
-                m_objectWheels[i]->physicsBody()->setTransform(transform);
-            }
+        if (i < 2 && m_right != 0)
+        {
+            rp3d::Quaternion rotation = rp3d::Quaternion::fromEulerAngles(0, m_right * (-3.14 / 6), 0);
+            rp3d::Transform transform(oldTransform.getPosition(), oldTransform.getOrientation() * rotation);
+            m_objectWheels[i]->physicsBody()->setTransform(transform);
+        }
 
-            rp3d::decimal scalar1 = forward.dot(callbackObject.m_lastNormal);
-            rp3d::decimal scalar2 = right.dot(callbackObject.m_lastNormal);
+        rp3d::decimal scalar1 = forward.dot(callbackObject.m_lastNormal);
+        rp3d::decimal scalar2 = right.dot(callbackObject.m_lastNormal);
 
-            rp3d::Vector3 proj1 = scalar1 * callbackObject.m_lastNormal;
-            rp3d::Vector3 proj2 = scalar2 * callbackObject.m_lastNormal;
+        rp3d::Vector3 proj1 = scalar1 * callbackObject.m_lastNormal;
+        rp3d::Vector3 proj2 = scalar2 * callbackObject.m_lastNormal;
 
-            rp3d::Vector3 forwardProjection = forward - proj1;
-            forwardProjection.normalize();
-            rp3d::Vector3 rightProjection = right - proj2;
-            rightProjection.normalize();
+        rp3d::Vector3 forwardProjection = forward - proj1;
+        forwardProjection.normalize();
+        rp3d::Vector3 rightProjection = right - proj2;
+        rightProjection.normalize();
 
-            rp3d::Vector3 velocity = m_objectWheels[i]->physicsBody()->getLinearVelocity();
-            rp3d::Vector3 localVelocity = m_objectWheels[i]->physicsBody()->getLocalVector(velocity);
-            rp3d::decimal tireForceRight = forceValue * std::clamp(-localVelocity.z, -1.f, 1.f);
+        rp3d::Vector3 velocity = m_objectWheels[i]->physicsBody()->getLinearVelocity();
+        rp3d::Vector3 localVelocity = m_objectWheels[i]->physicsBody()->getLocalVector(velocity);
+        rp3d::decimal tireForceRight = forceValue * std::clamp(-localVelocity.z, -1.f, 1.f);
 
-            float slipAngle = 0;
-            float slipAnglePeak = 8.0f / 180.0f * 3.14f;
+        float slipAngle = 0;
+        float slipAnglePeak = 8.0f / 180.0f * 3.14f;
 
-            if (localVelocity.x != 0)
-            {
-                slipAngle = atan(-localVelocity.z / abs(localVelocity.x));
-            }
+        if (localVelocity.x != 0)
+        {
+            slipAngle = atan(-localVelocity.z / abs(localVelocity.x));
+        }
 
-            float Sy = slipAngle / slipAnglePeak;
+        float Sy = slipAngle / slipAnglePeak;
 
-            tireForceRight = forceValue * std::clamp(Sy, -2.f, 2.f);
+        tireForceRight = forceValue * std::clamp(Sy, -2.f, 2.f);
 
-            rp3d::decimal tireForceForward = forceValue * 1.5 * m_forward;
-            int localVelXSign = localVelocity.x < 0 ? -1 : 1;
-            rp3d::decimal tireForceBack
-                    = 0.003
-                    * localVelXSign
-                    * std::clamp(-pow(localVelocity.x, 2.f), -1000.f, 1000.f);
-            tireForceForward += forceValue * tireForceBack;
+        rp3d::decimal tireForceForward = forceValue * 1.5 * m_forward;
+        int localVelXSign = localVelocity.x < 0 ? -1 : 1;
+        rp3d::decimal tireForceBack
+                = 0.003
+                * localVelXSign
+                * std::clamp(-pow(localVelocity.x, 2.f), -1000.f, 1000.f);
+        tireForceForward += forceValue * tireForceBack;
 
-            rp3d::Vector3 tireForce = (rightProjection * tireForceRight) + (forwardProjection * tireForceForward);
+        rp3d::Vector3 tireForce = (rightProjection * tireForceRight) + (forwardProjection * tireForceForward);
 
-            m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(tireForce, startPoint);
+        m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(tireForce, startPoint);
 
 
-            if (i < 2 && m_right != 0)
-            {
-                m_objectWheels[i]->physicsBody()->setTransform(oldTransform);
-            }
+        if (i < 2 && m_right != 0)
+        {
+            m_objectWheels[i]->physicsBody()->setTransform(oldTransform);
         }
     }
-
-//    int rayCount = 100;
-//    float rayLenght = 30;
-//    for (int i = 0; i < rayCount; ++i)
-//    {
-//        float x = std::cos(2 * 3.14 / rayCount * i);
-//        float z = std::sin(2 * 3.14 / rayCount * i);
-
-//        glm::vec3 tmp1 = m_objectBody->getPosition() - glm::vec3(0, 0.25, 0);
-//        reactphysics3d::Vector3 tmp2 = m_objectBody->physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
-//        glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
-//        tmp3 -= glm::vec3(0, 0.25, 0);
-//        // Create the ray
-//        reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
-//        reactphysics3d::Vector3 endPoint(tmp3.x, tmp3.y, tmp3.z);
-//        reactphysics3d::Ray ray(startPoint, endPoint);
-
-//        // Create an instance of your callback class
-//        FuryRaycastCallback callbackObject;
-//        //std::cout << "raycast " << i << "\n";
-
-//        // Raycast test
-//        world()->physicsWorld()->raycast(ray, &callbackObject);
-
-
-//        glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
-//        m_objectsDebugRays[i]->setPosition(tmp4);
-//    }
 }
 
 void CarObject::keyPressEvent(int _keyCode)
@@ -567,78 +544,4 @@ void CarObject::setSpringLenght(float _lenght)
 void CarObject::setSpringK(float _k)
 {
     m_springK = _k;
-}
-
-void CarObject::draw()
-{
-    Shader* shader = m_objectBody->shader();
-    glm::mat4 modelMatrix = m_objectBody->getOpenGLTransform();
-
-    glm::mat4 testSubModel = glm::mat4(1.0f);
-
-    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
-
-    modelMatrix = modelMatrix * testSubModel;
-
-    shader->setMat4("model", modelMatrix);
-    FuryModelManager* modelManager = FuryModelManager::instance();
-    FuryModel* modelObj = modelManager->modelByName("backpack2");
-
-    if (modelObj->isReady())
-    {
-        modelObj->draw(shader, modelMatrix);
-    }
-    else
-    {
-        FuryModel* LOD2 = modelManager->modelByName("backpack2LOD2");
-
-        if (LOD2->isReady())
-        {
-            LOD2->draw(shader, modelMatrix);
-        }
-        else
-        {
-            Debug(ru("Модель не готова"));
-        }
-    }
-}
-
-void CarObject::drawShadowMap(Shader* _shadowShader)
-{
-    FuryModelManager* modelManager = FuryModelManager::instance();
-
-    if (_shadowShader != nullptr)
-    {
-        glm::mat4 model = m_objectBody->getOpenGLTransform();
-        glm::mat4 testSubModel = glm::mat4(1.0f);
-        testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-        testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-        testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.4));	// it's a bit too big for our scene, so scale it down
-
-        model = model * testSubModel;
-        _shadowShader->setMat4("model", model);
-    }
-
-
-    FuryModel* modelObj = modelManager->modelByName("backpack2");
-
-    if (modelObj->isReady())
-    {
-        modelObj->drawShadowMap();
-    }
-    else
-    {
-        FuryModel* LOD2 = modelManager->modelByName("backpack2LOD2");
-
-        if (LOD2->isReady())
-        {
-            LOD2->drawShadowMap();
-        }
-        else
-        {
-            Debug(ru("Модель не готова"));
-        }
-    }
 }

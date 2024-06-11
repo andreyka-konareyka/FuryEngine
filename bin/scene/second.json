@@ -1,0 +1,1362 @@
+[
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; 20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(80; 2.5; 0.5)",
+        "textureScales": "(80; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(40; -1.25; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(100; 2.5; 0.5)",
+        "textureScales": "(100; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(20; -1.25; 60)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(50; -1.25; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(50; -1.25; 80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(60; -1.25; 50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(80; -1.25; 70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(80; -1.25; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(100; -1.25; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(100; -1.25; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(120; -1.25; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(100; -1.25; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(80; 2.5; 0.5)",
+        "textureScales": "(80; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(70; -1.25; 20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(60; -1.25; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(70; -1.25; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(80; -1.25; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(80; 2.5; 0.5)",
+        "textureScales": "(80; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(80; -1.25; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(100; -1.25; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(110; -1.25; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(120; -1.25; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(140; -1.25; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(120; -1.25; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(80; -1.25; -60)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(100; -1.25; -80)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(70; -1.25; -80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(70; -1.25; -100)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(60; -1.25; -60)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(40; -1.25; -80)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(30; -1.25; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(20; -1.25; -40)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(80; 2.5; 0.5)",
+        "textureScales": "(80; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(10; -1.25; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(10; -1.25; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-10; -1.25; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; -80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(80; 2.5; 0.5)",
+        "textureScales": "(80; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-40; -1.25; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-60; -1.25; -70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.25; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-80; -1.25; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-60; -1.25; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.25; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-70; -1.25; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.25; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-70; -1.25; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-40; -1.25; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(100; 2.5; 0.5)",
+        "textureScales": "(100; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-60; -1.25; 50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(100; 2.5; 0.5)",
+        "textureScales": "(100; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; 80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-40; -1.25; 100)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; 90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; 110)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-10; -1.25; 120)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; 130)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(30; -1.25; 140)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(30; -1.25; 120)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(20; -1.25; 110)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(40; -1.25; 110)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(60; -1.25; 110)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(60; 2.5; 0.5)",
+        "textureScales": "(60; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(20; -1.25; 100)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(0; -1.25; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(40; 2.5; 0.5)",
+        "textureScales": "(40; 3)"
+    },
+    {
+        "isTrigger": false,
+        "materialName": "firstPbrMaterial",
+        "name": "raceWall",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.25; 50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(20; 2.5; 0.5)",
+        "textureScales": "(20; 3)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 0",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 1",
+        "physicsType": "STATIC",
+        "position": "(20; -1.15; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 2",
+        "physicsType": "STATIC",
+        "position": "(30; -1.15; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 3",
+        "physicsType": "STATIC",
+        "position": "(30; -1.15; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 4",
+        "physicsType": "STATIC",
+        "position": "(40; -1.15; 70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 5",
+        "physicsType": "STATIC",
+        "position": "(60; -1.15; 70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 6",
+        "physicsType": "STATIC",
+        "position": "(70; -1.15; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 7",
+        "physicsType": "STATIC",
+        "position": "(80; -1.15; 50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 8",
+        "physicsType": "STATIC",
+        "position": "(100; -1.15; 50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 9",
+        "physicsType": "STATIC",
+        "position": "(110; -1.15; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 10",
+        "physicsType": "STATIC",
+        "position": "(110; -1.15; 20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 11",
+        "physicsType": "STATIC",
+        "position": "(100; -1.15; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 12",
+        "physicsType": "STATIC",
+        "position": "(80; -1.15; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 13",
+        "physicsType": "STATIC",
+        "position": "(60; -1.15; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 14",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 15",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 16",
+        "physicsType": "STATIC",
+        "position": "(60; -1.15; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 17",
+        "physicsType": "STATIC",
+        "position": "(80; -1.15; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 18",
+        "physicsType": "STATIC",
+        "position": "(90; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 19",
+        "physicsType": "STATIC",
+        "position": "(100; -1.15; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 20",
+        "physicsType": "STATIC",
+        "position": "(120; -1.15; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 21",
+        "physicsType": "STATIC",
+        "position": "(130; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 22",
+        "physicsType": "STATIC",
+        "position": "(130; -1.15; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 23",
+        "physicsType": "STATIC",
+        "position": "(120; -1.15; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 24",
+        "physicsType": "STATIC",
+        "position": "(100; -1.15; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 25",
+        "physicsType": "STATIC",
+        "position": "(90; -1.15; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 26",
+        "physicsType": "STATIC",
+        "position": "(90; -1.15; -80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 27",
+        "physicsType": "STATIC",
+        "position": "(80; -1.15; -90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 28",
+        "physicsType": "STATIC",
+        "position": "(60; -1.15; -90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 29",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; -80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 30",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 31",
+        "physicsType": "STATIC",
+        "position": "(40; -1.15; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 32",
+        "physicsType": "STATIC",
+        "position": "(30; -1.15; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 33",
+        "physicsType": "STATIC",
+        "position": "(30; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 34",
+        "physicsType": "STATIC",
+        "position": "(30; -1.15; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 35",
+        "physicsType": "STATIC",
+        "position": "(20; -1.15; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 36",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; 10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 37",
+        "physicsType": "STATIC",
+        "position": "(-10; -1.15; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 38",
+        "physicsType": "STATIC",
+        "position": "(-10; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 39",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; -30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 40",
+        "physicsType": "STATIC",
+        "position": "(10; -1.15; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 41",
+        "physicsType": "STATIC",
+        "position": "(10; -1.15; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 42",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; -70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 43",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.15; -70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 44",
+        "physicsType": "STATIC",
+        "position": "(-40; -1.15; -70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 45",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; -60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 46",
+        "physicsType": "STATIC",
+        "position": "(-60; -1.15; -50)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 47",
+        "physicsType": "STATIC",
+        "position": "(-70; -1.15; -40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 48",
+        "physicsType": "STATIC",
+        "position": "(-70; -1.15; -20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 49",
+        "physicsType": "STATIC",
+        "position": "(-60; -1.15; -10)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 50",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; 0)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 51",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; 20)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 52",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 53",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 54",
+        "physicsType": "STATIC",
+        "position": "(-50; -1.15; 80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 55",
+        "physicsType": "STATIC",
+        "position": "(-40; -1.15; 90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 56",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.15; 90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 57",
+        "physicsType": "STATIC",
+        "position": "(-10; -1.15; 100)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 58",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; 110)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 59",
+        "physicsType": "STATIC",
+        "position": "(10; -1.15; 120)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 60",
+        "physicsType": "STATIC",
+        "position": "(20; -1.15; 130)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 61",
+        "physicsType": "STATIC",
+        "position": "(40; -1.15; 130)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 62",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; 120)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 63",
+        "physicsType": "STATIC",
+        "position": "(50; -1.15; 100)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 64",
+        "physicsType": "STATIC",
+        "position": "(40; -1.15; 90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 65",
+        "physicsType": "STATIC",
+        "position": "(20; -1.15; 90)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 66",
+        "physicsType": "STATIC",
+        "position": "(10; -1.15; 80)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 67",
+        "physicsType": "STATIC",
+        "position": "(0; -1.15; 70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 68",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.15; 70)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 69",
+        "physicsType": "STATIC",
+        "position": "(-30; -1.15; 60)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 70",
+        "physicsType": "STATIC",
+        "position": "(-30; -1.15; 40)",
+        "rotate": "(0; 0; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    },
+    {
+        "isTrigger": true,
+        "materialName": "redRaceTriggerMaterial",
+        "name": "Trigger 71",
+        "physicsType": "STATIC",
+        "position": "(-20; -1.15; 30)",
+        "rotate": "(0; 1.57; 0)",
+        "scales": "(18; 2.5; 0.5)",
+        "textureScales": "(1; 1)"
+    }
+]

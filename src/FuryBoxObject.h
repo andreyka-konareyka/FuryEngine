@@ -6,6 +6,8 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include <QJsonObject>
+
 //! Класс коробки
 class FuryBoxObject : public FuryObject {
 public:
@@ -85,5 +87,20 @@ public:
      * \return Возвращает шейдер по умолчанию
      */
     static Shader* defaultShader();
+
+    /*!
+     * \brief Перевод в JSON объект
+     * \return Возвращает JSON объект
+     */
+    QJsonObject toJson();
+
+    /*!
+     * \brief Перевод из JSON объекта
+     * \param[in] _object - JSON объект
+     * \param[in] _world - Мир, к которому принадлежит объект
+     * \return Возвращает коробку
+     */
+    static FuryBoxObject* fromJson(const QJsonObject& _object,
+                                   FuryWorld* _world);
 };
 #endif // FURYBOXOBJECT_H
