@@ -1,4 +1,14 @@
 [
+	{
+		"isTrigger": false,
+		"materialName": "asphaltPbrMaterial",
+		"name": "bigFloor",
+		"physicsType": "STATIC",
+		"position": "(0; -3; 0)",
+		"rotate": "(0; 0; 0)",
+		"scales": "(500; 1; 500)",
+		"textureScales": "(400; 300)"
+	},
     {
         "isTrigger": false,
         "materialName": "firstPbrMaterial",

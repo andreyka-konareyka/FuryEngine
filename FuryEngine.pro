@@ -46,6 +46,7 @@ SOURCES += \
     src/CarObject.cpp \
     src/FuryBaseLocalKeyMapper.cpp \
     src/FuryBoxObject.cpp \
+    src/FuryDoubleValidator.cpp \
     src/FuryEventListener.cpp \
     src/FuryException.cpp \
     src/FuryLogger.cpp \
@@ -57,6 +58,7 @@ SOURCES += \
     src/FuryModel.cpp \
     src/FuryModelManager.cpp \
     src/FuryObject.cpp \
+    src/FuryObjectsTreeModel.cpp \
     src/FuryPbrMaterial.cpp \
     src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
     src/FuryRussianLocalKeyMapper.cpp \
@@ -64,6 +66,7 @@ SOURCES += \
     src/FurySphereObject.cpp \
     src/FuryTexture.cpp \
     src/FuryTextureManager.cpp \
+    src/FuryVectorInputWidget.cpp \
     src/FuryWorld.cpp \
     src/Particle.cpp \
     src/ParticleSystem.cpp \
@@ -75,6 +78,7 @@ HEADERS += \
     src/CarObject.h \
     src/FuryBaseLocalKeyMapper.h \
     src/FuryBoxObject.h \
+    src/FuryDoubleValidator.h \
     src/FuryEventListener.h \
     src/FuryException.h \
     src/FuryLogger.h \
@@ -86,6 +90,7 @@ HEADERS += \
     src/FuryModel.h \
     src/FuryModelManager.h \
     src/FuryObject.h \
+    src/FuryObjectsTreeModel.h \
     src/FuryPbrMaterial.h \
     src/FuryRaycastCallback.h \ #src/FuryWindow.h \
     src/FuryRussianLocalKeyMapper.h \
@@ -93,6 +98,7 @@ HEADERS += \
     src/FurySphereObject.h \
     src/FuryTexture.h \
     src/FuryTextureManager.h \
+    src/FuryVectorInputWidget.h \
     src/FuryWorld.h \
     src/Particle.h \
     src/ParticleSystem.h \
@@ -101,7 +107,8 @@ HEADERS += \
 
 FORMS += \
     src/FuryMainWindow.ui \
-    src/FuryMaterialEditDialog.ui
+    src/FuryMaterialEditDialog.ui \
+    src/FuryVectorInputWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

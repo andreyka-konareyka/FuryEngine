@@ -39,7 +39,7 @@ FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, cons
 {
     setShader(init_shader());
 
-    setRotate(_rotate);
+    setInitLocalRotation(_rotate);
     setScales(_scales);
 
     createBoxModel();
@@ -79,23 +79,27 @@ QJsonObject FuryBoxObject::toJson()
 {
     QJsonObject result;
 
-    result["name"] = name();
-    result["position"] = QString("(%1; %2; %3)").arg(m_position.x)
-                                                .arg(m_position.y)
-                                                .arg(m_position.z);
+    result["name"] = objectName();
+    result["position"] = QString("(%1; %2; %3)").arg(getWorldPosition().x)
+                                                .arg(getWorldPosition().y)
+                                                .arg(getWorldPosition().z);
 
     result["scales"] = QString("(%1; %2; %3)").arg(scales().x)
                                               .arg(scales().y)
                                               .arg(scales().z);
 
-    result["rotate"] = QString("(%1; %2; %3)").arg(rotate().x)
-                                              .arg(rotate().y)
-                                              .arg(rotate().z);
+    result["rotate"] = QString("(%1; %2; %3)").arg(getWorldRotation().x)
+                                              .arg(getWorldRotation().y)
+                                              .arg(getWorldRotation().z);
 
     result["textureScales"] = QString("(%1; %2)").arg(textureScales().x)
                                                  .arg(textureScales().y);
 
-    if (physicsBody()->getType() == rp3d::BodyType::STATIC)
+    if (physicsBody()->getNbColliders() == 0)
+    {
+        result["physicsType"] = "NONE";
+    }
+    else if (physicsBody()->getType() == rp3d::BodyType::STATIC)
     {
         result["physicsType"] = "STATIC";
     }
@@ -158,7 +162,13 @@ FuryBoxObject *FuryBoxObject::fromJson(const QJsonObject &_object, FuryWorld *_w
 
     QString physTypeStr = _object["physicsType"].toString();
     rp3d::BodyType physicsType = rp3d::BodyType::STATIC;
-    if (physTypeStr == "STATIC")
+    bool physicsEnabled = true;
+
+    if (physTypeStr == "NONE")
+    {
+        physicsEnabled = false;
+    }
+    else if (physTypeStr == "STATIC")
     {
         physicsType = rp3d::BodyType::STATIC;
     }
@@ -174,10 +184,14 @@ FuryBoxObject *FuryBoxObject::fromJson(const QJsonObject &_object, FuryWorld *_w
     bool isTrigger = _object["isTrigger"].toBool();
 
     FuryBoxObject* result = new FuryBoxObject(_world, position, scales, rotate);
-    result->setName(name);
+    result->setObjectName(name);
     result->setMaterialName(materialName);
     result->setTextureScales(textureScales);
-    result->Setup_physics(physicsType);
+
+    if (physicsEnabled)
+    {
+        result->Setup_physics(physicsType);
+    }
 
     if (isTrigger)
     {
@@ -185,14 +199,6 @@ FuryBoxObject *FuryBoxObject::fromJson(const QJsonObject &_object, FuryWorld *_w
     }
 
     return result;
-}
-
-void FuryBoxObject::tick(double /*dt*/)
-{
-    const reactphysics3d::Transform& physics_box_transform = physicsBody()->getTransform();
-    const reactphysics3d::Vector3& physics_box_position = physics_box_transform.getPosition();
-
-    this->m_position = glm::vec3(physics_box_position.x, physics_box_position.y, physics_box_position.z);
 }
 
 

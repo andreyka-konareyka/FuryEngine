@@ -9,9 +9,9 @@ reactphysics3d::decimal FuryRaycastCallback::notifyRaycastHit(const reactphysics
     // Return a fraction of 1.0 to gather all hits
     FuryObject* object = static_cast<FuryObject*>(_info.body->getUserData());
 
-    if (object->name().startsWith("Trigger"))
+    if (object->objectName().startsWith("Trigger"))
     {
-        int triggerNumber = object->name().split(' ').last().toInt();
+        int triggerNumber = object->objectName().split(' ').last().toInt();
 
         if (triggerNumber == m_needTriggerNumber)
         {

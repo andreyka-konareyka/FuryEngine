@@ -71,12 +71,6 @@ public:
     ~FuryBoxObject();
 
     /*!
-     * \brief Обновление состояния
-     * \param[in] _dt - Время от прошлого обновления
-     */
-    void tick(double _dt) override;
-
-    /*!
      * \brief Инициализация физического тела
      * \param[in] _type - Тип физического тела
      */

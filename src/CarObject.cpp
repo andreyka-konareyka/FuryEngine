@@ -1,10 +1,11 @@
 #include "CarObject.h"
 
-#include "FuryRaycastCallback.h"
+#include "Shader.h"
 #include "FuryWorld.h"
 #include "FuryPbrMaterial.h"
+#include "FurySphereObject.h"
+#include "FuryRaycastCallback.h"
 #include "FuryMaterialManager.h"
-#include "Shader.h"
 
 #include <QString>
 
@@ -14,7 +15,6 @@ int rayCount = 20;
 
 CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_shader) :
     FuryObject(_world, _position),
-    m_objectBody(nullptr),
     m_springLenght(0.4f),
     m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
@@ -29,40 +29,23 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_backTriggerCounter(0),
     m_hasContact(false)
 {
-    m_objectBody = new FuryBoxObject(world(), _position, 6.5, 1, 3);
-    m_objectsForDraw.push_back(m_objectBody);
-
-    m_objectBody->setName("carBody");
-    m_objectBody->setShader(_shader);
-    m_objectBody->setModelName("backpack2");
-    {
-        glm::mat4 testSubModel = glm::mat4(1.0f);
-        testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
-        testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
-        testSubModel = glm::scale(testSubModel, glm::vec3(1.5 / 3,
-                                                          1.5,
-                                                          1.5 / 6.5));
-        m_objectBody->setModelTransform(testSubModel);
-    }
-
-    float sphereRadius = 0.1f;
-    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, 1), sphereRadius));
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, 1)));
     m_objectWheels.last()->setShader(_shader);
-    m_objectsForDraw.push_back(m_objectWheels.last());
-    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(2, -0.5, -1), sphereRadius));
+    m_objectWheels.last()->setObjectName("wheel_FR");
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, -1)));
     m_objectWheels.last()->setShader(_shader);
-    m_objectsForDraw.push_back(m_objectWheels.last());
-    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, 1), sphereRadius));
+    m_objectWheels.last()->setObjectName("wheel_FL");
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, 1)));
     m_objectWheels.last()->setShader(_shader);
-    m_objectsForDraw.push_back(m_objectWheels.last());
-    m_objectWheels.push_back(new FurySphereObject(world(), _position + glm::vec3(-2, -0.5, -1), sphereRadius));
+    m_objectWheels.last()->setObjectName("wheel_RR");
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, -1)));
     m_objectWheels.last()->setShader(_shader);
-    m_objectsForDraw.push_back(m_objectWheels.last());
+    m_objectWheels.last()->setObjectName("wheel_RL");
 
     for (int i = 0; i < rayCount; ++i)
     {
-        m_objectsDebugRays.push_back(new FurySphereObject(world(), _position + glm::vec3(30, 0, 0), 0.25));
-        m_objectsForDraw.push_back(m_objectsDebugRays.last());
+        m_objectsDebugRays.push_back(new FurySphereObject(world(), glm::vec3(30, 0, 0), 0.25));
+        addChildObject(m_objectsDebugRays.last(), true);
 
         FuryMaterialManager* materialManager = FuryMaterialManager::instance();
 
@@ -76,13 +59,18 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
         }
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
-        m_objectsDebugRays.last()->setName("rayCastBall");
+        m_objectsDebugRays.last()->setObjectName("rayCastBall");
         m_objectsDebugRays.last()->setShader(_shader);
     }
 
-    setName("AI_car");
-    setShader(m_objectBody->shader());
-    setScales(m_objectBody->scales());
+    setObjectName("AI_car");
+    setModelName("backpack2");
+    setShader(_shader);
+    glm::mat4 testSubModel = glm::mat4(1.0f);
+    testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
+    testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
+    testSubModel = glm::scale(testSubModel, glm::vec3(1.5, 1.5, 1.5));
+    setModelTransform(testSubModel);
 }
 
 CarObject::~CarObject()
@@ -92,11 +80,9 @@ CarObject::~CarObject()
 
 void CarObject::tick(double _dt)
 {
-    setPosition(m_objectBody->getPosition());
-
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        glm::vec3 tmp1 = m_objectWheels[i]->getPosition();
+        glm::vec3 tmp1 = m_objectWheels[i]->getWorldPosition();
         // Create the ray
         reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
         reactphysics3d::Vector3 endPoint = m_objectWheels[i]->physicsBody()->getWorldPoint(reactphysics3d::Vector3(0, -m_springLenght, 0));
@@ -124,7 +110,7 @@ void CarObject::tick(double _dt)
         forceValue += (m_lastSuspentionLenght[i] - currentLenght) / _dt * damperK;
 
 
-        m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(callbackObject.m_lastNormal * forceValue, startPoint);
+        physicsBody()->applyLocalForceAtWorldPosition(callbackObject.m_lastNormal * forceValue, startPoint);
         m_lastSuspentionLenght[i] = currentLenght;
 
 
@@ -178,7 +164,7 @@ void CarObject::tick(double _dt)
 
         rp3d::Vector3 tireForce = (rightProjection * tireForceRight) + (forwardProjection * tireForceForward);
 
-        m_objectBody->physicsBody()->applyLocalForceAtWorldPosition(tireForce, startPoint);
+        physicsBody()->applyLocalForceAtWorldPosition(tireForce, startPoint);
 
 
         if (i < 2 && m_right != 0)
@@ -289,8 +275,8 @@ QVector<float> CarObject::getRays()
         float x = std::cos(2 * 3.14 / rayCount * i);
         float z = std::sin(2 * 3.14 / rayCount * i);
 
-        glm::vec3 tmp1 = m_objectBody->getPosition() - glm::vec3(0, 0.25, 0);
-        reactphysics3d::Vector3 tmp2 = m_objectBody->physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
+        glm::vec3 tmp1 = getWorldPosition() - glm::vec3(0, 0.25, 0);
+        reactphysics3d::Vector3 tmp2 = physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
         glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
         tmp3 -= glm::vec3(0, 0.25, 0);
         // Create the ray
@@ -312,7 +298,7 @@ QVector<float> CarObject::getRays()
         result.append((callbackObject.m_needTriggered) ? 1.0f : -1.0f);
 
         glm::vec3 tmp4 = tmp1 + (tmp3 - tmp1) * callbackObject.m_lastHitFraction;
-        m_objectsDebugRays[i]->setPosition(tmp4);
+        m_objectsDebugRays[i]->setWorldPosition(tmp4);
 
         {
             if (callbackObject.m_needTriggered)
@@ -331,14 +317,14 @@ QVector<float> CarObject::getRays()
 
 glm::vec3 CarObject::getSpeed()
 {
-    rp3d::Vector3 worldSpeed = m_objectBody->physicsBody()->getLinearVelocity();
-    rp3d::Vector3 localSpeed = m_objectBody->physicsBody()->getLocalVector(worldSpeed);
+    rp3d::Vector3 worldSpeed = physicsBody()->getLinearVelocity();
+    rp3d::Vector3 localSpeed = physicsBody()->getLocalVector(worldSpeed);
     return glm::vec3(localSpeed.x, localSpeed.y, localSpeed.z);
 }
 
 glm::vec3 CarObject::getAngularSpeed()
 {
-    rp3d::Vector3 angularSpeed = m_objectBody->physicsBody()->getAngularVelocity();
+    rp3d::Vector3 angularSpeed = physicsBody()->getAngularVelocity();
     return glm::vec3(angularSpeed.x, angularSpeed.y, angularSpeed.z);
 }
 
@@ -387,10 +373,10 @@ void CarObject::onTrigger(int _number)
 
 glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
 {
-    glm::vec3 vector = _trigger - m_objectBody->getPosition();
+    glm::vec3 vector = _trigger - getWorldPosition();
     vector = glm::normalize(vector);
     rp3d::Vector3 worldVector(vector.x, vector.y, vector.z);
-    rp3d::Vector3 localVector = m_objectBody->physicsBody()->getLocalVector(worldVector);
+    rp3d::Vector3 localVector = physicsBody()->getLocalVector(worldVector);
     glm::vec3 speedGlm = getSpeed();
     rp3d::Vector3 speed(speedGlm.x / 23, speedGlm.y / 23, speedGlm.z / 23);
 
@@ -407,47 +393,10 @@ glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
     return glm::vec3(localVector.x, localVector.y, localVector.z);
 }
 
-void CarObject::respawn()
+void CarObject::reset()
 {
-    rp3d::Vector3 objectPos(m_startPosition.x, m_startPosition.y, m_startPosition.z);
-    rp3d::Quaternion objectOrientation(rp3d::Quaternion::identity());
-    rp3d::Transform objectTransform(objectPos, objectOrientation);
+    FuryObject::reset();
 
-    world()->physicsWorld()->destroyRigidBody(m_objectBody->physicsBody());
-    m_objectBody->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
-    m_objectBody->setPosition(m_startPosition);
-    m_objectBody->physicsBody()->setUserData(m_objectBody);
-
-
-    objectPos = rp3d::Vector3(m_startPosition.x + 2, m_startPosition.y - 0.5, m_startPosition.z + 1);
-    objectTransform = rp3d::Transform(objectPos, objectOrientation);
-    world()->physicsWorld()->destroyRigidBody(m_objectWheels[0]->physicsBody());
-    m_objectWheels[0]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
-    m_objectWheels[0]->setPosition(m_startPosition + glm::vec3(2, -0.5, 1));
-    m_objectWheels[0]->physicsBody()->setUserData(m_objectWheels[0]);
-
-    objectPos = rp3d::Vector3(m_startPosition.x + 2, m_startPosition.y - 0.5, m_startPosition.z - 1);
-    objectTransform = rp3d::Transform(objectPos, objectOrientation);
-    world()->physicsWorld()->destroyRigidBody(m_objectWheels[1]->physicsBody());
-    m_objectWheels[1]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
-    m_objectWheels[1]->setPosition(m_startPosition + glm::vec3(2, -0.5, -1));
-    m_objectWheels[1]->physicsBody()->setUserData(m_objectWheels[1]);
-
-    objectPos = rp3d::Vector3(m_startPosition.x - 2, m_startPosition.y - 0.5, m_startPosition.z + 1);
-    objectTransform = rp3d::Transform(objectPos, objectOrientation);
-    world()->physicsWorld()->destroyRigidBody(m_objectWheels[2]->physicsBody());
-    m_objectWheels[2]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
-    m_objectWheels[2]->setPosition(m_startPosition + glm::vec3(-2, -0.5, 1));
-    m_objectWheels[2]->physicsBody()->setUserData(m_objectWheels[2]);
-
-    objectPos = rp3d::Vector3(m_startPosition.x - 2, m_startPosition.y - 0.5, m_startPosition.z - 1);
-    objectTransform = rp3d::Transform(objectPos, objectOrientation);
-    world()->physicsWorld()->destroyRigidBody(m_objectWheels[3]->physicsBody());
-    m_objectWheels[3]->setPhysicsBody(world()->physicsWorld()->createRigidBody(objectTransform));
-    m_objectWheels[3]->setPosition(m_startPosition + glm::vec3(-2, -0.5, -1));
-    m_objectWheels[3]->physicsBody()->setUserData(m_objectWheels[3]);
-
-    Setup_physics(reactphysics3d::BodyType::DYNAMIC);
     m_backTriggerCounter = 0;
     m_hasContact = false;
     m_timeCounter = 0;
@@ -492,7 +441,13 @@ bool CarObject::checkHasContact()
 
 void CarObject::Setup_physics(reactphysics3d::BodyType type)
 {
-    m_objectBody->Setup_physics(type);
+    physicsBody()->setType(type);
+    const reactphysics3d::Vector3 halfExtents(6.5 / 2.0f, 1 / 2.0f, 3 / 2.0f);
+    reactphysics3d::BoxShape* boxShape = world()->physicsCommon()->createBoxShape(halfExtents);
+    reactphysics3d::Transform transform_boxShape = reactphysics3d::Transform::identity();
+    reactphysics3d::Collider* collider_box;
+    collider_box = physicsBody()->addCollider(boxShape, transform_boxShape);
+    collider_box->getMaterial().setFrictionCoefficient(0.4f);
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
@@ -501,32 +456,33 @@ void CarObject::Setup_physics(reactphysics3d::BodyType type)
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        // Anchor point in world-space
-        float x = m_objectWheels[i]->getPosition().x;
-        float y = m_objectWheels[i]->getPosition().y;
-        float z = m_objectWheels[i]->getPosition().z;
-        const reactphysics3d::Vector3 anchorPoint(x, y, z);
+        addChildObject(m_objectWheels[i]);
+//        // Anchor point in world-space
+//        float x = m_objectWheels[i]->getPosition().x;
+//        float y = m_objectWheels[i]->getPosition().y;
+//        float z = m_objectWheels[i]->getPosition().z;
+//        const reactphysics3d::Vector3 anchorPoint(x, y, z);
 
-        // Create the joint info object
-        reactphysics3d::FixedJointInfo jointInfo(m_objectBody->physicsBody(), m_objectWheels[i]->physicsBody(), anchorPoint);
-        jointInfo.isCollisionEnabled = false;
+//        // Create the joint info object
+//        reactphysics3d::FixedJointInfo jointInfo(physicsBody(), m_objectWheels[i]->physicsBody(), anchorPoint);
+//        jointInfo.isCollisionEnabled = false;
 
-        // Create the hinge joint in the physics world
-        world()->physicsWorld()->createJoint(jointInfo);
+//        // Create the hinge joint in the physics world
+//        world()->physicsWorld()->createJoint(jointInfo);
     }
 }
 
 glm::vec3 CarObject::cameraPosition() const
 {
     reactphysics3d::Vector3 cameraLocalPosition(m_cameraLocalPosition.x, 0, m_cameraLocalPosition.z);
-    reactphysics3d::Vector3 worldPos = m_objectBody->physicsBody()->getWorldPoint(cameraLocalPosition);
+    reactphysics3d::Vector3 worldPos = physicsBody()->getWorldPoint(cameraLocalPosition);
     return glm::vec3(worldPos.x, worldPos.y + m_cameraLocalPosition.y, worldPos.z);
 }
 
 glm::vec3 CarObject::cameraViewPoint() const
 {
     reactphysics3d::Vector3 cameraLocalViewPoint(m_cameraLocalViewPoint.x, 0, m_cameraLocalViewPoint.z);
-    reactphysics3d::Vector3 worldPoint = m_objectBody->physicsBody()->getWorldPoint(cameraLocalViewPoint);
+    reactphysics3d::Vector3 worldPoint = physicsBody()->getWorldPoint(cameraLocalViewPoint);
     return glm::vec3(worldPoint.x, worldPoint.y + m_cameraLocalViewPoint.y, worldPoint.z);
 }
 
@@ -534,14 +490,4 @@ void CarObject::setLocalCameraPosition(float _x, float _y)
 {
     m_cameraLocalPosition.x = -_x;
     m_cameraLocalPosition.y = _y;
-}
-
-void CarObject::setSpringLenght(float _lenght)
-{
-    m_springLenght = _lenght;
-}
-
-void CarObject::setSpringK(float _k)
-{
-    m_springK = _k;
 }

@@ -11,6 +11,7 @@
 
 FuryModel::FuryModel(const QString &_path) :
     m_path(_path),
+    m_modelRadius(1),
     m_minimumVertex(std::numeric_limits<float>::max()),
     m_maximumVertex(std::numeric_limits<float>::min()),
     m_ready(false),
@@ -93,45 +94,26 @@ bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm:
 }
 
 
-void FuryModel::draw(Shader *_shader, const glm::mat4 &_transformation,
-                     FuryMaterial *_material)
-{
-    for (FuryMesh* mesh : m_meshes)
-    {
-        glm::mat4 modelMatrix = _transformation * mesh->transformation();
+//void FuryModel::draw(Shader *_shader, const glm::mat4 &_transformation,
+//                     FuryMaterial *_material)
+//{
+//    for (FuryMesh* mesh : m_meshes)
+//    {
+//        glm::mat4 modelMatrix = _transformation * mesh->transformation();
 
-        if (m_path.toLower().endsWith("fbx"))
-        {
-            glm::mat4 modelTransform = glm::mat4(1);
-            modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
-            modelMatrix = _transformation * modelTransform * mesh->transformation();
-        }
+//        if (m_path.toLower().endsWith("fbx"))
+//        {
+//            glm::mat4 modelTransform = glm::mat4(1);
+//            modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
+//            modelMatrix = _transformation * modelTransform * mesh->transformation();
+//        }
 
-        _shader->setMat4("model", modelMatrix);
-        _shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
-        mesh->draw(_shader, _material);
+//        _shader->setMat4("model", modelMatrix);
+//        _shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+//        mesh->draw(_shader, _material);
 
-    }
-}
-
-void FuryModel::drawShadowMap(Shader *_shader, const glm::mat4 &_transformation)
-{
-    for (FuryMesh* mesh : m_meshes)
-    {
-        glm::mat4 modelMatrix = _transformation * mesh->transformation();
-
-        if (m_path.toLower().endsWith("fbx"))
-        {
-            glm::mat4 modelTransform = glm::mat4(1);
-            modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
-            modelMatrix = _transformation * modelTransform * mesh->transformation();
-        }
-
-        _shader->setMat4("model", modelMatrix);
-        _shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
-        mesh->drawShadowMap();
-    }
-}
+//    }
+//}
 
 void FuryModel::setupMesh()
 {
@@ -228,6 +210,7 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
         vertex.m_position = glm::vec3(_mesh->mVertices[i].x,
                                       _mesh->mVertices[i].y,
                                       _mesh->mVertices[i].z);
+
         calculateMinMaxVertex(vertex.m_position);
         calculateMinMaxForMesh(vertex.m_position, meshMinVertex, meshMaxVertex);
 
@@ -304,6 +287,13 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
             transform = AiToGLMMat4(parent->mTransformation) * transform;
             parent = parent->mParent;
         }
+    }
+
+    if (m_path.toLower().endsWith(".fbx"))
+    {
+        glm::mat4 modelTransform = glm::mat4(1);
+        modelTransform = glm::scale(modelTransform, glm::vec3(0.01, 0.01, 0.01));
+        transform = modelTransform * transform;
     }
 
     // Возвращаем созданный меш

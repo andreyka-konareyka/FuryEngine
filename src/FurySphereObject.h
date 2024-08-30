@@ -5,6 +5,8 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include <QJsonObject>
+
 //! Класс сферы
 class FurySphereObject : public FuryObject
 {
@@ -31,12 +33,6 @@ public:
     FurySphereObject(FuryWorld* _world, const glm::vec3& _position, double _scale);
 
     /*!
-     * \brief Обновление состояния
-     * \param[in] _dt - Время от прошлого обновления
-     */
-    void tick(double _dt) override;
-
-    /*!
      * \brief Инициализация физического тела
      * \param[in] _type - Тип физического тела
      */
@@ -47,6 +43,21 @@ public:
      * \return Возвращает шейдер по умолчанию
      */
     static Shader* defaultShader();
+
+    /*!
+     * \brief Перевод в JSON объект
+     * \return Возвращает JSON объект
+     */
+    QJsonObject toJson();
+
+    /*!
+     * \brief Перевод из JSON объекта
+     * \param[in] _object - JSON объект
+     * \param[in] _world - Мир, к которому принадлежит объект
+     * \return Возвращает сферу
+     */
+    static FurySphereObject* fromJson(const QJsonObject& _object,
+                                      FuryWorld* _world);
 };
 
 

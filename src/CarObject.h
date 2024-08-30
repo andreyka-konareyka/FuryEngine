@@ -1,11 +1,7 @@
 #ifndef CAROBJECT_H
 #define CAROBJECT_H
 
-
-
 #include "FuryObject.h"
-#include "FuryBoxObject.h"
-#include "FurySphereObject.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <vector>
@@ -16,6 +12,12 @@
 //! Автомобиль для обучения ИИ
 class CarObject : public FuryObject
 {
+    Q_OBJECT
+    Q_PROPERTY(float springLenght READ springLenght WRITE setSpringLenght)
+    Q_PROPERTY(float springK READ springK WRITE setSpringK)
+    Q_PROPERTY(glm::vec3 cameraLocalViewPoint READ cameraLocalViewPoint WRITE setCameraLocalViewPoint)
+    Q_PROPERTY(glm::vec3 cameraLocalPosition READ cameraLocalPosition WRITE setCameraLocalPosition)
+
 public:
     /*!
      * \brief Конструктор
@@ -102,7 +104,7 @@ public:
     glm::vec3 calcNextTriggerVector(const glm::vec3& _trigger);
 
     //! Возрождение
-    void respawn();
+    void reset() override;
 
     /*!
      * \brief Проверка временного счётчика
@@ -129,13 +131,6 @@ public:
     void Setup_physics(reactphysics3d::BodyType type);
 
     /*!
-     * \brief Получение объектов для отрисовки
-     * \return Возвращает объекты для отрисовки
-     */
-    inline const QVector<FuryObject*>& objectsForDraw() const
-    { return m_objectsForDraw; }
-
-    /*!
     * \brief Получить позицию камеры (в глобальных координатах)
     * \return Возвращает позицию камеры (в глобальных координатах)
     */
@@ -158,21 +153,47 @@ public:
      * \brief Установка длины пружин
      * \param[in] _lenght - Длина пружин
      */
-    void setSpringLenght(float _lenght);
+    inline void setSpringLenght(float _lenght)
+    { m_springLenght = _lenght;}
+
+    /*!
+     * \brief Получение длины пружин
+     * \return Возвращает длину пружин
+     */
+    inline float springLenght() const
+    { return m_springLenght; }
 
     /*!
      * \brief Установка жёсткости пружин
      * \param[in] _k - Жёсткость пружин
      */
-    void setSpringK(float _k);
+    inline void setSpringK(float _k)
+    { m_springK = _k; }
+
+    /*!
+     * \brief Получение жёсткости пружин
+     * \return Возвращает жёсткость пружин
+     */
+    inline float springK() const
+    { return m_springK; }
+
+    inline const glm::vec3& cameraLocalViewPoint() const
+    { return m_cameraLocalViewPoint; }
+
+    inline void setCameraLocalViewPoint(const glm::vec3& _point)
+    { m_cameraLocalViewPoint = _point; }
+
+    inline const glm::vec3& cameraLocalPosition() const
+    { return m_cameraLocalPosition; }
+
+    inline void setCameraLocalPosition(const glm::vec3& _pos)
+    { m_cameraLocalPosition = _pos; }
 
 private:
-    //! Коробка - тело. Нужна для коллизий. Вместо него отображается модель автомобиля.
-    FuryBoxObject* m_objectBody;
     //! Список объектов-колёс
-    QVector<FurySphereObject*> m_objectWheels;
+    QVector<FuryObject*> m_objectWheels;
     //! Список объектов - сфер для отображения raycast лучей
-    QVector<FurySphereObject*> m_objectsDebugRays;
+    QVector<FuryObject*> m_objectsDebugRays;
     //! Длина пружин. Референс
     float m_springLenght;
     //! Коэффициент жёсткости пружин
@@ -202,10 +223,6 @@ private:
     int m_backTriggerCounter;
     //! Признак наличия контактов со стенами
     bool m_hasContact;
-
-
-    /// Дополнительные указатели. НЕ УДАЛЯТЬ!
-    QVector<FuryObject*> m_objectsForDraw;
 };
 
 

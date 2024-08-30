@@ -4,6 +4,7 @@
 #include "FuryLogger.h"
 #include "FuryScript.h"
 #include "FuryPbrMaterial.h"
+#include "FurySphereObject.h"
 #include "FuryRussianLocalKeyMapper.h"
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -26,14 +27,15 @@ const bool NEED_DEBUG_SHADOW_MAP = false;
 #define NEED_LEARN 0
 
 
-const unsigned int SHADOW_WIDTH = 1024 * 4, SHADOW_HEIGHT = 1024 * 4;
-QVector<QString> pbr_material_names{ "pbr_gold", "pbr_grass", "pbr_iron", "pbr_plastic", "pbr_wall", "pbr_asphalt" };
-QString current_pbr_material_name = pbr_material_names[0];
+const unsigned int SHADOW_WIDTH = 1024 * 4;
+const unsigned int SHADOW_HEIGHT = 1024 * 4;
+
+const unsigned int MAIN_BUFFER_WIDTH = 2048;
+const unsigned int MAIN_BUFFER_HEIGHT = 2048;
 
 
 void renderCube();
 void renderQuad();
-unsigned int loadTexture(const QString& path);
 
 
 
@@ -60,6 +62,12 @@ TestRender::TestRender(QWidget *_parent) :
     connect(this, &QOpenGLWidget::frameSwapped,
             this, &TestRender::updateGL, Qt::QueuedConnection);
     setFocusPolicy(Qt::StrongFocus);
+
+    own_physicsCommon = new reactphysics3d::PhysicsCommon;
+
+    m_testWorld = new FuryWorld(own_physicsCommon);
+    m_eventListener = new FuryEventListener;
+    m_testWorld->physicsWorld()->setEventListener(m_eventListener);
 }
 
 TestRender::~TestRender()
@@ -186,6 +194,9 @@ void TestRender::saveLearnModel()
 
 void TestRender::saveScoreList()
 {
+    Debug(ru("[ ВНИМАНИЕ ] Модель не сохраняю..."));
+    return;
+
     saveLearnModel();
 
     QFile file("scoresList.txt");
@@ -207,7 +218,7 @@ void TestRender::saveScoreList()
 void TestRender::mouseMoveEvent(QMouseEvent* _event)
 {
     if (m_testWorld->camera() == m_cameras[1])
-    { // Если не камера машины
+    { // Если камера машины
         return;
     }
 
@@ -226,7 +237,7 @@ void TestRender::mouseMoveEvent(QMouseEvent* _event)
 void TestRender::mousePressEvent(QMouseEvent *_event)
 {
     if (m_testWorld->camera() == m_cameras[1])
-    { // Если не камера машины
+    { // Если камера машины
         return;
     }
 
@@ -315,19 +326,15 @@ void TestRender::InitGL()
     InitParticleMesh();
 
 
+    initMainRender();
+
     // Загрузка всех текстур, шейдеров и т.д.
-    m_textureManager->addTexture("textures/FuryEngine_logo_for_dark.png", "Logo");
     init();
 }
 
 void TestRender::init() {
     Debug(ru("Версия OpenGL: ") + ru(glGetString(GL_VERSION)));
     Debug(ru("Количество потоков: ") + QString::number(QThread::idealThreadCount()));
-    own_physicsCommon = new reactphysics3d::PhysicsCommon;
-
-    m_testWorld = new FuryWorld(own_physicsCommon);
-    m_eventListener = new FuryEventListener;
-    m_testWorld->physicsWorld()->setEventListener(m_eventListener);
 
     m_modelManager->addModel("objects/cube/cube.obj", "cube");
     m_modelManager->addModel("objects/sphere/sphere.obj", "sphere");
@@ -335,9 +342,9 @@ void TestRender::init() {
     m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
 
     m_sunVisualBox = new FurySphereObject(m_testWorld, m_dirlight_position);
-    m_sunVisualBox->setName("sunVisualBox");
+    m_sunVisualBox->setObjectName("sunVisualBox");
     m_sunVisualBox->setShader(m_pbrShader);
-    m_testWorld->addObject(m_sunVisualBox);
+    m_testWorld->addRootObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
@@ -350,123 +357,24 @@ void TestRender::init() {
 
     m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 30), m_pbrShader);
     m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
-    m_testWorld->addObject(m_carObject);
-
-    const QVector<FuryObject*>& tempObjectsForDraw = m_carObject->objectsForDraw();
-    for (int i = 0; i < tempObjectsForDraw.size(); ++i)
-    {
-        m_testWorld->addObject(tempObjectsForDraw[i]);
-    }
-
+    m_testWorld->addRootObject(m_carObject);
     m_eventListener->setCarObject(m_carObject);
-
-    // Большой пол
-    m_bigFloor = new FuryBoxObject(m_testWorld, glm::vec3(0, -3, 0), 500, 1, 500);
-    m_bigFloor->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(m_bigFloor);
-
-    FuryPbrMaterial* asphaltPbrMaterial = m_materialManager->createPbrMaterial("asphaltPbrMaterial");
-    asphaltPbrMaterial->setAlbedoTexture("asphaltPbr_albedo");
-    asphaltPbrMaterial->setNormalTexture("asphaltPbr_normal");
-    asphaltPbrMaterial->setMetallicTexture("asphaltPbr_metallic");
-    asphaltPbrMaterial->setRoughnessTexture("asphaltPbr_roughness");
-    asphaltPbrMaterial->setAoTexture("asphaltPbr_ao");
-
-    m_bigFloor->setMaterialName("asphaltPbrMaterial");
-    m_bigFloor->setTextureScales(glm::vec2(4, 3) * 100.0f);
 
 
     m_particleShader = new Shader("particle.vs", "particle.fs");
     m_backgroundShader = new Shader("shaders/pbr/2.2.2.background.vs", "shaders/pbr/2.2.2.background.fs");
     m_simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
 
-    m_bigFloor->setShader(m_pbrShader);
-
-
-
-    FurySphereObject* testSphere = new FurySphereObject(m_testWorld, glm::vec3(-3, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
-
-    FuryPbrMaterial* firstPbrMaterial = m_materialManager->createPbrMaterial("firstPbrMaterial");
-    firstPbrMaterial->setAlbedoTexture("testPbr_albedo");
-    firstPbrMaterial->setNormalTexture("testPbr_normal");
-    firstPbrMaterial->setMetallicTexture("testPbr_metallic");
-    firstPbrMaterial->setRoughnessTexture("testPbr_roughness");
-    firstPbrMaterial->setAoTexture("testPbr_ao");
-    testSphere->setMaterialName("firstPbrMaterial");
-    testSphere->setShader(m_pbrShader);
-
-    testSphere = new FurySphereObject(m_testWorld, glm::vec3(-6, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
-
-    FuryPbrMaterial* plasticPbrMaterial = m_materialManager->createPbrMaterial("plasticPbrMaterial");
-    plasticPbrMaterial->setAlbedoTexture("plasticPbr_albedo");
-    plasticPbrMaterial->setNormalTexture("plasticPbr_normal");
-    plasticPbrMaterial->setMetallicTexture("plasticPbr_metallic");
-    plasticPbrMaterial->setRoughnessTexture("plasticPbr_roughness");
-    plasticPbrMaterial->setAoTexture("plasticPbr_ao");
-    testSphere->setMaterialName("plasticPbrMaterial");
-    testSphere->setShader(m_pbrShader);
-
-    testSphere = new FurySphereObject(m_testWorld, glm::vec3(6, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
-
-    FuryPbrMaterial* ironPbrMaterial = m_materialManager->createPbrMaterial("ironPbrMaterial");
-    ironPbrMaterial->setAlbedoTexture("ironPbr_albedo");
-    ironPbrMaterial->setNormalTexture("ironPbr_normal");
-    ironPbrMaterial->setMetallicTexture("ironPbr_metallic");
-    ironPbrMaterial->setRoughnessTexture("ironPbr_roughness");
-    ironPbrMaterial->setAoTexture("ironPbr_ao");
-    testSphere->setMaterialName("ironPbrMaterial");
-    testSphere->setShader(m_pbrShader);
-
-    testSphere = new FurySphereObject(m_testWorld, glm::vec3(3, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
-
-    FuryPbrMaterial* grassPbrMaterial = m_materialManager->createPbrMaterial("grassPbrMaterial");
-    grassPbrMaterial->setAlbedoTexture("grassPbr_albedo");
-    grassPbrMaterial->setNormalTexture("grassPbr_normal");
-    grassPbrMaterial->setMetallicTexture("grassPbr_metallic");
-    grassPbrMaterial->setRoughnessTexture("grassPbr_roughness");
-    grassPbrMaterial->setAoTexture("grassPbr_ao");
-    testSphere->setMaterialName("grassPbrMaterial");
-    testSphere->setShader(m_pbrShader);
-
-    testSphere = new FurySphereObject(m_testWorld, glm::vec3(0, 10, 0), 1);
-    testSphere->Setup_physics(reactphysics3d::BodyType::STATIC);
-    m_testWorld->addObject(testSphere);
-
-    FuryPbrMaterial* goldPbrMaterial = m_materialManager->createPbrMaterial("goldPbrMaterial");
-    goldPbrMaterial->setAlbedoTexture("m_gold_albedo_texture_id");
-    goldPbrMaterial->setNormalTexture("m_gold_norm_texture_id");
-    goldPbrMaterial->setMetallicTexture("m_gold_metallic_texture_id");
-    goldPbrMaterial->setRoughnessTexture("m_gold_roughness_texture_id");
-    goldPbrMaterial->setAoTexture("m_gold_ao_texture_id");
-    testSphere->setMaterialName("goldPbrMaterial");
-    testSphere->setShader(m_pbrShader);
-
-
-    // PBR-материалы
-    loadPBR();
-
-
-
-    m_smoke_texture_id = loadTexture("textures/smoke_ver2.png");
-    m_particle_texture_id = loadTexture("awesomeface.png");
 
 
     glm::vec3 part_pos(5, 0, 0);
     double part_scale = 0.15;
     glm::vec3 part_speed(0, 0.5, 0);
     glm::vec4 part_color(1, 1, 0, 1);
-    m_myFirstParticle = new Particle(part_pos, part_scale, part_speed, part_color, m_particle_texture_id, 10, m_particleShader);
+    m_myFirstParticle = new Particle(part_pos, part_scale, part_speed, part_color, "awesomeface", 10, m_particleShader);
 
     glm::vec3 part_sys_pos(0, 2, 0);
-    m_myFirstParticleSystem = new ParticleSystem(part_sys_pos, m_smoke_texture_id, 1000);
+    m_myFirstParticleSystem = new ParticleSystem(part_sys_pos, "smoke_ver2", 100);
 
 
 
@@ -477,15 +385,6 @@ void TestRender::init() {
     initDepthMapFBO();
     loadRaceMapFromJson();
 
-    m_textureManager->addTexture("textures/box_texture_5x5.png", "defaultBoxTexture");
-    m_textureManager->addTexture("textures/box_texture3_orig.png", "Diffuse_numbersBoxTexture");
-    m_textureManager->addTexture("textures/carBody.png", "carBody");
-    m_textureManager->addTexture("textures/rayCastBall.png", "Diffuse_rayCastBall");
-    m_textureManager->addTexture("textures/greenRay.png", "Diffuse_greenRay");
-    m_textureManager->addTexture("textures/box_texture2.png", "Diffuse_raceWall");
-    m_textureManager->addTexture("textures/asphalt.png", "Diffuse_asphalt");
-    m_textureManager->addTexture("textures/redCheckBox.png", "redCheckBox");
-    m_textureManager->addTexture("textures/greenCheckBox.png", "greenCheckBox");
 
 //    m_modelManager->addModel("objects/car2/LOD2.obj", "backpack2LOD2");
     m_modelManager->addModel("objects/car2/car.obj", "backpack2");
@@ -507,6 +406,15 @@ void TestRender::init() {
             shader->setVec3("lightColors[1]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[2]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[3]", 300.0f, 300.0f, 300.0f);
+            m_pbrShader->setInt("irradianceMap", 0);
+            m_pbrShader->setInt("prefilterMap", 1);
+            m_pbrShader->setInt("brdfLUT", 2);
+            m_pbrShader->setInt("material.albedoMap", 3);
+            m_pbrShader->setInt("material.normalMap", 4);
+            m_pbrShader->setInt("material.metallicMap", 5);
+            m_pbrShader->setInt("material.roughnessMap", 6);
+            m_pbrShader->setInt("material.aoMap", 7);
+            m_pbrShader->setInt("shadowMap", 8);
         }
     }
 }
@@ -571,7 +479,7 @@ void TestRender::render()
         glm::vec3 tempPosition = m_dirlight_position;
         tempPosition *= 3;
         tempPosition += m_testWorld->camera()->position();
-        m_sunVisualBox->setPosition(tempPosition);
+        m_sunVisualBox->setWorldPosition(tempPosition);
 
 
         // 1. сначала рисуем карту глубины
@@ -582,6 +490,8 @@ void TestRender::render()
         glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
 
 
+        glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
+        glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
 
 
 
@@ -607,12 +517,22 @@ void TestRender::render()
             planes[5] = m[3] - m[2];
         }
 
-        const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
+        QVector<FuryObject*> testWorldObjects = m_testWorld->getRootObjects();
         QVector<QPair<FuryObject*, FuryMesh*>> meshesForRender1;
         QVector<QPair<FuryObject*, FuryMesh*>> meshesForRender2;
 
-        foreach (FuryObject* obj, testWorldObjects)
+        for (int i = 0; i < testWorldObjects.size(); ++i)
         {
+            FuryObject* obj = testWorldObjects[i];
+            foreach (QObject* child, obj->children())
+            {
+                FuryObject* obj = qobject_cast<FuryObject*>(child);
+                if (obj != nullptr)
+                {
+                    testWorldObjects.append(obj);
+                }
+            }
+
             FuryModel* model = m_modelManager->modelByName(obj->modelName());
             FuryPbrMaterial* objMat = nullptr;
             if (m_materialManager->materialExist(obj->materialName()))
@@ -650,6 +570,67 @@ void TestRender::render()
                     meshesForRender2.append(qMakePair(obj, mesh));
                 }
             }
+
+            if (obj->selectedInEditor() && (!model->meshes().isEmpty()))
+            {
+                FuryModel* debugModel = m_modelManager->modelByName("cube");
+                Shader* shader = obj->shader();
+
+                shader->Use();
+                shader->setVec3("viewPos", m_testWorld->camera()->position());
+                shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
+
+
+                // view/projection transformations
+                shader->setMat4("projection", projection);
+                shader->setMat4("view", view);
+
+                shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+
+                {
+                    shader->setVec3("camPos", m_testWorld->camera()->position());
+
+                    glm::vec3 tempPosition = m_dirlight_position;
+                    tempPosition *= 3;
+
+                    shader->setVec3("lightPositions[0]", tempPosition);
+                    shader->setVec3("lightPositions[1]", tempPosition);
+                    shader->setVec3("lightPositions[2]", tempPosition);
+                    shader->setVec3("lightPositions[3]", tempPosition);
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+                    glActiveTexture(GL_TEXTURE2);
+                    glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+                    glActiveTexture(GL_TEXTURE8);
+                    glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                }
+
+                glm::mat4 modelMatrix = obj->getOpenGLTransform();
+                glm::vec3 modelSizes = model->maxVertex() - model->minVertex();
+                glm::vec3 modelOffset = (model->maxVertex() + model->minVertex()) / 2.0f;
+                modelMatrix *= obj->modelTransform();
+                modelMatrix = glm::translate(modelMatrix, modelOffset);
+                modelMatrix = glm::scale(modelMatrix, glm::vec3(modelSizes.x * obj->scales().x,
+                                                                modelSizes.y * obj->scales().y,
+                                                                modelSizes.z * obj->scales().z));
+                shader->setMat4("model", modelMatrix);
+                shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+
+                FuryMaterial* mat = m_materialManager->materialByName("debugMat");
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                glLineWidth(5);
+                debugModel->meshes()[0]->draw(shader, mat);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                glLineWidth(1);
+
+
+                glBindVertexArray(0);
+                glActiveTexture(GL_TEXTURE0);
+            }
         }
 
         for (QPair<FuryObject*, FuryMesh*>& pair : meshesForRender1)
@@ -660,7 +641,7 @@ void TestRender::render()
 
             if (!m_needDebugRender)
             {
-                if (obj->name() == "rayCastBall")
+                if (obj->objectName() == "rayCastBall")
                 {
                     continue;
                 }
@@ -704,6 +685,7 @@ void TestRender::render()
             glm::mat4 modelMatrix = obj->getOpenGLTransform();
             modelMatrix = glm::scale(modelMatrix, obj->scales());
             modelMatrix *= obj->modelTransform();
+            modelMatrix *= mesh->transformation();
             shader->setMat4("model", modelMatrix);
             shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
@@ -712,16 +694,24 @@ void TestRender::render()
             {
                 material = m_materialManager->materialByName(obj->materialName());
             }
-
             mesh->draw(shader, material);
 
 
             glBindVertexArray(0);
             glActiveTexture(GL_TEXTURE0);
 
-            if (obj->name() == "rayCastBall")
+            if (obj->objectName() == "rayCastBall")
             { // Отрисовка лучей у машины
-                glm::vec3 direct = m_carObject->getPosition() - obj->getPosition();
+
+                glm::mat4 modelMatrix(1.0f);
+                modelMatrix = glm::translate(modelMatrix, obj->getWorldPosition());
+                modelMatrix = glm::scale(modelMatrix, obj->scales());
+                modelMatrix *= obj->modelTransform();
+                modelMatrix *= mesh->transformation();
+                shader->setMat4("model", modelMatrix);
+                shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+
+                glm::vec3 direct = m_carObject->getWorldPosition() - obj->getWorldPosition();
                 direct /= obj->scales().x;
                 glBegin(GL_LINES);
                 glVertex3d(0, 0, 0);
@@ -828,7 +818,7 @@ void TestRender::render()
         {
             QList<QPair<float, QPair<FuryObject*, FuryMesh*>>> sorted;
             for (unsigned int i = 0; i < meshesForRender2.size(); i++){
-                float distance = glm::length(m_testWorld->camera()->position() - meshesForRender2[i].first->getPosition());
+                float distance = glm::length(m_testWorld->camera()->position() - meshesForRender2[i].first->getWorldPosition());
                 sorted.append(qMakePair(distance, meshesForRender2[i]));
             }
 
@@ -843,12 +833,12 @@ void TestRender::render()
 
                 if (!m_needDebugRender)
                 {
-                    if (obj->name() == "rayCastBall")
+                    if (obj->objectName() == "rayCastBall")
                     {
                         continue;
                     }
 
-                    if (obj->name().startsWith("Trigger"))
+                    if (obj->objectName().startsWith("Trigger"))
                     {
                         continue;
                     }
@@ -892,6 +882,7 @@ void TestRender::render()
                 glm::mat4 modelMatrix = obj->getOpenGLTransform();
                 modelMatrix = glm::scale(modelMatrix, obj->scales());
                 modelMatrix *= obj->modelTransform();
+                modelMatrix *= mesh->transformation();
                 shader->setMat4("model", modelMatrix);
                 shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
@@ -907,9 +898,18 @@ void TestRender::render()
                 glBindVertexArray(0);
                 glActiveTexture(GL_TEXTURE0);
 
-                if (obj->name() == "rayCastBall")
+                if (obj->objectName() == "rayCastBall")
                 { // Отрисовка лучей у машины
-                    glm::vec3 direct = m_carObject->getPosition() - obj->getPosition();
+
+                    glm::mat4 modelMatrix(1.0f);
+                    modelMatrix = glm::translate(modelMatrix, obj->getWorldPosition());
+                    modelMatrix = glm::scale(modelMatrix, obj->scales());
+                    modelMatrix *= obj->modelTransform();
+                    modelMatrix *= mesh->transformation();
+                    shader->setMat4("model", modelMatrix);
+                    shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+
+                    glm::vec3 direct = m_carObject->getWorldPosition() - obj->getWorldPosition();
                     direct /= obj->scales().x;
                     glBegin(GL_LINES);
                     glVertex3d(0, 0, 0);
@@ -921,6 +921,10 @@ void TestRender::render()
             sorted.clear();
         }
 
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+        glViewport(0, 0, this->m_width, this->m_height);
+        renderMainBuffer();
 
         if (NEED_DEBUG_SHADOW_MAP)
         {
@@ -951,6 +955,7 @@ void TestRender::createPBRTextures()
         stbi_set_flip_vertically_on_load(true);
         int width, height;
         float *data = stbi_loadf("textures/hdr/newport_loft3.hdr", &width, &height, 0, STBI_rgb);
+        stbi_set_flip_vertically_on_load(false);
         unsigned int hdrTexture;
         if (data)
         {
@@ -1147,13 +1152,6 @@ void TestRender::createPBRTextures()
 
 void TestRender::renderDepthMap()
 {
-    /*float near_plane = 1.0f, far_plane = 25.0f;
-    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-
-    glm::mat4 lightView = glm::lookAt(m_dirlight_position,
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));*/
-
     glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
     m_simpleDepthShader->Use();
     m_simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
@@ -1163,12 +1161,27 @@ void TestRender::renderDepthMap()
     glClear(GL_DEPTH_BUFFER_BIT);
 
 
-    const QVector<FuryObject*>& testWorldObjects = m_testWorld->getObjects();
+    QVector<FuryObject*> testWorldObjects = m_testWorld->getRootObjects();
     QVector<QPair<FuryObject*, FuryMesh*>> meshesForRender;
 
-    foreach (FuryObject* obj, testWorldObjects)
+    for (int i = 0; i < testWorldObjects.size(); ++i)
     {
+        FuryObject* obj = testWorldObjects[i];
+        foreach (QObject* child, obj->children())
+        {
+            FuryObject* obj = qobject_cast<FuryObject*>(child);
+            if (obj != nullptr)
+            {
+                testWorldObjects.append(obj);
+            }
+        }
+
         FuryModel* model = m_modelManager->modelByName(obj->modelName());
+
+        if (model == nullptr)
+        {
+            continue;
+        }
 
         foreach (FuryMesh* mesh, model->meshes())
         {
@@ -1181,17 +1194,17 @@ void TestRender::renderDepthMap()
         FuryObject* obj = pair.first;
         FuryMesh* mesh = pair.second;
 
-        if (obj->name().startsWith("Trigger"))
+        if (obj->objectName().startsWith("Trigger"))
         {
             continue;
         }
-        if (obj->name() == "sunVisualBox")
+        if (obj->objectName() == "sunVisualBox")
         {
             continue;
         }
         if (!m_needDebugRender)
         {
-            if (obj->name() == "rayCastBall")
+            if (obj->objectName() == "rayCastBall")
             {
                 continue;
             }
@@ -1200,6 +1213,7 @@ void TestRender::renderDepthMap()
         glm::mat4 modelMatrix = obj->getOpenGLTransform();
         modelMatrix = glm::scale(modelMatrix, obj->scales());
         modelMatrix *= obj->modelTransform();
+        modelMatrix *= mesh->transformation();
         m_simpleDepthShader->setMat4("model", modelMatrix);
 
 
@@ -1274,12 +1288,7 @@ void TestRender::updatePhysics()
         m_myFirstParticle->Tick(timeStep);
         m_myFirstParticleSystem->Tick(timeStep);
 
-        m_testWorld->physicsWorld()->update(timeStep);
-
-        for (int i = 0; i < m_testWorld->getObjects().size(); ++i)
-        {
-            m_testWorld->getObjects()[i]->tick(timeStep);
-        }
+        m_testWorld->tick(timeStep);
     }
 
 #if NEED_LEARN == 0
@@ -1501,6 +1510,69 @@ void TestRender::displayLogo()
     glUseProgram(0);
 }
 
+void TestRender::initMainRender()
+{
+    glGenFramebuffers(1, &m_mainFrameBuffer);
+    glGenRenderbuffers(1, &m_mainRenderBuffer);
+    glGenTextures(1, &m_mainRenderTexture);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_mainRenderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_mainRenderBuffer);
+
+    glBindTexture(GL_TEXTURE_2D, m_mainRenderTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_mainRenderTexture, 0);
+}
+
+void TestRender::renderMainBuffer()
+{
+    static Shader* shader = nullptr;
+    static GLuint vaoDebugTexturedRect = 0;
+
+    if (shader == nullptr)
+    {
+        shader = new Shader("bufferShader.vs", "bufferShader.fs");
+
+        GLfloat buffer_vertices[] = {
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f,
+
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, 0.0f, 1.0f,
+        };
+
+        GLuint vboDebugTexturedRect;
+        glGenVertexArrays(1, &vaoDebugTexturedRect);
+        glGenBuffers(1, &vboDebugTexturedRect);
+        glBindBuffer(GL_ARRAY_BUFFER, vboDebugTexturedRect);
+        glBindVertexArray(vaoDebugTexturedRect);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_vertices), buffer_vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+        //normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+        glBindVertexArray(0);
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    shader->Use();
+    glBindTexture(GL_TEXTURE_2D, m_mainRenderTexture);
+    glBindVertexArray(vaoDebugTexturedRect);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
 
 
 void TestRender::do_movement()
@@ -1521,63 +1593,6 @@ void TestRender::do_movement()
         m_testWorld->camera()->processKeyboard(Down, m_deltaTime);
 }
 
-
-
-void TestRender::loadPBR()
-{
-    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/albedo.png", "m_gold_albedo_texture_id");
-    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/normal.png", "m_gold_norm_texture_id");
-    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/metallic.png", "m_gold_metallic_texture_id");
-    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/roughness.png", "m_gold_roughness_texture_id");
-    m_textureManager->addTexture("textures/" + current_pbr_material_name + "/ao.png", "m_gold_ao_texture_id");
-
-    int newTextureNum = 4; // wall
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "testPbr_albedo");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "testPbr_normal");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "testPbr_metallic");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "testPbr_roughness");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "testPbr_ao");
-
-    newTextureNum = 5; // asphalt
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "asphaltPbr_albedo");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "asphaltPbr_normal");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "asphaltPbr_metallic");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "asphaltPbr_roughness");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "asphaltPbr_ao");
-
-    newTextureNum = 1; // grass
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "grassPbr_albedo");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "grassPbr_normal");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "grassPbr_metallic");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "grassPbr_roughness");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "grassPbr_ao");
-
-    newTextureNum = 2; // iron
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "ironPbr_albedo");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "ironPbr_normal");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "ironPbr_metallic");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "ironPbr_roughness");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "ironPbr_ao");
-
-    newTextureNum = 3; // plastic
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/albedo.png", "plasticPbr_albedo");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/normal.png", "plasticPbr_normal");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/metallic.png", "plasticPbr_metallic");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/roughness.png", "plasticPbr_roughness");
-    m_textureManager->addTexture("textures/" + pbr_material_names[newTextureNum] + "/ao.png", "plasticPbr_ao");
-
-    m_pbrShader->Use();
-    m_pbrShader->setInt("irradianceMap", 0);
-    m_pbrShader->setInt("prefilterMap", 1);
-    m_pbrShader->setInt("brdfLUT", 2);
-    m_pbrShader->setInt("material.albedoMap", 3);
-    m_pbrShader->setInt("material.normalMap", 4);
-    m_pbrShader->setInt("material.metallicMap", 5);
-    m_pbrShader->setInt("material.roughnessMap", 6);
-    m_pbrShader->setInt("material.aoMap", 7);
-    m_pbrShader->setInt("shadowMap", 8);
-    glUseProgram(0);
-}
 
 void TestRender::initSkyboxModel()
 {
@@ -1662,36 +1677,9 @@ void TestRender::initDepthMapFBO()
 
 void TestRender::loadRaceMapFromJson()
 {
-    QFile file("scene/second.json");
-
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QByteArray json = file.readAll();
-        file.close();
-
-        QJsonDocument doc = QJsonDocument::fromJson(json);
-        QJsonArray array = doc.array();
-
-        for (int i = 0; i < array.size(); ++i)
-        {
-            QJsonObject obj = array[i].toObject();
-
-            FuryBoxObject* object = FuryBoxObject::fromJson(obj, m_testWorld);
-            object->setShader(m_pbrShader);
-            m_testWorld->addObject(object);
-        }
-    }
-
-    if (!m_materialManager->materialExist("redRaceTriggerMaterial"))
-    {
-        FuryPbrMaterial* mat = m_materialManager->createPbrMaterial("redRaceTriggerMaterial");
-        mat->setAlbedoTexture("redCheckBox");
-        mat->setOpacity(0.5);
-
-        mat = m_materialManager->createPbrMaterial("greenRaceTriggerMaterial");
-        mat->setAlbedoTexture("greenCheckBox");
-        mat->setOpacity(0.5);
-    }
+    m_testWorld->loadRaceMap();
+    m_testWorld->createMaterials();
+    m_testWorld->createTextures();
 }
 
 
@@ -1726,34 +1714,4 @@ void renderQuad()
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
-}
-
-unsigned int loadTexture(const QString& path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height;
-    unsigned char *data = stbi_load(qUtf8Printable(path), &width, &height, 0, STBI_rgb_alpha);
-
-    if (data)
-    {
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << qUtf8Printable(path) << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
 }

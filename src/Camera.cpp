@@ -45,7 +45,7 @@ bool Camera::sphereInFrustum(FuryObject *_object)
 
     FuryModelManager* modelManager = FuryModelManager::instance();
 
-    const glm::vec3& minp = _object->getPosition();
+    const glm::vec3& minp = _object->getWorldPosition();
     const glm::vec3& scales = _object->scales();
     float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
     float radius = modelManager->modelByName(_object->modelName())->modelRadius();

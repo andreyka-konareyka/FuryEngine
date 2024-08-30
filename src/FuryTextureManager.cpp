@@ -75,33 +75,28 @@ void FuryTextureManager::deleteInstance()
 
 void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
 {
-    static QMutex mutexAddTexture;
-    QMutexLocker mutexLocker(&mutexAddTexture);
-
-
+    QMutexLocker mutexLocker(&m_textureMutex);
     QString texturePath = QFileInfo(_path).absoluteFilePath();
-    QMap<QString, FuryTexture*>::ConstIterator iter = m_textures.find(texturePath);
 
-    if (iter == m_textures.constEnd())
+    if (!m_textures.contains(texturePath))
     {
-        FuryTexture* texture = new FuryTexture(_path);
+        FuryTexture* texture = new FuryTexture(texturePath);
         m_textures.insert(texturePath, texture);
+
+        QMutexLocker mutexLocker2(&m_loadMutex);
         m_textureLoadQueue.enqueue(texture);
     }
 
     if (!_name.isEmpty())
     {
+        QMutexLocker mutexLocker(&m_nameMutex);
         m_nameToPath.insert(_name, texturePath);
     }
 }
 
-void FuryTextureManager::addTextureFromAnotherThread(const QString &_path, const QString &_name)
-{
-    m_texturesAddQueue.enqueue(qMakePair(_path, _name));
-}
-
 const FuryTexture& FuryTextureManager::textureByName(const QString& _name) const
 {
+    QMutexLocker mutexLocker(&m_nameMutex);
     QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
 
     if (pathIter == m_nameToPath.constEnd() || pathIter.value().isEmpty())
@@ -109,13 +104,15 @@ const FuryTexture& FuryTextureManager::textureByName(const QString& _name) const
         return m_emptyTexture;
     }
 
+    mutexLocker.unlock();
     return textureByPath(pathIter.value());
 }
 
 const FuryTexture& FuryTextureManager::textureByPath(const QString& _path) const
 {
-    QFileInfo texturePath(_path);
-    QMap<QString, FuryTexture*>::ConstIterator textureIter = m_textures.find(texturePath.absoluteFilePath());
+    QMutexLocker mutexLocker(&m_textureMutex);
+    QString texturePath = QFileInfo(_path).absoluteFilePath();
+    QMap<QString, FuryTexture*>::ConstIterator textureIter = m_textures.find(texturePath);
 
     if (textureIter == m_textures.constEnd() || !(textureIter.value()->isReady()))
     {
@@ -127,6 +124,7 @@ const FuryTexture& FuryTextureManager::textureByPath(const QString& _path) const
 
 QString FuryTextureManager::pathByName(const QString &_name) const
 {
+    QMutexLocker mutexLocker(&m_nameMutex);
     QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
 
     if (pathIter == m_nameToPath.constEnd())
@@ -144,7 +142,10 @@ void FuryTextureManager::loadTexturePart()
         GLuint textureID = 0;
         glGenTextures(1, &textureID);
 
+        QMutexLocker mutexLocker(&m_bindMutex);
         FuryTexture* texture = m_textureBindQueue.dequeue();
+        mutexLocker.unlock();
+
         texture->setIdOpenGL(textureID);
         int width = texture->width();
         int height = texture->height();
@@ -173,14 +174,7 @@ void FuryTextureManager::loadTexturePart()
 
         texture->setReady();
 
-        Debug(ru("Текстура загружена: (%1)").arg(texture->path()));
-    }
-
-
-    if (!m_texturesAddQueue.isEmpty())
-    {
-        QPair<QString, QString> pair = m_texturesAddQueue.dequeue();
-        addTexture(pair.first, pair.second);
+        Debug(ru("Текстура загружена: (%1) (id %2)").arg(texture->path()).arg(textureID));
     }
 }
 
@@ -199,14 +193,13 @@ void FuryTextureManager::stopLoopAndWait()
 
 void FuryTextureManager::infiniteLoop()
 {
-    static QMutex mutexInfiniteLoop;
     while (!m_needStop)
     {
         while (!m_textureLoadQueue.isEmpty())
         {
-            QMutexLocker mutexLocker(&mutexInfiniteLoop);
-
+            QMutexLocker mutexLocker(&m_loadMutex);
             FuryTexture* texture = m_textureLoadQueue.dequeue();
+            mutexLocker.unlock();
 
             int width, height;
             unsigned char* data = stbi_load(qUtf8Printable(texture->path()), &width, &height, 0, STBI_rgb_alpha);
@@ -221,7 +214,10 @@ void FuryTextureManager::infiniteLoop()
             texture->setWidth(width);
             texture->setHeight(height);
             texture->setLoaded();
+
+            QMutexLocker mutexLocker2(&m_bindMutex);
             m_textureBindQueue.enqueue(texture);
+            mutexLocker2.unlock();
         }
     }
 

@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include <QVector>
+#include <QObject>
 
 class Camera;
 class FuryObject;
@@ -14,7 +15,10 @@ namespace reactphysics3d
 
 
 //! Класс игрового мира
-class FuryWorld {
+class FuryWorld : public QObject
+{
+    Q_OBJECT
+
 public:
     /*!
      * \brief Конструктор
@@ -30,9 +34,26 @@ public:
      */
     void tick(double _dt);
 
+    //! Сброс мира
+    void resetWorld();
+
+    //! Поставить мир на паузу
+    inline void pauseWorld()
+    { m_started = false; }
+
+    //! Возобновить мир
+    inline void resumeWorld()
+    { m_started = true; }
+
     /*!
-     * \brief Добавление непрозрачный объекта
-     * \param[in] _object - Непрозрачный объект
+     * \brief Добавление корневого объекта мира
+     * \param[in] _object - Корневой объект
+     */
+    void addRootObject(FuryObject* _object);
+
+    /*!
+     * \brief Добавление объекта мира
+     * \param[in] _object - Объект
      */
     void addObject(FuryObject* _object);
 
@@ -46,10 +67,10 @@ public:
     void deleteCurrentCamera();
 
     /*!
-     * \brief Получение всех непрозрачных объектов
-     * \return Возвращает все непрозрачные объекты
+     * \brief Получение всех корневых объектов
+     * \return Возвращает все корневые объекты
      */
-    const QVector<FuryObject*>& getObjects();
+    const QVector<FuryObject*>& getRootObjects();
 
     /*!
      * \brief Получить все объекты
@@ -78,6 +99,20 @@ public:
     inline reactphysics3d::PhysicsWorld* physicsWorld() const
     { return m_physicsWorld; }
 
+    //! Загрузка гоночной трассы из json-файла
+    void loadRaceMap();
+    //! Создание материалов
+    void createMaterials();
+    //! Создание текстур
+    void createTextures();
+
+signals:
+    void addObjectSignal(FuryObject* _object);
+    void parentChangedSignal(FuryObject* _object);
+
+private slots:
+    void parentChangedSlot();
+
 private:
     //! Главный объект физики, к которому принадлежит мир
     reactphysics3d::PhysicsCommon* m_physicsCommon;
@@ -86,8 +121,13 @@ private:
 
     //! Текущая камера
     Camera* m_currentCamera;
-    //! Список непрозрачный объектов
+    //! Список корневых объектов
     QVector<FuryObject*> m_objects;
+    //! Список всех объектов
+    QVector<FuryObject*> m_allObjects;
+
+    //! Запущена ли симуляция
+    bool m_started;
 };
 
 #endif // WORLD_H

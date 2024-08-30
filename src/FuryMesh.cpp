@@ -15,6 +15,9 @@ FuryMesh::FuryMesh(FuryModel *_parentModel, const QVector<Vertex> &_vertices,
     m_parentModel(_parentModel),
     m_vertices(_vertices),
     m_indices(_indices),
+    VAO(0),
+    VBO(0),
+    EBO(0),
     m_materialName(_material),
     m_transformation(_transformation),
     m_minimumVertex(_minVertex),
@@ -37,17 +40,22 @@ void FuryMesh::draw(Shader *_shader, FuryMaterial *_material)
         _material->setShaderMaterial(_shader);
     }
 
-    // Отрисовка
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    if (VAO != 0)
+    { // Отрисовка
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
 
 void FuryMesh::drawShadowMap()
 {
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    if (VAO != 0)
+    {
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
 
 void FuryMesh::setupMesh()

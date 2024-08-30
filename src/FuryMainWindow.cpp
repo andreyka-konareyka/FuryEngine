@@ -2,14 +2,21 @@
 #include "ui_FuryMainWindow.h"
 
 #include "FuryLogger.h"
+#include "FuryObjectsTreeModel.h"
+#include "FuryVectorInputWidget.h"
 #include "FuryMaterialEditDialog.h"
 
-#include <QMessageBox>
 #include <QFile>
+#include <QLineEdit>
+#include <QSpacerItem>
+#include <QMessageBox>
+#include <QMetaProperty>
 
 FuryMainWindow::FuryMainWindow(QWidget* _parent) :
     QMainWindow(_parent),
-    m_ui(new Ui::FuryMainWindow)
+    m_ui(new Ui::FuryMainWindow),
+    m_treeModel(new FuryObjectsTreeModel),
+    m_currentObject(nullptr)
 {
     Debug(ru("Создание главного окна"));
     prepareUi();
@@ -18,6 +25,7 @@ FuryMainWindow::FuryMainWindow(QWidget* _parent) :
 FuryMainWindow::~FuryMainWindow()
 {
     Debug(ru("Удаление главного окна"));
+    delete m_treeModel;
     delete m_ui;
 }
 
@@ -37,20 +45,6 @@ void FuryMainWindow::onZoomSliderMoveSlot(int _value)
     m_ui->lbCameraZoom->setText(ru("Увеличение камеры: %1").arg(_value));
 }
 
-void FuryMainWindow::onCarCameraMoveSliderSlot()
-{
-    float x = m_ui->carCamXSlider->value() / 10.0f;
-    float y = m_ui->carCamYSlider->value() / 10.0f;
-
-    QString camX = QString("CarCam.x: %1").arg(x);
-    QString camY = QString("CarCam.y: %1").arg(y);
-
-    m_ui->carCamXLabel->setText(camX);
-    m_ui->carCamYLabel->setText(camY);
-
-    m_ui->openGLWidget->setCarCameraPos(x, y);
-}
-
 void FuryMainWindow::onSetWindowTitleSlot(const QString &_title)
 {
 //    setWindowTitle(_title);
@@ -60,20 +54,6 @@ void FuryMainWindow::onSetWindowTitleSlot(const QString &_title)
 void FuryMainWindow::onSetComputerLoadSlot(int _value)
 {
     m_ui->progressBar->setValue(_value);
-}
-
-void FuryMainWindow::onCarSpringLenghtSliderSlot()
-{
-    float value = m_ui->springLenghtSlider->value() / 100.0;
-    m_ui->springLenghtLabel->setText(ru("Длина пружины: %1").arg(value));
-    m_ui->openGLWidget->setCarSpringLenght(value);
-}
-
-void FuryMainWindow::onCarSpringKSliderSlot()
-{
-    float value = m_ui->springKSlider->value() / 100.0 * 800 + 100;
-    m_ui->springKLabel->setText(ru("Жёсткость пружины: %1").arg(value));
-    m_ui->openGLWidget->setCarSpringK(value);
 }
 
 void FuryMainWindow::onShadowNearSliderSlot()
@@ -132,15 +112,158 @@ void FuryMainWindow::onMaterialEditSlot()
     dialog.exec();
 }
 
+void FuryMainWindow::selectObjectSlot(const QModelIndex &_current, const QModelIndex &_previous)
+{
+    m_currentObject = nullptr;
+
+    if (_previous.isValid())
+    {
+        FuryObject* object = m_treeModel->objectByIndex(_previous);
+        object->setSelectedInEditor(false);
+    }
+
+    if (_current.isValid())
+    {
+        FuryObject* object = m_treeModel->objectByIndex(_current);
+        object->setSelectedInEditor(true);
+        m_currentObject = object;
+
+        while (m_ui->objectProperties->layout()->count() > 0)
+        {
+            QLayoutItem* tmp = m_ui->objectProperties->layout()->takeAt(0);
+            delete tmp->widget();
+            delete tmp;
+        }
+
+        m_ui->objectProperties->update();
+
+        for (int i = 0; i < object->metaObject()->propertyCount(); ++i)
+        {
+            const char* propName = object->metaObject()->property(i).name();
+            QVariant prop = object->property(propName);
+            qDebug() << propName << prop;
+
+            QString text(propName);
+            m_ui->objectProperties->layout()->addWidget(new QLabel(text, this));
+
+            if (QString(prop.typeName()) == "glm::vec<3,float,0>")
+            {
+                glm::vec3 vec = prop.value<glm::vec3>();
+                qDebug() << vec.x << vec.y << vec.z;
+
+                FuryVectorInputWidget* input = new FuryVectorInputWidget(vec, this);
+                input->setProperty("propName", QByteArray(propName));
+                m_ui->objectProperties->layout()->addWidget(input);
+
+                connect(input, &FuryVectorInputWidget::vectorChangedSignal,
+                        this, qOverload<const glm::vec3&>(&FuryMainWindow::propertyChangedSlot));
+            }
+            else
+            {
+                QLineEdit* input = new QLineEdit(prop.toString(), this);
+                input->setProperty("propName", QByteArray(propName));
+                m_ui->objectProperties->layout()->addWidget(input);
+
+                connect(input, &QLineEdit::editingFinished,
+                        this, qOverload<>(&FuryMainWindow::propertyChangedSlot));
+            }
+        }
+
+        m_ui->objectProperties->layout()->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
+        qDebug() << "";
+    }
+}
+
+void FuryMainWindow::propertyChangedSlot(const glm::vec3 &_vector)
+{
+    if (m_currentObject == nullptr)
+    {
+        return;
+    }
+
+    FuryVectorInputWidget* input = dynamic_cast<FuryVectorInputWidget*>(sender());
+
+    if (input == nullptr)
+    {
+        return;
+    }
+
+    QVariant prop;
+    prop.setValue(_vector);
+    m_currentObject->setProperty(input->property("propName").toByteArray().constData(),
+                                 prop);
+}
+
+void FuryMainWindow::propertyChangedSlot()
+{
+    if (m_currentObject == nullptr)
+    {
+        return;
+    }
+
+    QLineEdit* input = dynamic_cast<QLineEdit*>(sender());
+
+    if (input == nullptr)
+    {
+        return;
+    }
+
+    m_currentObject->setProperty(input->property("propName").toByteArray().constData(),
+                                 input->text());
+}
+
+void FuryMainWindow::resetWorldSlot()
+{
+    m_ui->openGLWidget->getTestWorld()->resetWorld();
+}
+
+void FuryMainWindow::pauseWorldSlot()
+{
+    m_ui->openGLWidget->getTestWorld()->pauseWorld();
+}
+
+void FuryMainWindow::resumeWorldSlot()
+{
+    m_ui->openGLWidget->getTestWorld()->resumeWorld();
+}
+
 void FuryMainWindow::prepareUi()
 {
     m_ui->setupUi(this);
     initConnections();
     loadStyle();
+
+    m_ui->toolBar->setMovable(false);
+    QAction* resetAction = new QAction(ru("Сброс сцены"), this);
+    QAction* pauseAction = new QAction(ru("Пауза"), this);
+    QAction* resumeAction = new QAction(ru("Старт"), this);
+    m_ui->toolBar->addAction(resetAction);
+    m_ui->toolBar->addAction(pauseAction);
+    m_ui->toolBar->addAction(resumeAction);
+
     m_ui->statusbar->showMessage(ru("Обучаем..."));
 
     m_ui->splitter->setStretchFactor(0, 1);
     m_ui->splitter->setStretchFactor(1, 0);
+
+
+    m_ui->tvSceneObjects->setModel(m_treeModel);
+
+    connect(m_ui->openGLWidget->getTestWorld(), &FuryWorld::addObjectSignal,
+            m_treeModel, &FuryObjectsTreeModel::addObjectSlot);
+    connect(m_ui->openGLWidget->getTestWorld(), &FuryWorld::parentChangedSignal,
+            m_treeModel, &FuryObjectsTreeModel::parentChangedSlot);
+
+    connect(m_ui->tvSceneObjects->selectionModel(), &QItemSelectionModel::currentChanged,
+            this, &FuryMainWindow::selectObjectSlot);
+
+    connect(resetAction, &QAction::triggered,
+            this, &FuryMainWindow::resetWorldSlot);
+    connect(pauseAction, &QAction::triggered,
+            this, &FuryMainWindow::pauseWorldSlot);
+    connect(resumeAction, &QAction::triggered,
+            this, &FuryMainWindow::resumeWorldSlot);
 }
 
 void FuryMainWindow::initConnections()
@@ -151,20 +274,11 @@ void FuryMainWindow::initConnections()
             this, &FuryMainWindow::close);
     connect(m_ui->cameraZoomSlider, &QSlider::valueChanged,
             this, &FuryMainWindow::onZoomSliderMoveSlot);
-    connect(m_ui->carCamXSlider, &QSlider::valueChanged,
-            this, &FuryMainWindow::onCarCameraMoveSliderSlot);
-    connect(m_ui->carCamYSlider, &QSlider::valueChanged,
-            this, &FuryMainWindow::onCarCameraMoveSliderSlot);
 
     connect(m_ui->openGLWidget, &TestRender::setWindowTitleSignal,
             this, &FuryMainWindow::onSetWindowTitleSlot);
     connect(m_ui->openGLWidget, &TestRender::setComputerLoadSignal,
             this, &FuryMainWindow::onSetComputerLoadSlot);
-
-    connect(m_ui->springLenghtSlider, &QSlider::valueChanged,
-            this, &FuryMainWindow::onCarSpringLenghtSliderSlot);
-    connect(m_ui->springKSlider, &QSlider::valueChanged,
-            this, &FuryMainWindow::onCarSpringKSliderSlot);
 
     connect(m_ui->shadowNearSlider, &QSlider::valueChanged,
             this, &FuryMainWindow::onShadowNearSliderSlot);

@@ -1,11 +1,12 @@
 # FuryEngine
 3D-движок для обучения ИИ.
 В данный момент находится в разработке.
-### Готовность: 39.85%
+### Готовность: 42.61%
 
 Пока совмещён с приложением для обучения Автопилота для автомобиля
 ![FuryWindowWithLogo](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f5bf35a4-b0c9-421b-9fb4-3fd5de8ab188)
 ### Графическая составляющая
+![image](https://github.com/user-attachments/assets/440a2e65-d411-4f6b-8b8b-4323f42b4b62)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/83220cd9-2068-400f-a3dd-fa289dd2d06c)
 ![2](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/c093d1cd-d4d2-4882-b146-627a8567a61f)
 ![image](https://github.com/andreyka-konareyka/FuryEngine/assets/74678430/f8c5af31-91b2-4b69-9a9c-79b5c36138c1)

@@ -25,22 +25,6 @@ public:
     ~FuryModel();
 
     /*!
-     * \brief Отрисовка с заданным материалом
-     * \param[in] _shader - Шейдер
-     * \param[in] _transformation - Трансформация модели
-     * \param[in] _material - Материал. Если nullptr, то берётся материал из меша
-     */
-    void draw(Shader* _shader, const glm::mat4& _transformation,
-              FuryMaterial* _material = nullptr);
-
-    /*!
-     * \brief Отрисовка для карты теней
-     * \param[in] _shader - Шейдер
-     * \param[in] _transformation - Трансформация модели
-     */
-    void drawShadowMap(Shader* _shader, const glm::mat4& _transformation);
-
-    /*!
      * \brief Получение пути к файлу модели
      * \return Возвращает путь к файлу модели
      */
@@ -81,6 +65,20 @@ public:
      */
     inline float modelRadius()
     {  return m_modelRadius; }
+
+    /*!
+     * \brief Получение минимальной координаты куба, в которую вписана модель
+     * \return Возвращает координату
+     */
+    inline const glm::vec3& minVertex() const
+    { return m_minimumVertex; }
+
+    /*!
+     * \brief Получение максимальную координаты куба, в которую вписана модель
+     * \return Возвращает координату
+     */
+    inline const glm::vec3& maxVertex() const
+    { return m_maximumVertex; }
 
     /*!
      * \brief Получение мешей модели

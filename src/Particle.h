@@ -29,7 +29,7 @@ public:
     bool m_isLiving;
 
     Particle(const glm::vec3& _position, double _scale, const glm::vec3& _speed,
-             const glm::vec4& _color, GLuint _textureId, float _lifeTime, Shader *_shader);
+             const glm::vec4& _color, const QString& _textureName, float _lifeTime, Shader *_shader);
     void Tick(float _dt);
     void Draw(Camera& _camera, int& _width, int& _height);
     void Draw(Shader& _shader);
@@ -40,6 +40,7 @@ private:
     unsigned int m_VBO, m_EBO, m_VAO;
     Shader* m_particleShader;
     GLuint m_textureId;
+    QString m_textureName;
 };
 
 #endif // PARTICLE_H

@@ -8,9 +8,9 @@
 static double chance_create_particle = 0.15;
 static double default_particle_size = 1.0;
 
-ParticleSystem::ParticleSystem(glm::vec3& pos, GLuint tex_id, int count) {
+ParticleSystem::ParticleSystem(glm::vec3& pos, const QString &_textureName, int count) {
     this->position = pos;
-    this->texture_id = tex_id;
+    this->m_textureName = _textureName;
     this->count = count;
     this->particle_shader = Shader("particle.vs", "particle.fs");
     //SetupParticleMesh();
@@ -27,7 +27,7 @@ ParticleSystem::ParticleSystem(glm::vec3& pos, GLuint tex_id, int count) {
 
         double particle_scale = default_particle_size;
 
-        Particle new_particle(pos, particle_scale, speed, color, tex_id, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+        Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
         //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
         m_particles.push_back(new_particle);
     }
@@ -49,7 +49,7 @@ void ParticleSystem::Tick(float deltaTime) {
 
             double particle_scale = default_particle_size;
 
-            Particle new_particle(pos, particle_scale, speed, color, texture_id, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+            Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
             //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
             m_particles[i] = new_particle;
             /*_particles[i].position = pos;
@@ -72,7 +72,7 @@ void ParticleSystem::Tick(float deltaTime) {
 
             double particle_scale = default_particle_size;
 
-            Particle new_particle(pos, particle_scale, speed, color, texture_id, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+            Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
             //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
             m_particles.push_back(new_particle);
         }

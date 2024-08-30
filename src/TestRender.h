@@ -58,6 +58,9 @@ public:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
+    inline FuryWorld* getTestWorld() const
+    { return m_testWorld; }
+
     /*!
      * \brief Установка увеличения камеры
      * \param[in] _value - Увеличение камеры
@@ -136,7 +139,6 @@ private:
     FuryEventListener* m_eventListener;
 
 
-    void loadPBR();
     void initSkyboxModel();
     void initDepthMapFBO();
     void loadRaceMapFromJson();
@@ -153,8 +155,12 @@ private:
     void displayBuffer(GLuint _bufferId);
     void displayLogo();
 
+    //! Инициализация буферов главного рендеринга
+    void initMainRender();
+    //! Рендер отрисованной сцены на экран из буфера
+    void renderMainBuffer();
 
-    FuryBoxObject* m_bigFloor;
+
     FuryObject* m_sunVisualBox;
     FuryWorld* m_testWorld;
 
@@ -165,8 +171,6 @@ private:
     Shader* m_simpleDepthShader;
     Shader* m_brdfShader;
 
-    GLuint m_particle_texture_id;
-
     unsigned int m_irradianceMap = 0;
     unsigned int m_prefilterMap;
     unsigned int m_brdfLUTTexture = 0;
@@ -174,7 +178,6 @@ private:
     GLuint m_envCubemap = 0;
 
 
-    GLuint m_smoke_texture_id;
     Particle* m_myFirstParticle;
     ParticleSystem* m_myFirstParticleSystem;
 
@@ -207,6 +210,10 @@ private:
     float m_shadowCamDistance = 37;
 
     bool m_needDebugRender;
+
+    GLuint m_mainFrameBuffer = 0;
+    GLuint m_mainRenderBuffer = 0;
+    GLuint m_mainRenderTexture = 0;
 
 private:
     //! Камеры

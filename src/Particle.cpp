@@ -1,5 +1,7 @@
 #include "Particle.h"
 
+#include "FuryTextureManager.h"
+
 static unsigned int defaultVBO, defaultEBO, defaultVAO;
 
 void InitParticleMesh()
@@ -32,14 +34,14 @@ void InitParticleMesh()
 
 Particle::Particle(const glm::vec3 &_position, double _scale,
                    const glm::vec3 &_speed, const glm::vec4 &_color,
-                   GLuint _textureId, float _lifeTime, Shader *_shader)
+                   const QString &_textureName, float _lifeTime, Shader *_shader)
 {
     this->m_particleShader = _shader;
     this->m_position = _position;
     this->m_scale = _scale;
     this->m_speed = _speed;
     this->m_color = _color;
-    this->m_textureId = _textureId;
+    this->m_textureName = _textureName;
     this->m_lifeTime = _lifeTime;
     this->m_isLiving = true;
 
@@ -94,7 +96,8 @@ void Particle::Draw(Camera& _camera, int& _width, int& _height)
 
     m_particleShader->setVec4("objectColor", m_color);
 
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    FuryTextureManager* manager = FuryTextureManager::instance();
+    glBindTexture(GL_TEXTURE_2D, manager->textureByName(m_textureName).idOpenGL());
 
     //Draw(particleShader);
     glBindVertexArray(m_VAO);

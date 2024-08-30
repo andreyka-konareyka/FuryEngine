@@ -87,13 +87,13 @@ void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::Callbac
         FuryObject* tempObj1 = static_cast<FuryObject*>(overlapPair.getBody1()->getUserData());
         FuryObject* tempObj2 = static_cast<FuryObject*>(overlapPair.getBody2()->getUserData());
 
-        if (tempObj2->name() == "carBody")
+        if (tempObj2->objectName() == "AI_car")
         {
             FuryObject* tempObj3 = tempObj1;
             tempObj1 = tempObj2;
             tempObj2 = tempObj3;
         }
-        else if (tempObj1->name() != "carBody")
+        else if (tempObj1->objectName() != "AI_car")
         {
             // Столкновение колёс, их не считаем
             continue;
@@ -110,7 +110,7 @@ void FuryEventListener::onTrigger(const reactphysics3d::OverlapCallback::Callbac
 
             if (m_carObject != nullptr)
             {
-                int number = tempObj2->name().split(' ').last().toInt();
+                int number = tempObj2->objectName().split(' ').last().toInt();
                 m_carObject->onTrigger(number);
             }
         }

@@ -11,6 +11,7 @@
 #include <QMap>
 #include <QString>
 #include <QQueue>
+#include <QMutex>
 
 
 //! Класс менеджера текстур
@@ -38,13 +39,6 @@ public:
     * \param[in] _name - Название текстуры (псевдоним)
     */
     void addTexture(const QString& _path, const QString& _name = "");
-
-    /*!
-     * \brief Добавление текстур из другого потока
-    * \param[in] _path - Путь к файлу текстуры
-    * \param[in] _name - Название текстуры (псевдоним)
-     */
-    void addTextureFromAnotherThread(const QString& _path, const QString& _name = "");
 
     /*!
     * \brief Получить текстуру по названию
@@ -104,8 +98,14 @@ private:
     //! Очередь текстур на связывание с OpenGL
     QQueue<FuryTexture*> m_textureBindQueue;
 
-    //! Очередь добавления текстур (для другого потока)
-    QQueue<QPair<QString, QString>> m_texturesAddQueue;
+    //! Мьютекс для очереди загрузки
+    mutable QMutex m_loadMutex;
+    //! Мьютекс для очереди связывания с OpenGL
+    mutable QMutex m_bindMutex;
+    //! Мьютекс для m_nameToPath
+    mutable QMutex m_nameMutex;
+    //! Мьютекс для m_textures
+    mutable QMutex m_textureMutex;
 
     //! Пустая текстура по умолчанию
     FuryTexture m_emptyTexture;
