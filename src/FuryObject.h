@@ -30,7 +30,7 @@ class FuryObject : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(glm::vec3 position READ initLocalPosition WRITE setInitLocalPosition)
-    Q_PROPERTY(glm::vec3 rotation READ initLocalRotation WRITE setInitLocalRotation)
+    Q_PROPERTY(glm::vec3 rotation READ initLocalRotationDegrees WRITE setInitLocalRotationDegrees)
     Q_PROPERTY(glm::vec3 scales READ scales WRITE setScales)
     Q_PROPERTY(QString modelName READ modelName WRITE setModelName)
     Q_PROPERTY(QString materialName READ materialName WRITE setMaterialName)
@@ -86,7 +86,7 @@ public:
      * \brief Получение позиции от физичиского мира
      * \return Возвращает позицию
      */
-    inline const glm::vec3& getWorldPosition() const
+    inline const glm::vec3& worldPosition() const
     { return m_worldPosition; }
 
     /*!
@@ -140,7 +140,7 @@ public:
      * \brief Получение вращения от физического мира
      * \return Возвращает вращение
      */
-    inline const glm::vec3& getWorldRotation() const
+    inline const glm::vec3& worldRotation() const
     { return m_worldRotation; }
 
     /*!
@@ -150,17 +150,29 @@ public:
     void setWorldRotation(const glm::vec3& _rotation);
 
     /*!
-     * \brief Получение начального поворота
+     * \brief Получение начального поворота в радианах
      * \return Возвращает начальный поворот
      */
     inline const glm::vec3& initLocalRotation() const
     { return m_initLocalRotation; }
 
     /*!
-     * \brief Установка начального поворота
+     * \brief Установка начального поворота в радианах
      * \param[in] _rotation - Начальный поворот
      */
     void setInitLocalRotation(const glm::vec3& _rotation);
+
+    /*!
+     * \brief Получение начального поворота в градусах
+     * \return Возвращает начальный поворот
+     */
+    glm::vec3 initLocalRotationDegrees() const;
+
+    /*!
+     * \brief Установка начального поворота в градусах
+     * \param[in] _rotation - Начальный поворот
+     */
+    void setInitLocalRotationDegrees(const glm::vec3& _rotation);
 
     /*!
      * \brief Получение масштабы по осям

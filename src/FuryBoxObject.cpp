@@ -80,17 +80,17 @@ QJsonObject FuryBoxObject::toJson()
     QJsonObject result;
 
     result["name"] = objectName();
-    result["position"] = QString("(%1; %2; %3)").arg(getWorldPosition().x)
-                                                .arg(getWorldPosition().y)
-                                                .arg(getWorldPosition().z);
+    result["position"] = QString("(%1; %2; %3)").arg(worldPosition().x)
+                                                .arg(worldPosition().y)
+                                                .arg(worldPosition().z);
 
     result["scales"] = QString("(%1; %2; %3)").arg(scales().x)
                                               .arg(scales().y)
                                               .arg(scales().z);
 
-    result["rotate"] = QString("(%1; %2; %3)").arg(getWorldRotation().x)
-                                              .arg(getWorldRotation().y)
-                                              .arg(getWorldRotation().z);
+    result["rotate"] = QString("(%1; %2; %3)").arg(worldRotation().x)
+                                              .arg(worldRotation().y)
+                                              .arg(worldRotation().z);
 
     result["textureScales"] = QString("(%1; %2)").arg(textureScales().x)
                                                  .arg(textureScales().y);

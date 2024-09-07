@@ -137,6 +137,22 @@ void FuryObject::setInitLocalRotation(const glm::vec3 &_rotation)
     reset();
 }
 
+glm::vec3 FuryObject::initLocalRotationDegrees() const
+{
+    constexpr float scale = 180.0f / 3.14f;
+    return glm::vec3(m_initLocalRotation.x * scale,
+                     m_initLocalRotation.y * scale,
+                     m_initLocalRotation.z * scale);
+}
+
+void FuryObject::setInitLocalRotationDegrees(const glm::vec3 &_rotation)
+{
+    constexpr float scale = 3.14f / 180.0f;
+    setInitLocalRotation(glm::vec3(_rotation.x * scale,
+                                   _rotation.y * scale,
+                                   _rotation.z * scale));
+}
+
 glm::mat4 FuryObject::getOpenGLTransform() const
 {
     float rawMatrix[16];

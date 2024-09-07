@@ -82,7 +82,7 @@ void CarObject::tick(double _dt)
 {
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        glm::vec3 tmp1 = m_objectWheels[i]->getWorldPosition();
+        glm::vec3 tmp1 = m_objectWheels[i]->worldPosition();
         // Create the ray
         reactphysics3d::Vector3 startPoint(tmp1.x, tmp1.y, tmp1.z);
         reactphysics3d::Vector3 endPoint = m_objectWheels[i]->physicsBody()->getWorldPoint(reactphysics3d::Vector3(0, -m_springLenght, 0));
@@ -275,7 +275,7 @@ QVector<float> CarObject::getRays()
         float x = std::cos(2 * 3.14 / rayCount * i);
         float z = std::sin(2 * 3.14 / rayCount * i);
 
-        glm::vec3 tmp1 = getWorldPosition() - glm::vec3(0, 0.25, 0);
+        glm::vec3 tmp1 = worldPosition() - glm::vec3(0, 0.25, 0);
         reactphysics3d::Vector3 tmp2 = physicsBody()->getWorldPoint(reactphysics3d::Vector3(rayLenght * x, 0, rayLenght * z));
         glm::vec3 tmp3(tmp2.x, tmp2.y, tmp2.z);
         tmp3 -= glm::vec3(0, 0.25, 0);
@@ -373,7 +373,7 @@ void CarObject::onTrigger(int _number)
 
 glm::vec3 CarObject::calcNextTriggerVector(const glm::vec3 &_trigger)
 {
-    glm::vec3 vector = _trigger - getWorldPosition();
+    glm::vec3 vector = _trigger - worldPosition();
     vector = glm::normalize(vector);
     rp3d::Vector3 worldVector(vector.x, vector.y, vector.z);
     rp3d::Vector3 localVector = physicsBody()->getLocalVector(worldVector);

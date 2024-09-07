@@ -610,13 +610,17 @@ void TestRender::render()
                 }
 
                 glm::mat4 modelMatrix = obj->getOpenGLTransform();
+                modelMatrix = glm::scale(modelMatrix, glm::vec3(obj->scales().x,
+                                                                obj->scales().y,
+                                                                obj->scales().z));
                 glm::vec3 modelSizes = model->maxVertex() - model->minVertex();
                 glm::vec3 modelOffset = (model->maxVertex() + model->minVertex()) / 2.0f;
                 modelMatrix *= obj->modelTransform();
+                modelMatrix = glm::scale(modelMatrix, glm::vec3(modelSizes.x,
+                                                                modelSizes.y,
+                                                                modelSizes.z));
+
                 modelMatrix = glm::translate(modelMatrix, modelOffset);
-                modelMatrix = glm::scale(modelMatrix, glm::vec3(modelSizes.x * obj->scales().x,
-                                                                modelSizes.y * obj->scales().y,
-                                                                modelSizes.z * obj->scales().z));
                 shader->setMat4("model", modelMatrix);
                 shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
@@ -704,14 +708,14 @@ void TestRender::render()
             { // Отрисовка лучей у машины
 
                 glm::mat4 modelMatrix(1.0f);
-                modelMatrix = glm::translate(modelMatrix, obj->getWorldPosition());
+                modelMatrix = glm::translate(modelMatrix, obj->worldPosition());
                 modelMatrix = glm::scale(modelMatrix, obj->scales());
                 modelMatrix *= obj->modelTransform();
                 modelMatrix *= mesh->transformation();
                 shader->setMat4("model", modelMatrix);
                 shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
-                glm::vec3 direct = m_carObject->getWorldPosition() - obj->getWorldPosition();
+                glm::vec3 direct = m_carObject->worldPosition() - obj->worldPosition();
                 direct /= obj->scales().x;
                 glBegin(GL_LINES);
                 glVertex3d(0, 0, 0);
@@ -818,7 +822,7 @@ void TestRender::render()
         {
             QList<QPair<float, QPair<FuryObject*, FuryMesh*>>> sorted;
             for (unsigned int i = 0; i < meshesForRender2.size(); i++){
-                float distance = glm::length(m_testWorld->camera()->position() - meshesForRender2[i].first->getWorldPosition());
+                float distance = glm::length(m_testWorld->camera()->position() - meshesForRender2[i].first->worldPosition());
                 sorted.append(qMakePair(distance, meshesForRender2[i]));
             }
 
@@ -902,14 +906,14 @@ void TestRender::render()
                 { // Отрисовка лучей у машины
 
                     glm::mat4 modelMatrix(1.0f);
-                    modelMatrix = glm::translate(modelMatrix, obj->getWorldPosition());
+                    modelMatrix = glm::translate(modelMatrix, obj->worldPosition());
                     modelMatrix = glm::scale(modelMatrix, obj->scales());
                     modelMatrix *= obj->modelTransform();
                     modelMatrix *= mesh->transformation();
                     shader->setMat4("model", modelMatrix);
                     shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
-                    glm::vec3 direct = m_carObject->getWorldPosition() - obj->getWorldPosition();
+                    glm::vec3 direct = m_carObject->worldPosition() - obj->worldPosition();
                     direct /= obj->scales().x;
                     glBegin(GL_LINES);
                     glVertex3d(0, 0, 0);

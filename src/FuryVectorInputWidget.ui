@@ -33,7 +33,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leX"/>
+      <widget class="QLineEdit" name="leX">
+       <property name="styleSheet">
+        <string notr="true">border-left: 3px solid red;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
@@ -46,7 +50,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leY"/>
+      <widget class="QLineEdit" name="leY">
+       <property name="styleSheet">
+        <string notr="true">border-left: 3px solid green;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_3">
@@ -59,7 +67,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leZ"/>
+      <widget class="QLineEdit" name="leZ">
+       <property name="styleSheet">
+        <string notr="true">border-left: 3px solid blue;</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

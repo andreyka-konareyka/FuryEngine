@@ -51,9 +51,9 @@ QJsonObject FurySphereObject::toJson()
     QJsonObject result;
 
     result["name"] = objectName();
-    result["position"] = QString("(%1; %2; %3)").arg(getWorldPosition().x)
-                                                .arg(getWorldPosition().y)
-                                                .arg(getWorldPosition().z);
+    result["position"] = QString("(%1; %2; %3)").arg(worldPosition().x)
+                                                .arg(worldPosition().y)
+                                                .arg(worldPosition().z);
     result["scale"] = scales().x;
 
     if (physicsBody()->getNbColliders() == 0)
