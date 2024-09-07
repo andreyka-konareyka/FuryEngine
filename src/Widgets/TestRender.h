@@ -26,16 +26,13 @@
 
 
 #include "FuryWorld.h"
-#include "FuryBoxObject.h"
-#include "FuryTextureManager.h"
+#include "Managers/FuryTextureManager.h"
 #include "CarObject.h"
-#include "FuryEventListener.h"
-#include "FuryMaterial.h"
-#include "FuryModel.h"
-#include "FuryModelManager.h"
-#include "FuryMaterialManager.h"
+#include "Physics/FuryEventListener.h"
+#include "Managers/FuryModelManager.h"
+#include "Managers/FuryMaterialManager.h"
 #include "FuryScript.h"
-#include "FuryBaseLocalKeyMapper.h"
+#include "LocalKeyboard/FuryBaseLocalKeyMapper.h"
 
 
 #include <QOpenGLWidget>

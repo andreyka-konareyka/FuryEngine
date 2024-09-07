@@ -3,9 +3,9 @@
 #include "Shader.h"
 #include "FuryWorld.h"
 #include "FuryPbrMaterial.h"
-#include "FurySphereObject.h"
-#include "FuryRaycastCallback.h"
-#include "FuryMaterialManager.h"
+#include "DefaultObjects/FurySphereObject.h"
+#include "Physics/FuryRaycastCallback.h"
+#include "Managers/FuryMaterialManager.h"
 
 #include <QString>
 

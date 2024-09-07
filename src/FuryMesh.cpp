@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "FuryModel.h"
 #include "FuryMaterial.h"
-#include "FuryMaterialManager.h"
+#include "Managers/FuryMaterialManager.h"
 
 
 FuryMesh::FuryMesh(FuryModel *_parentModel, const QVector<Vertex> &_vertices,

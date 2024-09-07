@@ -1,10 +1,10 @@
 #include "FuryModel.h"
 
 #include "Shader.h"
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 #include "FuryMaterial.h"
 #include "FuryPbrMaterial.h"
-#include "FuryMaterialManager.h"
+#include "Managers/FuryMaterialManager.h"
 
 #include <QFileInfo>
 #include <numeric>

@@ -1,6 +1,6 @@
 #include "Particle.h"
 
-#include "FuryTextureManager.h"
+#include "Managers/FuryTextureManager.h"
 
 static unsigned int defaultVBO, defaultEBO, defaultVAO;
 

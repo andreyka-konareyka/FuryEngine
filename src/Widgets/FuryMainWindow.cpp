@@ -1,7 +1,7 @@
 #include "FuryMainWindow.h"
 #include "ui_FuryMainWindow.h"
 
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 #include "FuryObjectsTreeModel.h"
 #include "FuryVectorInputWidget.h"
 #include "FuryMaterialEditDialog.h"

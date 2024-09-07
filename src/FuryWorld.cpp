@@ -1,13 +1,13 @@
 #include "FuryWorld.h"
 
 #include "Camera.h"
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 #include "FuryObject.h"
-#include "FuryBoxObject.h"
+#include "DefaultObjects/FuryBoxObject.h"
 #include "FuryPbrMaterial.h"
-#include "FurySphereObject.h"
-#include "FuryTextureManager.h"
-#include "FuryMaterialManager.h"
+#include "DefaultObjects/FurySphereObject.h"
+#include "Managers/FuryTextureManager.h"
+#include "Managers/FuryMaterialManager.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 

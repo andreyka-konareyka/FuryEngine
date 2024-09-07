@@ -1,11 +1,12 @@
 #include "TestRender.h"
 
 
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 #include "FuryScript.h"
+#include "DefaultObjects/FuryBoxObject.h"
 #include "FuryPbrMaterial.h"
-#include "FurySphereObject.h"
-#include "FuryRussianLocalKeyMapper.h"
+#include "DefaultObjects/FurySphereObject.h"
+#include "LocalKeyboard/FuryRussianLocalKeyMapper.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <stb_image.h>

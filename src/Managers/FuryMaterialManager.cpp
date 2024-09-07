@@ -1,7 +1,7 @@
 #include "FuryMaterialManager.h"
 
-#include "FuryLogger.h"
-#include "FuryException.h"
+#include "Logger/FuryLogger.h"
+#include "Logger/FuryException.h"
 #include "FuryMaterial.h"
 #include "FuryPbrMaterial.h"
 

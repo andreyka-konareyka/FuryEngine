@@ -1,7 +1,7 @@
 #include "FuryPbrMaterial.h"
 
 #include "Shader.h"
-#include "FuryTextureManager.h"
+#include "Managers/FuryTextureManager.h"
 
 #include <QDir>
 

@@ -2,9 +2,9 @@
 
 #include <assimp/material.h>
 
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 #include "Shader.h"
-#include "FuryTextureManager.h"
+#include "Managers/FuryTextureManager.h"
 
 #include <QDir>
 

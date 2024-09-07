@@ -2,7 +2,7 @@
 #include "ui_FuryMaterialEditDialog.h"
 
 #include "FuryPbrMaterial.h"
-#include "FuryMaterialManager.h"
+#include "Managers/FuryMaterialManager.h"
 
 #include <QSlider>
 #include <QColorDialog>

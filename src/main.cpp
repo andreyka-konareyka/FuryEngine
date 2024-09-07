@@ -1,4 +1,4 @@
-#include "FuryMainWindow.h"
+#include "Widgets/FuryMainWindow.h"
 
 #include <QApplication>
 #include <QStyleFactory>

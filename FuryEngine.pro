@@ -14,6 +14,7 @@ RCC_DIR = build
 
 
 INCLUDEPATH += \
+    src \
     includes \
     $$(LOCALAPPDATA)/Programs/Python/Python36/include
 
@@ -44,71 +45,71 @@ LIBS        += \
 SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
-    src/FuryBaseLocalKeyMapper.cpp \
-    src/FuryBoxObject.cpp \
-    src/FuryDoubleValidator.cpp \
-    src/FuryEventListener.cpp \
-    src/FuryException.cpp \
-    src/FuryLogger.cpp \
-    src/FuryMainWindow.cpp \
+    src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
+    src/DefaultObjects/FuryBoxObject.cpp \
+    src/Widgets/FuryDoubleValidator.cpp \
+    src/Physics/FuryEventListener.cpp \
+    src/Logger/FuryException.cpp \
+    src/Logger/FuryLogger.cpp \
+    src/Widgets/FuryMainWindow.cpp \
     src/FuryMaterial.cpp \
-    src/FuryMaterialEditDialog.cpp \
-    src/FuryMaterialManager.cpp \
+    src/Widgets/FuryMaterialEditDialog.cpp \
+    src/Managers/FuryMaterialManager.cpp \
     src/FuryMesh.cpp \
     src/FuryModel.cpp \
-    src/FuryModelManager.cpp \
+    src/Managers/FuryModelManager.cpp \
     src/FuryObject.cpp \
-    src/FuryObjectsTreeModel.cpp \
+    src/Widgets/FuryObjectsTreeModel.cpp \
     src/FuryPbrMaterial.cpp \
-    src/FuryRaycastCallback.cpp \ #src/FuryWindow.cpp \
-    src/FuryRussianLocalKeyMapper.cpp \
+    src/Physics/FuryRaycastCallback.cpp \
+    src/LocalKeyboard/FuryRussianLocalKeyMapper.cpp \
     src/FuryScript.cpp \
-    src/FurySphereObject.cpp \
+    src/DefaultObjects/FurySphereObject.cpp \
     src/FuryTexture.cpp \
-    src/FuryTextureManager.cpp \
-    src/FuryVectorInputWidget.cpp \
+    src/Managers/FuryTextureManager.cpp \
+    src/Widgets/FuryVectorInputWidget.cpp \
     src/FuryWorld.cpp \
     src/Particle.cpp \
     src/ParticleSystem.cpp \
-    src/TestRender.cpp \
+    src/Widgets/TestRender.cpp \
     src/main.cpp
 
 HEADERS += \
     src/Camera.h \
     src/CarObject.h \
-    src/FuryBaseLocalKeyMapper.h \
-    src/FuryBoxObject.h \
-    src/FuryDoubleValidator.h \
-    src/FuryEventListener.h \
-    src/FuryException.h \
-    src/FuryLogger.h \
-    src/FuryMainWindow.h \
+    src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
+    src/DefaultObjects/FuryBoxObject.h \
+    src/Widgets/FuryDoubleValidator.h \
+    src/Physics/FuryEventListener.h \
+    src/Logger/FuryException.h \
+    src/Logger/FuryLogger.h \
+    src/Widgets/FuryMainWindow.h \
     src/FuryMaterial.h \
-    src/FuryMaterialEditDialog.h \
-    src/FuryMaterialManager.h \
+    src/Widgets/FuryMaterialEditDialog.h \
+    src/Managers/FuryMaterialManager.h \
     src/FuryMesh.h \
     src/FuryModel.h \
-    src/FuryModelManager.h \
+    src/Managers/FuryModelManager.h \
     src/FuryObject.h \
-    src/FuryObjectsTreeModel.h \
+    src/Widgets/FuryObjectsTreeModel.h \
     src/FuryPbrMaterial.h \
-    src/FuryRaycastCallback.h \ #src/FuryWindow.h \
-    src/FuryRussianLocalKeyMapper.h \
+    src/Physics/FuryRaycastCallback.h \
+    src/LocalKeyboard/FuryRussianLocalKeyMapper.h \
     src/FuryScript.h \
-    src/FurySphereObject.h \
+    src/DefaultObjects/FurySphereObject.h \
     src/FuryTexture.h \
-    src/FuryTextureManager.h \
-    src/FuryVectorInputWidget.h \
+    src/Managers/FuryTextureManager.h \
+    src/Widgets/FuryVectorInputWidget.h \
     src/FuryWorld.h \
     src/Particle.h \
     src/ParticleSystem.h \
     src/Shader.h \
-    src/TestRender.h
+    src/Widgets/TestRender.h
 
 FORMS += \
-    src/FuryMainWindow.ui \
-    src/FuryMaterialEditDialog.ui \
-    src/FuryVectorInputWidget.ui
+    src/Widgets/FuryMainWindow.ui \
+    src/Widgets/FuryMaterialEditDialog.ui \
+    src/Widgets/FuryVectorInputWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

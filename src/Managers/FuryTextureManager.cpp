@@ -1,6 +1,6 @@
 #include "FuryTextureManager.h"
 
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 
 #include <string>
 

@@ -1,7 +1,7 @@
 #include "FuryModelManager.h"
 
-#include "FuryLogger.h"
-#include "FuryException.h"
+#include "Logger/FuryLogger.h"
+#include "Logger/FuryException.h"
 
 #include <QThread>
 #include <QMutex>

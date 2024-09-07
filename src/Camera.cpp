@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 #include "FuryObject.h"
-#include "FuryModelManager.h"
+#include "Managers/FuryModelManager.h"
 
 
 Camera::Camera(glm::vec3 _position, glm::vec3 _up, GLfloat _yaw, GLfloat _pitch) :

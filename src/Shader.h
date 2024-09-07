@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "FuryLogger.h"
+#include "Logger/FuryLogger.h"
 
 //#define GLEW_STATIC
 #include <GL/glew.h>
