@@ -36,6 +36,8 @@ private slots:
     void onRoughnessSlot();
     //! Слот изменения затенения
     void onAoSlot();
+    //! Слот изменения названия любой текстуры
+    void onAnyTextureNameChangedSlot();
 
 private:
     //! Подготовка интерфейса

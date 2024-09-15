@@ -15,6 +15,9 @@ public:
      */
     static FuryLogger* instance();
 
+    //! Удаляет экземпляр класса
+    static void deleteInstance();
+
     /*!
      * \brief Логирование строки. Выводит в консоль отладочную информацию.
      * \param[in] _func - Название функции
@@ -31,6 +34,17 @@ public:
 private:
     //! Конструктор
     FuryLogger();
+    //! Деструктор
+    ~FuryLogger();
+
+    //! Запрещаем конструктор копирования
+    FuryLogger(const FuryLogger&) = delete;
+    //! Запрещаем оператор присваивания
+    FuryLogger& operator=(const FuryLogger&) = delete;
+
+private:
+    //! Экземпляр класса
+    static FuryLogger* s_instance;
 };
 
 //! Логирование

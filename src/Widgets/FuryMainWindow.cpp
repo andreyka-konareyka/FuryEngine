@@ -275,9 +275,9 @@ void FuryMainWindow::initConnections()
     connect(m_ui->cameraZoomSlider, &QSlider::valueChanged,
             this, &FuryMainWindow::onZoomSliderMoveSlot);
 
-    connect(m_ui->openGLWidget, &TestRender::setWindowTitleSignal,
+    connect(m_ui->openGLWidget, &FuryRenderer::setWindowTitleSignal,
             this, &FuryMainWindow::onSetWindowTitleSlot);
-    connect(m_ui->openGLWidget, &TestRender::setComputerLoadSignal,
+    connect(m_ui->openGLWidget, &FuryRenderer::setComputerLoadSignal,
             this, &FuryMainWindow::onSetComputerLoadSlot);
 
     connect(m_ui->shadowNearSlider, &QSlider::valueChanged,

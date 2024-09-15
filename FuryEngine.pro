@@ -47,6 +47,7 @@ SOURCES += \
     src/CarObject.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
+    src/Shader.cpp \
     src/Widgets/FuryDoubleValidator.cpp \
     src/Physics/FuryEventListener.cpp \
     src/Logger/FuryException.cpp \
@@ -59,6 +60,7 @@ SOURCES += \
     src/FuryModel.cpp \
     src/Managers/FuryModelManager.cpp \
     src/FuryObject.cpp \
+    src/Widgets/FuryMaterialRenderWidget.cpp \
     src/Widgets/FuryObjectsTreeModel.cpp \
     src/FuryPbrMaterial.cpp \
     src/Physics/FuryRaycastCallback.cpp \
@@ -67,11 +69,11 @@ SOURCES += \
     src/DefaultObjects/FurySphereObject.cpp \
     src/FuryTexture.cpp \
     src/Managers/FuryTextureManager.cpp \
+    src/Widgets/FuryRenderer.cpp \
     src/Widgets/FuryVectorInputWidget.cpp \
     src/FuryWorld.cpp \
     src/Particle.cpp \
     src/ParticleSystem.cpp \
-    src/Widgets/TestRender.cpp \
     src/main.cpp
 
 HEADERS += \
@@ -91,6 +93,7 @@ HEADERS += \
     src/FuryModel.h \
     src/Managers/FuryModelManager.h \
     src/FuryObject.h \
+    src/Widgets/FuryMaterialRenderWidget.h \
     src/Widgets/FuryObjectsTreeModel.h \
     src/FuryPbrMaterial.h \
     src/Physics/FuryRaycastCallback.h \
@@ -99,12 +102,12 @@ HEADERS += \
     src/DefaultObjects/FurySphereObject.h \
     src/FuryTexture.h \
     src/Managers/FuryTextureManager.h \
+    src/Widgets/FuryRenderer.h \
     src/Widgets/FuryVectorInputWidget.h \
     src/FuryWorld.h \
     src/Particle.h \
     src/ParticleSystem.h \
-    src/Shader.h \
-    src/Widgets/TestRender.h
+    src/Shader.h
 
 FORMS += \
     src/Widgets/FuryMainWindow.ui \

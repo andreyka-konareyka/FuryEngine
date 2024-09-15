@@ -30,7 +30,7 @@ FuryMaterial::~FuryMaterial()
 
 void FuryMaterial::setShaderMaterial(Shader *_shader)
 {
-    _shader->Use();
+    _shader->use();
     _shader->setFloat("material.shininess", 32);
     _shader->setVec3("material.diffuseColor", m_diffuseColor);
     _shader->setVec3("material.specularColor", m_specularColor);

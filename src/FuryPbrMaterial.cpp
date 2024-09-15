@@ -20,7 +20,7 @@ void FuryPbrMaterial::setShaderMaterial(Shader *_shader)
 {
     FuryTextureManager* textureManager = FuryTextureManager::instance();
 
-    _shader->Use();
+    _shader->use();
     _shader->setVec3("material.albedoColor", m_albedoColor);
     _shader->setFloat("material.metallic", m_metallic);
     _shader->setFloat("material.roughness", m_roughness);

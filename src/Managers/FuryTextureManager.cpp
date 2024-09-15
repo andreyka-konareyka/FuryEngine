@@ -2,8 +2,6 @@
 
 #include "Logger/FuryLogger.h"
 
-#include <string>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -34,7 +32,7 @@ FuryTextureManager::~FuryTextureManager()
         if (iter.value() != nullptr)
         {
             FuryTexture*& texture = iter.value();
-            Debug(ru("Удаление текстуры (%1)").arg(texture->path()));
+            Debug(ru("Удаление текстуры (%1)").arg(texture->path().section('/', -1, -1)));
             delete texture;
             texture = nullptr;
         }
@@ -89,7 +87,7 @@ void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
 
     if (!_name.isEmpty())
     {
-        QMutexLocker mutexLocker(&m_nameMutex);
+        QMutexLocker mutexLockex3(&m_nameMutex);
         m_nameToPath.insert(_name, texturePath);
     }
 }
@@ -137,14 +135,15 @@ QString FuryTextureManager::pathByName(const QString &_name) const
 
 void FuryTextureManager::loadTexturePart()
 {
+    QMutexLocker mutexLocker(&m_bindMutex);
+
     if (!m_textureBindQueue.isEmpty())
     {
-        GLuint textureID = 0;
-        glGenTextures(1, &textureID);
-
-        QMutexLocker mutexLocker(&m_bindMutex);
         FuryTexture* texture = m_textureBindQueue.dequeue();
         mutexLocker.unlock();
+
+        GLuint textureID = 0;
+        glGenTextures(1, &textureID);
 
         texture->setIdOpenGL(textureID);
         int width = texture->width();
@@ -174,7 +173,8 @@ void FuryTextureManager::loadTexturePart()
 
         texture->setReady();
 
-        Debug(ru("Текстура загружена: (%1) (id %2)").arg(texture->path()).arg(textureID));
+        Debug(ru("Текстура загружена: (%1) (id %2)").arg(texture->path().section('/', -1, -1))
+                                                    .arg(textureID));
     }
 }
 
@@ -204,7 +204,7 @@ void FuryTextureManager::infiniteLoop()
             int width, height;
             unsigned char* data = stbi_load(qUtf8Printable(texture->path()), &width, &height, 0, STBI_rgb_alpha);
 
-            if (width == 0 || height == 0 || data == 0)
+            if (width == 0 || height == 0 || data == nullptr)
             {
                 Debug(ru("Текстура не загружена: (%1)").arg(texture->path()));
                 continue;
@@ -217,8 +217,9 @@ void FuryTextureManager::infiniteLoop()
 
             QMutexLocker mutexLocker2(&m_bindMutex);
             m_textureBindQueue.enqueue(texture);
-            mutexLocker2.unlock();
         }
+
+        QThread::msleep(16); // (1000 / 60)
     }
 
     m_stopped = true;

@@ -3,9 +3,10 @@
 
 #include "FuryModel.h"
 
-#include <QString>
 #include <QMap>
 #include <QQueue>
+#include <QString>
+#include <QMutex>
 
 
 //! Класс менеджера моделей
@@ -76,6 +77,15 @@ private:
     QQueue<FuryModel*> m_modelLoadQueue;
     //! Очередь моделей на подключение к OpenGL
     QQueue<FuryModel*> m_modelBindQueue;
+
+    //! Мьютекс для m_models
+    mutable QMutex m_modelsMutex;
+    //! Мьютекс для m_nameToPath
+    mutable QMutex m_nameMutex;
+    //! Мьютекс для m_modelLoadQueue
+    mutable QMutex m_loadMutex;
+    //! Мьютекс для m_modelBindQueue
+    mutable QMutex m_bindMutex;
 
     //! Пустая модель по умолчанию
     FuryModel m_emptyModel;

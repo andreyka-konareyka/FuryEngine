@@ -1,4 +1,4 @@
-#include "TestRender.h"
+#include "FuryRenderer.h"
 
 
 #include "Logger/FuryLogger.h"
@@ -39,9 +39,10 @@ void renderCube();
 void renderQuad();
 
 
+FuryRenderer* FuryRenderer::s_instance = nullptr;
 
 
-TestRender::TestRender(QWidget *_parent) :
+FuryRenderer::FuryRenderer(QWidget *_parent) :
     QOpenGLWidget(_parent),
     m_textureManager(FuryTextureManager::createInstance()),
     m_modelManager(FuryModelManager::createInstance()),
@@ -58,10 +59,19 @@ TestRender::TestRender(QWidget *_parent) :
     m_learnSpeed(1),
     m_russianKeyMapper(new FuryRussianLocalKeyMapper)
 {
+    if (s_instance != nullptr)
+    {
+        Debug(ru("Повторное создание главного отрисовщика."));
+        throw FuryException(ru("Повторное создание главного отрисовщика."),
+                            "", Q_FUNC_INFO);
+    }
+
+
     Debug(ru("Создание рендера"));
+    s_instance = this;
 
     connect(this, &QOpenGLWidget::frameSwapped,
-            this, &TestRender::updateGL, Qt::QueuedConnection);
+            this, &FuryRenderer::updateGL, Qt::QueuedConnection);
     setFocusPolicy(Qt::StrongFocus);
 
     own_physicsCommon = new reactphysics3d::PhysicsCommon;
@@ -71,9 +81,10 @@ TestRender::TestRender(QWidget *_parent) :
     m_testWorld->physicsWorld()->setEventListener(m_eventListener);
 }
 
-TestRender::~TestRender()
+FuryRenderer::~FuryRenderer()
 {
     Debug(ru("Удаление рендера"));
+    s_instance = nullptr;
 
     for (Camera* camera : m_cameras)
     {
@@ -107,13 +118,148 @@ TestRender::~TestRender()
     FuryModelManager::deleteInstance();
 }
 
-void TestRender::initializeGL()
+GLuint FuryRenderer::renderTestScene(const QString &_materialName, int _width, int _height)
+{
+    makeCurrent();
+
+    FuryMaterial* material = nullptr;
+    if (m_materialManager->materialExist(_materialName))
+    {
+        material = m_materialManager->materialByName(_materialName);
+    }
+
+    float opacity = 1;
+    if (material != nullptr)
+    {
+        if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(material); pbr != nullptr)
+        {
+            opacity = pbr->opacity();
+        }
+        else
+        {
+            opacity = material->opacity();
+        }
+    }
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_testFrameBuffer);
+    glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+
+
+
+    // Clear the colorbuffer
+    glClearColor(0, 1, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    Camera cam(glm::vec3(0, 0, 2));
+    const glm::mat4& projection = cam.getPerspectiveMatrix(_width, _height, m_perspective_near, m_perspective_far);
+    const glm::mat4& view =  cam.getViewMatrix();
+
+    if (opacity < 0.95)
+    {
+        // draw skybox as last
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+
+        m_backgroundShader->use();
+        m_backgroundShader->setMat4("projection", projection);
+        m_backgroundShader->setMat4("view", view);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        // skybox cube
+        glBindVertexArray(m_skyboxVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS); // set depth function back to default
+    }
+
+
+    Shader* shader = FurySphereObject::defaultShader();
+    shader->use();
+    shader->setVec3("viewPos", cam.position());
+    shader->setFloat("material.shininess", 128.0f); // 32.0 - default
+    shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
+
+
+    // view/projection transformations
+    shader->setMat4("projection", projection);
+    shader->setMat4("view", view);
+
+//        shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    shader->setVec2("textureScales", 1, 1);
+
+
+    {
+        shader->setVec3("camPos", cam.position());
+
+        glm::vec3 tempPosition = m_dirlight_position;
+        tempPosition *= 3;
+
+        shader->setVec3("lightPositions[0]", tempPosition);
+        shader->setVec3("lightPositions[1]", tempPosition);
+        shader->setVec3("lightPositions[2]", tempPosition);
+        shader->setVec3("lightPositions[3]", tempPosition);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_2D, m_depthMap);
+    }
+
+    glm::mat4 modelMatrix(1.0f);
+    shader->setMat4("model", modelMatrix);
+    shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+
+
+
+    FuryModel* model = m_modelManager->modelByName("sphere");
+    foreach (FuryMesh* mesh, model->meshes())
+    {
+        mesh->draw(shader, material);
+    }
+
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
+
+
+    if (opacity >= 0.95)
+    {
+        // draw skybox as last
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+
+        m_backgroundShader->use();
+        m_backgroundShader->setMat4("projection", projection);
+        m_backgroundShader->setMat4("view", view);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        // skybox cube
+        glBindVertexArray(m_skyboxVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS); // set depth function back to default
+    }
+
+    doneCurrent();
+
+    return m_testRenderTexture;
+}
+
+FuryRenderer *FuryRenderer::instance()
+{
+    return s_instance;
+}
+
+void FuryRenderer::initializeGL()
 {
     Debug(ru("Инициализация OpenGL"));
     InitGL();
 }
 
-void TestRender::resizeGL(int w, int h)
+void FuryRenderer::resizeGL(int w, int h)
 {
     glViewport(0,0,w,h);
 
@@ -121,7 +267,7 @@ void TestRender::resizeGL(int w, int h)
     m_width = w;
 }
 
-void TestRender::paintGL()
+void FuryRenderer::paintGL()
 {
     static QDateTime lastTime = QDateTime::currentDateTime();
     static QDateTime lastFPSUpdate = QDateTime::currentDateTime();
@@ -163,7 +309,7 @@ void TestRender::paintGL()
     lastTime = endTime;
 }
 
-void TestRender::setCameraZoomValue(int _value)
+void FuryRenderer::setCameraZoomValue(int _value)
 {
     for (Camera* camera : m_cameras)
     {
@@ -171,29 +317,29 @@ void TestRender::setCameraZoomValue(int _value)
     }
 }
 
-void TestRender::setCarCameraPos(float _x, float _y)
+void FuryRenderer::setCarCameraPos(float _x, float _y)
 {
     m_carObject->setLocalCameraPosition(_x, _y);
 }
 
-void TestRender::setCarSpringLenght(float _lenght)
+void FuryRenderer::setCarSpringLenght(float _lenght)
 {
     m_carObject->setSpringLenght(_lenght);
 }
 
-void TestRender::setCarSpringK(float _k)
+void FuryRenderer::setCarSpringK(float _k)
 {
     m_carObject->setSpringK(_k);
 }
 
-void TestRender::saveLearnModel()
+void FuryRenderer::saveLearnModel()
 {
 #if NEED_LEARN == 1
     m_learnScript->saveModel();
 #endif
 }
 
-void TestRender::saveScoreList()
+void FuryRenderer::saveScoreList()
 {
     Debug(ru("[ ВНИМАНИЕ ] Модель не сохраняю..."));
     return;
@@ -216,7 +362,7 @@ void TestRender::saveScoreList()
     }
 }
 
-void TestRender::mouseMoveEvent(QMouseEvent* _event)
+void FuryRenderer::mouseMoveEvent(QMouseEvent* _event)
 {
     if (m_testWorld->camera() == m_cameras[1])
     { // Если камера машины
@@ -235,7 +381,7 @@ void TestRender::mouseMoveEvent(QMouseEvent* _event)
     }
 }
 
-void TestRender::mousePressEvent(QMouseEvent *_event)
+void FuryRenderer::mousePressEvent(QMouseEvent *_event)
 {
     if (m_testWorld->camera() == m_cameras[1])
     { // Если камера машины
@@ -249,7 +395,7 @@ void TestRender::mousePressEvent(QMouseEvent *_event)
     }
 }
 
-void TestRender::keyPressEvent(QKeyEvent *_event)
+void FuryRenderer::keyPressEvent(QKeyEvent *_event)
 {
     int keyCode = m_russianKeyMapper->mapLocalKeyToLatin(_event->key());
     if (keyCode == 0)
@@ -279,7 +425,7 @@ void TestRender::keyPressEvent(QKeyEvent *_event)
     }
 }
 
-void TestRender::keyReleaseEvent(QKeyEvent *_event)
+void FuryRenderer::keyReleaseEvent(QKeyEvent *_event)
 {
     int keyCode = m_russianKeyMapper->mapLocalKeyToLatin(_event->key());
     if (keyCode == 0)
@@ -295,7 +441,7 @@ void TestRender::keyReleaseEvent(QKeyEvent *_event)
     }
 }
 
-void TestRender::updateGL()
+void FuryRenderer::updateGL()
 {
     update();
 }
@@ -303,7 +449,7 @@ void TestRender::updateGL()
 
 
 
-void TestRender::InitGL()
+void FuryRenderer::InitGL()
 {
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
     glewExperimental = GL_TRUE;
@@ -328,12 +474,13 @@ void TestRender::InitGL()
 
 
     initMainRender();
+    initTestRender();
 
     // Загрузка всех текстур, шейдеров и т.д.
     init();
 }
 
-void TestRender::init() {
+void FuryRenderer::init() {
     Debug(ru("Версия OpenGL: ") + ru(glGetString(GL_VERSION)));
     Debug(ru("Количество потоков: ") + QString::number(QThread::idealThreadCount()));
 
@@ -402,7 +549,7 @@ void TestRender::init() {
 
         for (Shader* shader : shaders)
         {
-            shader->Use();
+            shader->use();
             shader->setVec3("lightColors[0]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[1]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[2]", 300.0f, 300.0f, 300.0f);
@@ -420,7 +567,7 @@ void TestRender::init() {
     }
 }
 
-void TestRender::render()
+void FuryRenderer::render()
 {
     {
         // Calculate deltatime of current frame
@@ -577,7 +724,7 @@ void TestRender::render()
                 FuryModel* debugModel = m_modelManager->modelByName("cube");
                 Shader* shader = obj->shader();
 
-                shader->Use();
+                shader->use();
                 shader->setVec3("viewPos", m_testWorld->camera()->position());
                 shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
 
@@ -652,7 +799,7 @@ void TestRender::render()
                 }
             }
 
-            shader->Use();
+            shader->use();
             shader->setVec3("viewPos", m_testWorld->camera()->position());
             shader->setFloat("material.shininess", 128.0f); // 32.0 - default
             shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
@@ -781,7 +928,7 @@ void TestRender::render()
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 
-        m_backgroundShader->Use();
+        m_backgroundShader->use();
         m_backgroundShader->setMat4("projection", projection);
         m_backgroundShader->setMat4("view", view);
         glActiveTexture(GL_TEXTURE0);
@@ -849,7 +996,7 @@ void TestRender::render()
                     }
                 }
 
-                shader->Use();
+                shader->use();
                 shader->setVec3("viewPos", m_testWorld->camera()->position());
                 shader->setFloat("material.shininess", 128.0f); // 32.0 - default
                 shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
@@ -938,7 +1085,7 @@ void TestRender::render()
     }
 }
 
-void TestRender::createPBRTextures()
+void FuryRenderer::createPBRTextures()
 {
     glDisable(GL_CULL_FACE);
     glClearColor(1, 1, 1, 1.0f);
@@ -1010,7 +1157,7 @@ void TestRender::createPBRTextures()
         // pbr: convert HDR equirectangular environment map to cubemap equivalent
         // ----------------------------------------------------------------------
         Shader equirectangularToCubemapShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.equirectangular_to_cubemap.fs");
-        equirectangularToCubemapShader.Use();
+        equirectangularToCubemapShader.use();
         equirectangularToCubemapShader.setInt("equirectangularMap", 0);
         equirectangularToCubemapShader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
@@ -1053,7 +1200,7 @@ void TestRender::createPBRTextures()
         // pbr: solve diffuse integral by convolution to create an irradiance (cube)map.
         // -----------------------------------------------------------------------------
         Shader irradianceShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.irradiance_convolution.fs");
-        irradianceShader.Use();
+        irradianceShader.use();
         irradianceShader.setInt("environmentMap", 0);
         irradianceShader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
@@ -1090,7 +1237,7 @@ void TestRender::createPBRTextures()
         // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
         // ----------------------------------------------------------------------------------------------------
         Shader prefilterShader("shaders/pbr/2.2.2.cubemap.vs", "shaders/pbr/2.2.2.prefilter.fs");
-        prefilterShader.Use();
+        prefilterShader.use();
         prefilterShader.setInt("environmentMap", 0);
         prefilterShader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
@@ -1142,7 +1289,7 @@ void TestRender::createPBRTextures()
         glViewport(0, 0, 512, 512);
 
         Shader brdfShader("shaders/pbr/2.2.2.brdf.vs", "shaders/pbr/2.2.2.brdf.fs");
-        brdfShader.Use();
+        brdfShader.use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_BLEND);
         renderQuad();
@@ -1155,10 +1302,10 @@ void TestRender::createPBRTextures()
     glEnable(GL_CULL_FACE);
 }
 
-void TestRender::renderDepthMap()
+void FuryRenderer::renderDepthMap()
 {
     glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
-    m_simpleDepthShader->Use();
+    m_simpleDepthShader->use();
     m_simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -1234,7 +1381,7 @@ void TestRender::renderDepthMap()
     glViewport(0, 0, this->m_width, this->m_height);
 }
 
-glm::mat4 TestRender::getLightSpaceMatrix()
+glm::mat4 FuryRenderer::getLightSpaceMatrix()
 {
     glm::mat4 lightProjection = glm::ortho(-m_shadowViewSize, m_shadowViewSize,
                                            -m_shadowViewSize, m_shadowViewSize,
@@ -1258,7 +1405,7 @@ glm::mat4 TestRender::getLightSpaceMatrix()
     return lightProjection * lightView;
 }
 
-void TestRender::renderLoading(float _currentFrame)
+void FuryRenderer::renderLoading(float _currentFrame)
 {
     Q_UNUSED(_currentFrame);
     static QTime startTime = QTime::currentTime();
@@ -1275,7 +1422,7 @@ void TestRender::renderLoading(float _currentFrame)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void TestRender::updatePhysics()
+void FuryRenderer::updatePhysics()
 {
     float timeStep = 1.0f / 60.0f;
 
@@ -1417,7 +1564,7 @@ void TestRender::updatePhysics()
 #endif
 }
 
-void TestRender::displayBuffer(GLuint _bufferId)
+void FuryRenderer::displayBuffer(GLuint _bufferId)
 {
     static Shader* shader = nullptr;
     static GLuint vaoDebugTexturedRect = 0;
@@ -1452,7 +1599,7 @@ void TestRender::displayBuffer(GLuint _bufferId)
     }
 
     glActiveTexture(GL_TEXTURE0);
-    shader->Use();
+    shader->use();
     glBindTexture(GL_TEXTURE_2D, _bufferId);
     glBindVertexArray(vaoDebugTexturedRect);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1460,7 +1607,7 @@ void TestRender::displayBuffer(GLuint _bufferId)
     glUseProgram(0);
 }
 
-void TestRender::displayLogo()
+void FuryRenderer::displayLogo()
 {
     static Shader* shader = nullptr;
     static GLuint vaoDebugTexturedRect = 0;
@@ -1505,7 +1652,7 @@ void TestRender::displayLogo()
     float logoAlpha = std::max(std::sin(deltaTime / m_loadingOvertime * 3.14), 0.0);
 
     glActiveTexture(GL_TEXTURE0);
-    shader->Use();
+    shader->use();
     shader->setVec2("logoScale", glm::vec2(logoWidth, logoHeight));
     shader->setFloat("logoAlpha", logoAlpha);
     glBindTexture(GL_TEXTURE_2D, m_textureManager->textureByName("Logo").idOpenGL());
@@ -1515,7 +1662,7 @@ void TestRender::displayLogo()
     glUseProgram(0);
 }
 
-void TestRender::initMainRender()
+void FuryRenderer::initMainRender()
 {
     glGenFramebuffers(1, &m_mainFrameBuffer);
     glGenRenderbuffers(1, &m_mainRenderBuffer);
@@ -1535,7 +1682,27 @@ void TestRender::initMainRender()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_mainRenderTexture, 0);
 }
 
-void TestRender::renderMainBuffer()
+void FuryRenderer::initTestRender()
+{
+    glGenFramebuffers(1, &m_testFrameBuffer);
+    glGenRenderbuffers(1, &m_testRenderBuffer);
+    glGenTextures(1, &m_testRenderTexture);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_testFrameBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_testRenderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_testRenderBuffer);
+
+    glBindTexture(GL_TEXTURE_2D, m_testRenderTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_testRenderTexture, 0);
+}
+
+void FuryRenderer::renderMainBuffer()
 {
     static Shader* shader = nullptr;
     static GLuint vaoDebugTexturedRect = 0;
@@ -1570,7 +1737,7 @@ void TestRender::renderMainBuffer()
     }
 
     glActiveTexture(GL_TEXTURE0);
-    shader->Use();
+    shader->use();
     glBindTexture(GL_TEXTURE_2D, m_mainRenderTexture);
     glBindVertexArray(vaoDebugTexturedRect);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1580,7 +1747,7 @@ void TestRender::renderMainBuffer()
 
 
 
-void TestRender::do_movement()
+void FuryRenderer::do_movement()
 {
     // Camera controls
     if (m_keys[Qt::Key_W])
@@ -1599,7 +1766,7 @@ void TestRender::do_movement()
 }
 
 
-void TestRender::initSkyboxModel()
+void FuryRenderer::initSkyboxModel()
 {
     float skyboxVertices[] = {
         // positions
@@ -1656,7 +1823,7 @@ void TestRender::initSkyboxModel()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void TestRender::initDepthMapFBO()
+void FuryRenderer::initDepthMapFBO()
 {
     // Создадим буфер глубины для теней
     glGenFramebuffers(1, &m_depthMapFBO);
@@ -1680,7 +1847,7 @@ void TestRender::initDepthMapFBO()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void TestRender::loadRaceMapFromJson()
+void FuryRenderer::loadRaceMapFromJson()
 {
     m_testWorld->loadRaceMap();
     m_testWorld->createMaterials();

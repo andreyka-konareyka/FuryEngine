@@ -1,5 +1,5 @@
-#ifndef TESTRENDER_H
-#define TESTRENDER_H
+#ifndef FURYRENDERER_H
+#define FURYRENDERER_H
 
 // GLEW
 //#define GLEW_STATIC
@@ -38,18 +38,34 @@
 #include <QOpenGLWidget>
 
 
-//! Тестовый класс рендера
-class TestRender : public QOpenGLWidget
+//! Основной класс рендера
+class FuryRenderer : public QOpenGLWidget
 {
     Q_OBJECT
 public:
     /*!
      * \brief Конструктор
      * \param[in] _parent - Родительский виджет
+     * \throw FuryException в случае повторного создания
      */
-    explicit TestRender(QWidget* _parent = nullptr);
+    explicit FuryRenderer(QWidget* _parent = nullptr);
     //! Деструктор
-    ~TestRender();
+    ~FuryRenderer();
+
+    /*!
+     * \brief Отрисовка тестовой сцены
+     * \param[in] _materialName - Название материала
+     * \param[in] _width - Ширина экранчика
+     * \param[in] _height - Высота экранчика
+     * \return Возвращает идентификатор текстуры рендер-буфера
+     */
+    GLuint renderTestScene(const QString& _materialName, int _width, int _height);
+
+    /*!
+     * \brief Получение экземпляра класса
+     * \return Возвращает экземпляр класса
+     */
+    static FuryRenderer* instance();
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -132,6 +148,16 @@ private:
     void do_movement();
 
 private:
+    //! Запрещаем конструктор копирования
+    FuryRenderer(const FuryRenderer&) = delete;
+    //! Запрещаем оператор присваивания
+    FuryRenderer& operator=(const FuryRenderer&) = delete;
+
+private:
+    //! Экземпляр класса
+    static FuryRenderer* s_instance;
+
+private:
     reactphysics3d::PhysicsCommon* own_physicsCommon;
     FuryEventListener* m_eventListener;
 
@@ -154,6 +180,8 @@ private:
 
     //! Инициализация буферов главного рендеринга
     void initMainRender();
+    //! Тестовая инициализация буферов рендеринга
+    void initTestRender();
     //! Рендер отрисованной сцены на экран из буфера
     void renderMainBuffer();
 
@@ -183,7 +211,7 @@ private:
     GLuint m_skyboxVAO, m_skyboxVBO;
 
     bool m_is_loading = true;
-    float m_loadingOvertime = 3.0f;
+    float m_loadingOvertime = 1.0f;
 
 
     GLuint m_depthMapFBO;
@@ -212,6 +240,10 @@ private:
     GLuint m_mainRenderBuffer = 0;
     GLuint m_mainRenderTexture = 0;
 
+    GLuint m_testFrameBuffer = 0;
+    GLuint m_testRenderBuffer = 0;
+    GLuint m_testRenderTexture = 0;
+
 private:
     //! Камеры
     QVector<Camera*> m_cameras;
@@ -226,4 +258,4 @@ private:
     FuryBaseLocalKeyMapper* m_russianKeyMapper;
 };
 
-#endif // TESTRENDER_H
+#endif // FURYRENDERER_H

@@ -7,10 +7,26 @@
 #include <QThread>
 #include <QString>
 
+
+FuryLogger* FuryLogger::s_instance = nullptr;
+
 FuryLogger* FuryLogger::instance()
 {
-    static FuryLogger* logger = new FuryLogger;
-    return logger;
+    if (s_instance == nullptr)
+    {
+        s_instance = new FuryLogger;
+    }
+
+    return s_instance;
+}
+
+void FuryLogger::deleteInstance()
+{
+    if (s_instance != nullptr)
+    {
+        delete s_instance;
+        s_instance = nullptr;
+    }
 }
 
 QDebug FuryLogger::log(const QString &_func)
@@ -28,10 +44,17 @@ void FuryLogger::logException(const FuryException &_exception)
     qDebug() << "*** Exception: ***";
     qDebug() << _exception.userInfo();
     qDebug() << _exception.debugInfo();
+    qDebug() << ru("*** Метод: ***");
+    qDebug() << _exception.funcInfo();
     qDebug();
 }
 
 FuryLogger::FuryLogger()
 {
+    qDebug() << ru("Создание логгера");
+}
 
+FuryLogger::~FuryLogger()
+{
+    qDebug() << ru("Удаление логгера");
 }

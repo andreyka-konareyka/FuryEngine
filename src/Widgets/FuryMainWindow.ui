@@ -14,7 +14,7 @@
    <string>Fury Engine :: Car AI</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../FuryRecources.qrc">
+   <iconset resource="../../FuryRecources.qrc">
     <normaloff>:/images/icon</normaloff>:/images/icon</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -39,7 +39,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="TestRender" name="openGLWidget">
+      <widget class="FuryRenderer" name="openGLWidget">
        <property name="minimumSize">
         <size>
          <width>150</width>
@@ -304,13 +304,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TestRender</class>
+   <class>FuryRenderer</class>
    <extends>QOpenGLWidget</extends>
-   <header>TestRender.h</header>
+   <header>FuryRenderer.h</header>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../FuryRecources.qrc"/>
+  <include location="../../FuryRecources.qrc"/>
  </resources>
  <connections/>
 </ui>

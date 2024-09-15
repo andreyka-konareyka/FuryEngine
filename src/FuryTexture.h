@@ -130,9 +130,6 @@ private:
     bool m_ready;
     //! Загружена ли текстура в буфер
     bool m_loaded;
-
-
-    QString m_type; // ????????
 };
 
 #endif // FURYTEXTURE_H

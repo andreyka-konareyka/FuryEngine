@@ -34,6 +34,10 @@ void FuryMaterialEditDialog::onMaterialChoiceSlot()
         m_ui->slMetallic->setValue(pbr->metallic() * 100);
         m_ui->slRough->setValue(pbr->roughness() * 100);
         m_ui->slAo->setValue(pbr->ao() * 100);
+        m_ui->leColorTexture->setText(pbr->albedoTexture());
+        m_ui->leMetallicTexture->setText(pbr->metallicTexture());
+        m_ui->leRoughTexture->setText(pbr->roughnessTexture());
+        m_ui->leAoTexture->setText(pbr->aoTexture());
     }
     else if (m_currentMaterial != NULL)
     {
@@ -43,6 +47,7 @@ void FuryMaterialEditDialog::onMaterialChoiceSlot()
     }
 
     m_ui->pbColor->setStyleSheet(QString("background: %1").arg(color.name()));
+    m_ui->openGLWidget->setMaterialName(m_ui->cbMaterialName->currentText());
 }
 
 void FuryMaterialEditDialog::onColorClickedSlot()
@@ -89,6 +94,9 @@ void FuryMaterialEditDialog::onColorClickedSlot()
 
         m_currentMaterial->setDiffuseColor(rawColor);
     }
+
+    m_ui->pbColor->setStyleSheet(QString("background: %1").arg(color.name()));
+    m_ui->openGLWidget->update();
 }
 
 void FuryMaterialEditDialog::onMetallicSlot()
@@ -97,6 +105,7 @@ void FuryMaterialEditDialog::onMetallicSlot()
     {
         pbr->setMetallic(m_ui->slMetallic->value() / 100.0f);
     }
+    m_ui->openGLWidget->update();
 }
 
 void FuryMaterialEditDialog::onRoughnessSlot()
@@ -105,6 +114,7 @@ void FuryMaterialEditDialog::onRoughnessSlot()
     {
         pbr->setRoughness(m_ui->slRough->value() / 100.0f);
     }
+    m_ui->openGLWidget->update();
 }
 
 void FuryMaterialEditDialog::onAoSlot()
@@ -113,6 +123,19 @@ void FuryMaterialEditDialog::onAoSlot()
     {
         pbr->setAo(m_ui->slAo->value() / 100.0f);
     }
+    m_ui->openGLWidget->update();
+}
+
+void FuryMaterialEditDialog::onAnyTextureNameChangedSlot()
+{
+    if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(m_currentMaterial); pbr != NULL)
+    {
+        pbr->setAlbedoTexture(m_ui->leColorTexture->text());
+        pbr->setMetallicTexture(m_ui->leMetallicTexture->text());
+        pbr->setRoughnessTexture(m_ui->leRoughTexture->text());
+        pbr->setAoTexture(m_ui->leAoTexture->text());
+    }
+    m_ui->openGLWidget->update();
 }
 
 void FuryMaterialEditDialog::prepareUi()
@@ -136,4 +159,13 @@ void FuryMaterialEditDialog::initConnections()
             this, &FuryMaterialEditDialog::onRoughnessSlot);
     connect(m_ui->slAo, &QSlider::valueChanged,
             this, &FuryMaterialEditDialog::onAoSlot);
+
+    connect(m_ui->leColorTexture, &QLineEdit::editingFinished,
+            this, &FuryMaterialEditDialog::onAnyTextureNameChangedSlot);
+    connect(m_ui->leMetallicTexture, &QLineEdit::editingFinished,
+            this, &FuryMaterialEditDialog::onAnyTextureNameChangedSlot);
+    connect(m_ui->leRoughTexture, &QLineEdit::editingFinished,
+            this, &FuryMaterialEditDialog::onAnyTextureNameChangedSlot);
+    connect(m_ui->leAoTexture, &QLineEdit::editingFinished,
+            this, &FuryMaterialEditDialog::onAnyTextureNameChangedSlot);
 }
