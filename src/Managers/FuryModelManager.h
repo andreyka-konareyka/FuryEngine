@@ -59,6 +59,11 @@ private:
     //! Экземпляр класса
     static FuryModelManager* s_instance;
 
+    //! Запрещаем конструктор копирования
+    FuryModelManager(const FuryModelManager&) = delete;
+    //! Запрещаем оператор присваивания
+    FuryModelManager& operator=(const FuryModelManager&) = delete;
+
     //! Бесконечный цикл
     void infiniteLoop();
 

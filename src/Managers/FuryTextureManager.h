@@ -75,6 +75,11 @@ private:
     //! Экземпляр класса
     static FuryTextureManager* s_instance;
 
+    //! Запрещаем конструктор копирования
+    FuryTextureManager(const FuryTextureManager&) = delete;
+    //! Запрещаем оператор присваивания
+    FuryTextureManager& operator=(const FuryTextureManager&) = delete;
+
 
     /*!
     * \brief Бесконечный цикл подгрузки текстур с диска.

@@ -17,12 +17,18 @@ public:
      * \return Возвращает экземпляр класса
      */
     static FuryMaterialManager* instance();
+
     /*!
      * \brief Создание экземпляра класса
      * \return Возвращает экземпляр класса
+     * \throw FuryException - При повторном создании
      */
     static FuryMaterialManager* createInstance();
-    //! Удаление экземпляра класса
+
+    /*!
+     * \brief Удаление экземпляра класса
+     * \throw FuryException - При удалении пустого
+     */
     static void deleteInstance();
 
     /*!
@@ -82,6 +88,11 @@ private:
     ~FuryMaterialManager();
     //! Экземпляр класса
     static FuryMaterialManager* s_instance;
+
+    //! Запрещаем конструктор копирования
+    FuryMaterialManager(const FuryMaterialManager&) = delete;
+    //! Запрещаем оператор присваивания
+    FuryMaterialManager& operator=(const FuryMaterialManager&) = delete;
 
 private:
     //! Отображение: Название материала -> Материал

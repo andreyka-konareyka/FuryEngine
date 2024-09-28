@@ -34,6 +34,7 @@ class FuryObject : public QObject
     Q_PROPERTY(glm::vec3 scales READ scales WRITE setScales)
     Q_PROPERTY(QString modelName READ modelName WRITE setModelName)
     Q_PROPERTY(QString materialName READ materialName WRITE setMaterialName)
+    Q_PROPERTY(bool visible READ visible WRITE setVisible)
 
 public:
     /*!
@@ -258,6 +259,20 @@ public:
     { m_textureScales = _textureScales; }
 
     /*!
+     * \brief Видимость объекта
+     * \return Возвращает признак видимости объекта
+     */
+    inline bool visible() const
+    { return m_visible; }
+
+    /*!
+     * \brief Установить видимость объекта
+     * \param[in] _visible - Видимость объекта
+     */
+    inline void setVisible(bool _visible)
+    { m_visible = _visible; }
+
+    /*!
      * \brief Получить признак выбранности объекта в редакторе
      * \return Возвращает признак выбранности
      */
@@ -325,6 +340,9 @@ private:
 
     //! Масштаб текстур
     glm::vec2 m_textureScales;
+
+    //! Видимость объекта
+    bool m_visible;
 
     //! Объект выбран в редакторе
     bool m_selectedInEditor;

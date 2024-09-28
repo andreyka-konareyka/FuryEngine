@@ -1,6 +1,10 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+// GLEW
+//#define GLEW_STATIC
+#include <GL/glew.h>
+
 #include <QVector>
 #include <QObject>
 
@@ -44,6 +48,13 @@ public:
     //! Возобновить мир
     inline void resumeWorld()
     { m_started = true; }
+
+    /*!
+     * \brief Отрисовка мира
+     * \param[in] _width - Ширина экрана
+     * \param[in] _height - Высота экрана
+     */
+    void draw(int _width, int _height);
 
     /*!
      * \brief Добавление корневого объекта мира
@@ -106,6 +117,9 @@ public:
     //! Создание текстур
     void createTextures();
 
+    //! Создание окружения для pbr
+    void createPbrCubemap(const QString& _cubemapHdrName);
+
 signals:
     void addObjectSignal(FuryObject* _object);
     void parentChangedSignal(FuryObject* _object);
@@ -128,6 +142,12 @@ private:
 
     //! Запущена ли симуляция
     bool m_started;
+
+    GLuint m_envCubemap;
+    GLuint m_irradianceMap;
+    GLuint m_prefilterMap;
+    GLuint m_brdfLUTTexture;
+    bool m_shadowMapEnabled;
 };
 
 #endif // WORLD_H

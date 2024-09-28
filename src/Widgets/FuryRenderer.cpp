@@ -47,6 +47,7 @@ FuryRenderer::FuryRenderer(QWidget *_parent) :
     m_textureManager(FuryTextureManager::createInstance()),
     m_modelManager(FuryModelManager::createInstance()),
     m_materialManager(FuryMaterialManager::createInstance()),
+    m_worldManager(FuryWorldManager::createInstance()),
     m_needDebugRender(false),
     m_updateAccumulator(0),
 
@@ -106,6 +107,9 @@ FuryRenderer::~FuryRenderer()
         m_testWorld = nullptr;
     }
 
+    Debug(ru("Удаление менеджера миров..."));
+    FuryWorldManager::deleteInstance();
+
     Debug(ru("Удаление менеджера материалов..."));
     FuryMaterialManager::deleteInstance();
 
@@ -122,126 +126,20 @@ GLuint FuryRenderer::renderTestScene(const QString &_materialName, int _width, i
 {
     makeCurrent();
 
-    FuryMaterial* material = nullptr;
-    if (m_materialManager->materialExist(_materialName))
-    {
-        material = m_materialManager->materialByName(_materialName);
-    }
-
-    float opacity = 1;
-    if (material != nullptr)
-    {
-        if (FuryPbrMaterial* pbr = dynamic_cast<FuryPbrMaterial*>(material); pbr != nullptr)
-        {
-            opacity = pbr->opacity();
-        }
-        else
-        {
-            opacity = material->opacity();
-        }
-    }
-
-
     glBindFramebuffer(GL_FRAMEBUFFER, m_testFrameBuffer);
     glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
-
-
 
     // Clear the colorbuffer
     glClearColor(0, 1, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-    Camera cam(glm::vec3(0, 0, 2));
-    const glm::mat4& projection = cam.getPerspectiveMatrix(_width, _height, m_perspective_near, m_perspective_far);
-    const glm::mat4& view =  cam.getViewMatrix();
-
-    if (opacity < 0.95)
+    const QVector<FuryObject*> worldObjects = m_worldManager->worldByName("materialPreview").getRootObjects();
+    if (worldObjects.size() == 1)
     {
-        // draw skybox as last
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-
-        m_backgroundShader->use();
-        m_backgroundShader->setMat4("projection", projection);
-        m_backgroundShader->setMat4("view", view);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
-        // skybox cube
-        glBindVertexArray(m_skyboxVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS); // set depth function back to default
+        worldObjects[0]->setMaterialName(_materialName);
     }
 
-
-    Shader* shader = FurySphereObject::defaultShader();
-    shader->use();
-    shader->setVec3("viewPos", cam.position());
-    shader->setFloat("material.shininess", 128.0f); // 32.0 - default
-    shader->setVec3("dirLight.direction", glm::vec3(0, 0, 0) - m_dirlight_position);
-
-
-    // view/projection transformations
-    shader->setMat4("projection", projection);
-    shader->setMat4("view", view);
-
-//        shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-    shader->setVec2("textureScales", 1, 1);
-
-
-    {
-        shader->setVec3("camPos", cam.position());
-
-        glm::vec3 tempPosition = m_dirlight_position;
-        tempPosition *= 3;
-
-        shader->setVec3("lightPositions[0]", tempPosition);
-        shader->setVec3("lightPositions[1]", tempPosition);
-        shader->setVec3("lightPositions[2]", tempPosition);
-        shader->setVec3("lightPositions[3]", tempPosition);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
-        glActiveTexture(GL_TEXTURE8);
-        glBindTexture(GL_TEXTURE_2D, m_depthMap);
-    }
-
-    glm::mat4 modelMatrix(1.0f);
-    shader->setMat4("model", modelMatrix);
-    shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
-
-
-
-    FuryModel* model = m_modelManager->modelByName("sphere");
-    foreach (FuryMesh* mesh, model->meshes())
-    {
-        mesh->draw(shader, material);
-    }
-
-    glBindVertexArray(0);
-    glActiveTexture(GL_TEXTURE0);
-
-
-    if (opacity >= 0.95)
-    {
-        // draw skybox as last
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-
-        m_backgroundShader->use();
-        m_backgroundShader->setMat4("projection", projection);
-        m_backgroundShader->setMat4("view", view);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
-        // skybox cube
-        glBindVertexArray(m_skyboxVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS); // set depth function back to default
-    }
+     m_worldManager->worldByName("materialPreview").draw(_width, _height);
 
     doneCurrent();
 
@@ -496,8 +394,13 @@ void FuryRenderer::init() {
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 30.0f, 60.0f)));
+    m_cameras.push_back(new Camera(glm::vec3(0, 0, 2)));
     m_testWorld->setCamera(m_cameras[0]);
 
+    FuryWorld& world = m_worldManager->createWorld("materialPreview");
+    world.setCamera(m_cameras[2]);
+    world.addRootObject(new FurySphereObject(&world));
+    world.createPbrCubemap("textures/hdr/newport_loft3.hdr");
 
     //
     // МАШИНА
@@ -601,7 +504,8 @@ void FuryRenderer::render()
 
         if (m_irradianceMap == 0)
         {
-            createPBRTextures();
+            createPBRTextures("textures/hdr/newport_loft3.hdr", &m_envCubemap,
+                              &m_irradianceMap, &m_prefilterMap, &m_brdfLUTTexture);
         }
 
 
@@ -635,7 +539,7 @@ void FuryRenderer::render()
         {
             renderDepthMap();
         }
-        glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
+        glm::mat4 lightSpaceMatrix = getLightSpaceMatrix(m_dirlight_position);
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
@@ -679,6 +583,11 @@ void FuryRenderer::render()
                 {
                     testWorldObjects.append(obj);
                 }
+            }
+
+            if (!obj->visible())
+            {
+                continue;
             }
 
             FuryModel* model = m_modelManager->modelByName(obj->modelName());
@@ -753,8 +662,10 @@ void FuryRenderer::render()
                     glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
                     glActiveTexture(GL_TEXTURE2);
                     glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+
                     glActiveTexture(GL_TEXTURE8);
                     glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                    shader->setBool("shadowMapEnabled", NEED_DRAW_SHADOW);
                 }
 
                 glm::mat4 modelMatrix = obj->getOpenGLTransform();
@@ -832,6 +743,7 @@ void FuryRenderer::render()
                 glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
                 glActiveTexture(GL_TEXTURE8);
                 glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                shader->setBool("shadowMapEnabled", NEED_DRAW_SHADOW);
             }
 
             glm::mat4 modelMatrix = obj->getOpenGLTransform();
@@ -872,52 +784,6 @@ void FuryRenderer::render()
             }
         }
 
-//        for (int i = 0; i < testWorldObjects.size(); ++i)
-//        {
-//            continue;
-//            FuryObject* renderObject = testWorldObjects[i];
-//            Shader* shader = renderObject->shader();
-
-//            {
-//                if (!m_needDebugRender)
-//                {
-//                    if (renderObject->name() == "rayCastBall")
-//                    {
-//                        continue;
-//                    }
-//                }
-
-
-//                if (renderObject->name() == "carBody") // Физическая коробка вокруг машины
-//                {
-////                    continue;
-//                }
-
-//                if (renderObject->name() != "rayCastBall")
-//                {
-//                    bool result = true;
-//                    const glm::vec3& minp = renderObject->getPosition();
-//                    const glm::vec3& scales = renderObject->scales();
-//                    float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
-//                    float radius = m_modelManager->modelByName(renderObject->modelName())->modelRadius();
-//                    radius *= maxScale;
-
-//                    for (int i = 0; i < 6; i++)
-//                    {
-//                        float distance = glm::dot(planes[i], glm::vec4(minp.x, minp.y, minp.z, 1.0f));
-
-//                        if (distance < -(radius * 1))
-//                        {
-//                            result = false;
-//                            break;
-//                        }
-//                    }
-
-//                    if (!result)
-//                    {
-//                        continue;
-//                    }
-//                }
 
 
         /*
@@ -934,9 +800,17 @@ void FuryRenderer::render()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
         // skybox cube
-        glBindVertexArray(m_skyboxVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+//        glBindVertexArray(m_skyboxVAO);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        glBindVertexArray(0);
+
+        FuryModel* modelTest = m_modelManager->modelByName("cube");
+        if (!modelTest->meshes().isEmpty())
+        {
+            glDisable(GL_CULL_FACE);
+            modelTest->meshes()[0]->drawShadowMap();
+            glEnable(GL_CULL_FACE);
+        }
         glDepthFunc(GL_LESS); // set depth function back to default
 
 
@@ -1029,6 +903,7 @@ void FuryRenderer::render()
                     glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
                     glActiveTexture(GL_TEXTURE8);
                     glBindTexture(GL_TEXTURE_2D, m_depthMap);
+                    shader->setBool("shadowMapEnabled", NEED_DRAW_SHADOW);
                 }
 
                 glm::mat4 modelMatrix = obj->getOpenGLTransform();
@@ -1085,15 +960,19 @@ void FuryRenderer::render()
     }
 }
 
-void FuryRenderer::createPBRTextures()
+void FuryRenderer::createPBRTextures(const QString& _cubemapHdrPath,
+                                     GLuint* _envCubemap,
+                                     GLuint* _irradianceMap,
+                                     GLuint* _prefilterMap,
+                                     GLuint* _brdfLUTTexture)
 {
     glDisable(GL_CULL_FACE);
     glClearColor(1, 1, 1, 1.0f);
 
     // pbr: setup framebuffer
         // ----------------------
-        unsigned int captureFBO;
-        unsigned int captureRBO;
+        GLuint captureFBO;
+        GLuint captureRBO;
         glGenFramebuffers(1, &captureFBO);
         glGenRenderbuffers(1, &captureRBO);
 
@@ -1104,11 +983,10 @@ void FuryRenderer::createPBRTextures()
 
         // pbr: load the HDR environment map
         // ---------------------------------
-        stbi_set_flip_vertically_on_load(true);
         int width, height;
-        float *data = stbi_loadf("textures/hdr/newport_loft3.hdr", &width, &height, 0, STBI_rgb);
-        stbi_set_flip_vertically_on_load(false);
-        unsigned int hdrTexture;
+        float *data = stbi_loadf(qUtf8Printable(_cubemapHdrPath), &width, &height, 0, STBI_rgb);
+        GLuint hdrTexture;
+
         if (data)
         {
             glGenTextures(1, &hdrTexture);
@@ -1124,13 +1002,13 @@ void FuryRenderer::createPBRTextures()
         }
         else
         {
-            std::cout << "Failed to load HDR image." << std::endl;
+            qDebug() << "Failed to load HDR image.";
         }
 
         // pbr: setup cubemap to render to and attach to framebuffer
         // ---------------------------------------------------------
-        glGenTextures(1, &m_envCubemap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        glGenTextures(1, _envCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_envCubemap);
         for (unsigned int i = 0; i < 6; ++i)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -1168,7 +1046,7 @@ void FuryRenderer::createPBRTextures()
         for (unsigned int i = 0; i < 6; ++i)
         {
             equirectangularToCubemapShader.setMat4("view", captureViews[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_envCubemap, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, *_envCubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             renderCube();
@@ -1176,13 +1054,13 @@ void FuryRenderer::createPBRTextures()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // then let OpenGL generate mipmaps from first mip face (combatting visible dots artifact)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_envCubemap);
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
         // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
         // --------------------------------------------------------------------------------
-        glGenTextures(1, &m_irradianceMap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMap);
+        glGenTextures(1, _irradianceMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_irradianceMap);
         for (unsigned int i = 0; i < 6; ++i)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -1204,14 +1082,14 @@ void FuryRenderer::createPBRTextures()
         irradianceShader.setInt("environmentMap", 0);
         irradianceShader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_envCubemap);
 
         glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         for (unsigned int i = 0; i < 6; ++i)
         {
             irradianceShader.setMat4("view", captureViews[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_irradianceMap, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, *_irradianceMap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             renderCube();
@@ -1220,8 +1098,8 @@ void FuryRenderer::createPBRTextures()
 
         // pbr: create a pre-filter cubemap, and re-scale capture FBO to pre-filter scale.
         // --------------------------------------------------------------------------------
-        glGenTextures(1, &m_prefilterMap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMap);
+        glGenTextures(1, _prefilterMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_prefilterMap);
         for (unsigned int i = 0; i < 6; ++i)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -1241,7 +1119,7 @@ void FuryRenderer::createPBRTextures()
         prefilterShader.setInt("environmentMap", 0);
         prefilterShader.setMat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_envCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, *_envCubemap);
 
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         unsigned int maxMipLevels = 5;
@@ -1259,7 +1137,7 @@ void FuryRenderer::createPBRTextures()
             for (unsigned int i = 0; i < 6; ++i)
             {
                 prefilterShader.setMat4("view", captureViews[i]);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_prefilterMap, mip);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, *_prefilterMap, mip);
 
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 renderCube();
@@ -1269,10 +1147,10 @@ void FuryRenderer::createPBRTextures()
 
         // pbr: generate a 2D LUT from the BRDF equations used.
         // ----------------------------------------------------
-        glGenTextures(1, &m_brdfLUTTexture);
+        glGenTextures(1, _brdfLUTTexture);
 
         // pre-allocate enough memory for the LUT texture.
-        glBindTexture(GL_TEXTURE_2D, m_brdfLUTTexture);
+        glBindTexture(GL_TEXTURE_2D, *_brdfLUTTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
         // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1284,7 +1162,7 @@ void FuryRenderer::createPBRTextures()
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUTTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_brdfLUTTexture, 0);
 
         glViewport(0, 0, 512, 512);
 
@@ -1304,7 +1182,7 @@ void FuryRenderer::createPBRTextures()
 
 void FuryRenderer::renderDepthMap()
 {
-    glm::mat4 lightSpaceMatrix = getLightSpaceMatrix();
+    glm::mat4 lightSpaceMatrix = getLightSpaceMatrix(m_dirlight_position);
     m_simpleDepthShader->use();
     m_simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
@@ -1381,13 +1259,13 @@ void FuryRenderer::renderDepthMap()
     glViewport(0, 0, this->m_width, this->m_height);
 }
 
-glm::mat4 FuryRenderer::getLightSpaceMatrix()
+glm::mat4 FuryRenderer::getLightSpaceMatrix(const glm::vec3 &_dirLightPosition)
 {
     glm::mat4 lightProjection = glm::ortho(-m_shadowViewSize, m_shadowViewSize,
                                            -m_shadowViewSize, m_shadowViewSize,
                                            m_shadowNear, m_shadowPlane);
 
-    glm::vec3 tempDirLight = glm::normalize(m_dirlight_position);
+    glm::vec3 tempDirLight = glm::normalize(_dirLightPosition);
     tempDirLight *= m_shadowCamDistance;
 
     glm::vec3 cameraPos = m_testWorld->camera()->position();

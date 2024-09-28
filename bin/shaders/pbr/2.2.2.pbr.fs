@@ -35,6 +35,7 @@ uniform sampler2D brdfLUT;
 
 // Shadow Map
 uniform sampler2D shadowMap;
+uniform int shadowMapEnabled;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -140,6 +141,11 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
+	if (shadowMapEnabled == 0)
+	{
+		return 0;
+	}
+	
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     

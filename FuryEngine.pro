@@ -47,6 +47,7 @@ SOURCES += \
     src/CarObject.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
+    src/Managers/FuryWorldManager.cpp \
     src/Shader.cpp \
     src/Widgets/FuryDoubleValidator.cpp \
     src/Physics/FuryEventListener.cpp \
@@ -81,6 +82,7 @@ HEADERS += \
     src/CarObject.h \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
     src/DefaultObjects/FuryBoxObject.h \
+    src/Managers/FuryWorldManager.h \
     src/Widgets/FuryDoubleValidator.h \
     src/Physics/FuryEventListener.h \
     src/Logger/FuryException.h \

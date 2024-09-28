@@ -26,11 +26,12 @@
 
 
 #include "FuryWorld.h"
-#include "Managers/FuryTextureManager.h"
 #include "CarObject.h"
+#include "Managers/FuryTextureManager.h"
 #include "Physics/FuryEventListener.h"
 #include "Managers/FuryModelManager.h"
 #include "Managers/FuryMaterialManager.h"
+#include "Managers/FuryWorldManager.h"
 #include "FuryScript.h"
 #include "LocalKeyboard/FuryBaseLocalKeyMapper.h"
 
@@ -60,6 +61,14 @@ public:
      * \return Возвращает идентификатор текстуры рендер-буфера
      */
     GLuint renderTestScene(const QString& _materialName, int _width, int _height);
+
+    void createPBRTextures(const QString &_cubemapHdrPath, GLuint *_envCubemap,
+                           GLuint *_irradianceMap, GLuint *_prefilterMap, GLuint *_brdfLUTTexture);
+
+    inline GLuint depthMap() const
+    { return m_depthMap; }
+    inline GLuint skyboxVAO() const
+    { return m_skyboxVAO; }
 
     /*!
      * \brief Получение экземпляра класса
@@ -166,10 +175,8 @@ private:
     void initDepthMapFBO();
     void loadRaceMapFromJson();
 
-    void createPBRTextures();
-
     void renderDepthMap();
-    glm::mat4 getLightSpaceMatrix();
+    glm::mat4 getLightSpaceMatrix(const glm::vec3& _dirLightPosition);
 
     void renderLoading(float _currentFrame);
 
@@ -227,6 +234,7 @@ private:
     FuryTextureManager* m_textureManager;
     FuryModelManager* m_modelManager;
     FuryMaterialManager* m_materialManager;
+    FuryWorldManager* m_worldManager;
     CarObject* m_carObject = nullptr;
 
     float m_shadowNear = 0.1f;

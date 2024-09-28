@@ -7,8 +7,6 @@
 #include <QVector3D>
 #include <QQuaternion>
 
-#include <QDebug>
-
 /*!
  * \brief Дополнительная функция. Потом надо вынести. Углы Эйлера по кватерниону
  * \param[in] q - Кватернион вращения
@@ -35,6 +33,7 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
     m_world(_world),
     m_modelTransform(1),
     m_textureScales(1, 1),
+    m_visible(true),
     m_selectedInEditor(false)
 {
     m_world->addObject(this);
