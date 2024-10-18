@@ -4,6 +4,7 @@
 #include "Logger/FuryLogger.h"
 #include "FuryMaterial.h"
 #include "FuryPbrMaterial.h"
+#include "FuryPhongMaterial.h"
 #include "Managers/FuryMaterialManager.h"
 
 #include <QFileInfo>
@@ -265,7 +266,7 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
     {
         if (!materialManager->tryLoadMaterial(materialName))
         {
-            FuryMaterial* modelMaterial = FuryMaterial::createFromAssimp(material, m_directory);
+            FuryPhongMaterial* modelMaterial = FuryPhongMaterial::createFromAssimp(material, m_directory);
 //            FuryMaterial* material = materialManager->createMaterial(materialName);
 //            *material = *modelMaterial;
 

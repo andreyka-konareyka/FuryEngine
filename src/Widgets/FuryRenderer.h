@@ -62,13 +62,24 @@ public:
      */
     GLuint renderTestScene(const QString& _materialName, int _width, int _height);
 
+    /*!
+     * \brief Создание текстур окружения для PBR
+     * \param[in] _cubemapHdrPath - Путь к HDR текстуры
+     * \param[out] _envCubemap - Выходная текстура окружения
+     * \param[out] _irradianceMap - Выходная карта освещенности
+     * \param[out] _prefilterMap - Выходная карта предварительной фильтрации
+     * \param[out] _brdfLUTTexture - Выходная текстуры brdfUT
+     */
     void createPBRTextures(const QString &_cubemapHdrPath, GLuint *_envCubemap,
                            GLuint *_irradianceMap, GLuint *_prefilterMap, GLuint *_brdfLUTTexture);
 
-    inline GLuint depthMap() const
-    { return m_depthMap; }
-    inline GLuint skyboxVAO() const
-    { return m_skyboxVAO; }
+    /*!
+     * \brief Создание карты теней
+     * \param[out] _depthMapFBO - Выходной буфер глубины
+     * \param[out] _depthMap - Выходная текстура для буфера
+     */
+    void createDepthMap(GLuint* _depthMapFBO, GLuint* _depthMap);
+
 
     /*!
      * \brief Получение экземпляра класса
@@ -88,16 +99,6 @@ public:
      * \param[in] _value - Увеличение камеры
      */
     void setCameraZoomValue(int _value);
-
-    /*!
-     * \brief Установка позиции камеры машины
-     * \param[in] _x - Координата x
-     * \param[in] _y - Координата y
-     */
-    void setCarCameraPos(float _x, float _y);
-
-    void setCarSpringLenght(float _lenght);
-    void setCarSpringK(float _k);
 
 
     inline void setShadowNear(float _shadowNear)
@@ -133,10 +134,6 @@ protected:
     void keyPressEvent(QKeyEvent* _event) override;
     void keyReleaseEvent(QKeyEvent* _event) override;
 
-private slots:
-    //! Слот обновления фрейма
-    void updateGL();
-
 
 private:
     int m_width;
@@ -167,16 +164,10 @@ private:
     static FuryRenderer* s_instance;
 
 private:
-    reactphysics3d::PhysicsCommon* own_physicsCommon;
     FuryEventListener* m_eventListener;
 
 
-    void initSkyboxModel();
-    void initDepthMapFBO();
     void loadRaceMapFromJson();
-
-    void renderDepthMap();
-    glm::mat4 getLightSpaceMatrix(const glm::vec3& _dirLightPosition);
 
     void renderLoading(float _currentFrame);
 
@@ -185,10 +176,19 @@ private:
     void displayBuffer(GLuint _bufferId);
     void displayLogo();
 
-    //! Инициализация буферов главного рендеринга
-    void initMainRender();
     //! Тестовая инициализация буферов рендеринга
-    void initTestRender();
+    /*!
+     * \brief Создание буфера рендеринга
+     * \param[out] _frameBuffer - Фрейм буфер
+     * \param[out] _renderBuffer - Рендер буфер
+     * \param[out] _renderTexture - Рендер текстура
+     * \param[in] _width - Ширина
+     * \param[in] _height - Высота
+     */
+    void createRenderBuffer(GLuint* _frameBuffer,
+                            GLuint* _renderBuffer,
+                            GLuint* _renderTexture,
+                            int _width, int _height);
     //! Рендер отрисованной сцены на экран из буфера
     void renderMainBuffer();
 
@@ -199,30 +199,14 @@ private:
 
     Shader* m_particleShader;
     Shader* m_pbrShader;
-    Shader* m_backgroundShader;
-    Shader* m_simpleDepthShader;
-    Shader* m_brdfShader;
-
-    unsigned int m_irradianceMap = 0;
-    unsigned int m_prefilterMap;
-    unsigned int m_brdfLUTTexture = 0;
-
-    GLuint m_envCubemap = 0;
 
 
     Particle* m_myFirstParticle;
     ParticleSystem* m_myFirstParticleSystem;
 
 
-
-    GLuint m_skyboxVAO, m_skyboxVBO;
-
     bool m_is_loading = true;
     float m_loadingOvertime = 1.0f;
-
-
-    GLuint m_depthMapFBO;
-    GLuint m_depthMap;
 
     glm::vec3 m_dirlight_position = glm::vec3(-8.0f, 6.0f, 3.0f);
 

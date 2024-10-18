@@ -26,29 +26,7 @@ FuryMesh::FuryMesh(FuryModel *_parentModel, const QVector<Vertex> &_vertices,
 
 }
 
-void FuryMesh::draw(Shader *_shader, FuryMaterial *_material)
-{
-    // Установка материала
-    if (_material == nullptr)
-    {
-        FuryMaterialManager* manager = FuryMaterialManager::instance();
-        FuryMaterial* myMaterial = manager->materialByName(m_materialName);
-        myMaterial->setShaderMaterial(_shader);
-    }
-    else
-    {
-        _material->setShaderMaterial(_shader);
-    }
-
-    if (VAO != 0)
-    { // Отрисовка
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-    }
-}
-
-void FuryMesh::drawShadowMap()
+void FuryMesh::draw()
 {
     if (VAO != 0)
     {

@@ -4,6 +4,7 @@
 #include "Logger/FuryException.h"
 #include "FuryMaterial.h"
 #include "FuryPbrMaterial.h"
+#include "FuryPhongMaterial.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -12,7 +13,7 @@ FuryMaterialManager* FuryMaterialManager::s_instance = nullptr;
 
 
 FuryMaterialManager::FuryMaterialManager() :
-    m_defaultMaterial(new FuryMaterial)
+    m_defaultMaterial(new FuryPbrMaterial)
 {
     Debug(ru("Создание менеджера материалов"));
 }
@@ -30,6 +31,9 @@ FuryMaterialManager::~FuryMaterialManager()
             delete iter.value();
         }
     }
+
+    delete m_defaultMaterial;
+    m_defaultMaterial = nullptr;
 }
 
 FuryMaterialManager *FuryMaterialManager::instance()
@@ -64,34 +68,14 @@ void FuryMaterialManager::deleteInstance()
     s_instance = nullptr;
 }
 
-FuryMaterial *FuryMaterialManager::createMaterial(const QString &_name)
+FuryPhongMaterial *FuryMaterialManager::createPhongMaterial(const QString &_name)
 {
-    if (m_materials.contains(_name))
-    {
-        Debug(ru("[ ВНИМАНИЕ ] Материал (%1) уже существовал.").arg(_name));
-        return m_materials.value(_name);
-    }
-
-    Debug(ru("Создан материал: (%1)").arg(_name));
-
-    FuryMaterial* material = new FuryMaterial;
-    m_materials.insert(_name, material);
-    return material;
+    return createUserMaterial<FuryPhongMaterial>(_name);
 }
 
 FuryPbrMaterial *FuryMaterialManager::createPbrMaterial(const QString &_name)
 {
-    if (m_materials.contains(_name))
-    {
-        Debug(ru("[ ВНИМАНИЕ ] Материал (%1) уже существовал.").arg(_name));
-        return static_cast<FuryPbrMaterial*>(m_materials.value(_name));
-    }
-
-    Debug(ru("Создан материал: (%1)").arg(_name));
-
-    FuryPbrMaterial* material = new FuryPbrMaterial;
-    m_materials.insert(_name, material);
-    return material;
+    return createUserMaterial<FuryPbrMaterial>(_name);
 }
 
 FuryMaterial *FuryMaterialManager::materialByName(const QString &_name)
@@ -142,9 +126,9 @@ bool FuryMaterialManager::tryLoadMaterial(const QString &_name)
     QString type = object["materialType"].toString();
     FuryMaterial* mat = NULL;
 
-    if (type == "FuryMaterial")
+    if (type == "FuryPhongMaterial")
     {
-        mat = FuryMaterial::fromJson(object);
+        mat = FuryPhongMaterial::fromJson(object);
     }
     else if (type == "FuryPbrMaterial")
     {

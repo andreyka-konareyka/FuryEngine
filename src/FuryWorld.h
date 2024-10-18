@@ -4,11 +4,14 @@
 // GLEW
 //#define GLEW_STATIC
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <QVector>
 #include <QObject>
 
 class Camera;
+class FuryMesh;
 class FuryObject;
 
 namespace reactphysics3d
@@ -55,6 +58,9 @@ public:
      * \param[in] _height - Высота экрана
      */
     void draw(int _width, int _height);
+
+    //! Отрисовка карты теней
+    void drawDepthMap();
 
     /*!
      * \brief Добавление корневого объекта мира
@@ -120,12 +126,27 @@ public:
     //! Создание окружения для pbr
     void createPbrCubemap(const QString& _cubemapHdrName);
 
+    //! Создать карту теней
+    void createDepthMap();
+
 signals:
     void addObjectSignal(FuryObject* _object);
     void parentChangedSignal(FuryObject* _object);
 
 private slots:
     void parentChangedSlot();
+
+private:
+    void drawComponent(const QPair<FuryObject*, FuryMesh*>& _component,
+                       const glm::mat4& _projection,
+                       const glm::mat4& _view,
+                       const glm::mat4& _lightSpaceMatrix);
+
+    void fillDrawComponents(QVector<QPair<FuryObject*, FuryMesh*>>& _solidComponents,
+                            QVector<QPair<FuryObject*, FuryMesh*>>& _transparentComponents);
+
+    void drawSelectedInEditor(const glm::mat4& _projection,
+                              const glm::mat4& _view);
 
 private:
     //! Главный объект физики, к которому принадлежит мир
@@ -143,11 +164,15 @@ private:
     //! Запущена ли симуляция
     bool m_started;
 
+    glm::vec3 m_dirLightPosition;
     GLuint m_envCubemap;
     GLuint m_irradianceMap;
     GLuint m_prefilterMap;
     GLuint m_brdfLUTTexture;
     bool m_shadowMapEnabled;
+
+    GLuint m_depthMapFBO;
+    GLuint m_depthMap;
 };
 
 #endif // WORLD_H

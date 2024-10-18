@@ -2,6 +2,7 @@
 #include "ui_FuryMaterialEditDialog.h"
 
 #include "FuryPbrMaterial.h"
+#include "FuryPhongMaterial.h"
 #include "Managers/FuryMaterialManager.h"
 
 #include <QSlider>
@@ -39,9 +40,9 @@ void FuryMaterialEditDialog::onMaterialChoiceSlot()
         m_ui->leRoughTexture->setText(pbr->roughnessTexture());
         m_ui->leAoTexture->setText(pbr->aoTexture());
     }
-    else if (m_currentMaterial != NULL)
+    else if (FuryPhongMaterial* phong = dynamic_cast<FuryPhongMaterial*>(m_currentMaterial); phong != NULL)
     {
-        const glm::vec3& rawColor = m_currentMaterial->diffuseColor();
+        const glm::vec3& rawColor = phong->diffuseColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
 
     }
@@ -64,9 +65,9 @@ void FuryMaterialEditDialog::onColorClickedSlot()
         const glm::vec3& rawColor = pbr->albedoColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
     }
-    else if (m_currentMaterial != NULL)
+    else if (FuryPhongMaterial* phong = dynamic_cast<FuryPhongMaterial*>(m_currentMaterial); phong != NULL)
     {
-        const glm::vec3& rawColor = m_currentMaterial->diffuseColor();
+        const glm::vec3& rawColor = phong->diffuseColor();
         color = QColor(rawColor.r * 255, rawColor.g * 255, rawColor.b * 255);
 
     }
@@ -86,13 +87,13 @@ void FuryMaterialEditDialog::onColorClickedSlot()
 
         pbr->setAlbedoColor(rawColor);
     }
-    else if (m_currentMaterial != NULL)
+    else if (FuryPhongMaterial* phong = dynamic_cast<FuryPhongMaterial*>(m_currentMaterial); phong != NULL)
     {
         glm::vec3 rawColor(color.red() / 255.0f,
                            color.green() / 255.0f,
                            color.blue() / 255.0f);
 
-        m_currentMaterial->setDiffuseColor(rawColor);
+        phong->setDiffuseColor(rawColor);
     }
 
     m_ui->pbColor->setStyleSheet(QString("background: %1").arg(color.name()));

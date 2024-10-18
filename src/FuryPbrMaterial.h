@@ -2,6 +2,9 @@
 #define FURYPBRMATERIAL_H
 
 #include "FuryMaterial.h"
+#include "FuryPhongMaterial.h"
+
+#include <QString>
 
 //! Класс PBR материала
 class FuryPbrMaterial : public FuryMaterial
@@ -153,7 +156,7 @@ public:
      * \brief Получение признака рендера с двух сторон
      * \return Возвращает признак
      */
-    inline bool twoSided() const
+    inline bool isTwoSided() const override
     { return m_twoSided; }
 
     /*!
@@ -163,12 +166,11 @@ public:
     inline void setOpacity(float _opacity)
     { m_opacity = _opacity; }
 
-
     /*!
      * \brief Получение непрозрачности
      * \return Возвращает непрозрачность
      */
-    inline float opacity() const
+    inline float opacity() const override
     { return m_opacity; }
 
     /*!
@@ -189,7 +191,7 @@ public:
      * \param[in] _material - Обычный материал
      * \return Возвращает PBR-материал
      */
-    static FuryPbrMaterial* createFromMaterial(const FuryMaterial* _material);
+    static FuryPbrMaterial* createFromMaterial(const FuryPhongMaterial* _material);
 
 private:
     //! Основной цвет

@@ -1,11 +1,14 @@
 #ifndef FURYMATERIALMANAGER_H
 #define FURYMATERIALMANAGER_H
 
+#include "Logger/FuryLogger.h"
+
 #include <QMap>
 #include <QString>
 
 class FuryMaterial;
 class FuryPbrMaterial;
+class FuryPhongMaterial;
 
 
 //! Класс менеджера материалов
@@ -32,11 +35,11 @@ public:
     static void deleteInstance();
 
     /*!
-     * \brief Создание материала
+     * \brief Создание Phong материала
      * \param[in] _name - Название
      * \return Возвращает материал
      */
-    FuryMaterial* createMaterial(const QString& _name);
+    FuryPhongMaterial* createPhongMaterial(const QString& _name);
 
     /*!
      * \brief Создание PBR материала
@@ -44,6 +47,14 @@ public:
      * \return Возвращает PBR материал
      */
     FuryPbrMaterial* createPbrMaterial(const QString& _name);
+
+    /*!
+     * \brief Шаблонное создание любого материала, наследника FuryMaterial
+     * \param[in] _name - Название
+     * \return Возвращает созданный материал
+     */
+    template <typename T>
+    T* createUserMaterial(const QString& _name);
 
     /*!
      * \brief Получение материала по названию
@@ -100,5 +111,24 @@ private:
     //! Материал по умолчанию
     FuryMaterial* m_defaultMaterial;
 };
+
+
+
+
+template<typename T>
+T *FuryMaterialManager::createUserMaterial(const QString &_name)
+{
+    if (m_materials.contains(_name))
+    {
+        Debug(ru("[ ВНИМАНИЕ ] Материал (%1) уже существовал.").arg(_name));
+        return static_cast<T*>(m_materials.value(_name));
+    }
+
+    Debug(ru("Создан материал: (%1)").arg(_name));
+
+    T* material = new T;
+    m_materials.insert(_name, material);
+    return material;
+}
 
 #endif // FURYMATERIALMANAGER_H

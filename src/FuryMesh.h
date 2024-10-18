@@ -51,15 +51,8 @@ public:
              const glm::vec3& _minVertex,
              const glm::vec3& _maxVertex);
 
-    /*!
-     * \brief Отрисовка меша с заданным материалом
-     * \param[in] _shader - Шейдер
-     * \param[in] _material - Материал. Если nullptr, то берётся из меша
-     */
-    void draw(Shader* _shader, FuryMaterial* _material);
-
-    //! Отрисовка меша для карты теней
-    void drawShadowMap();
+    //! Отрисовка меша
+    void draw();
 
     //! Инициализация меша
     void setupMesh();

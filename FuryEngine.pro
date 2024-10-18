@@ -45,6 +45,7 @@ LIBS        += \
 SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
+    src/FuryPhongMaterial.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
     src/Managers/FuryWorldManager.cpp \
@@ -80,6 +81,7 @@ SOURCES += \
 HEADERS += \
     src/Camera.h \
     src/CarObject.h \
+    src/FuryPhongMaterial.h \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
     src/DefaultObjects/FuryBoxObject.h \
     src/Managers/FuryWorldManager.h \

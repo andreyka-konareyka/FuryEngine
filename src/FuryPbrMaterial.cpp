@@ -174,18 +174,18 @@ FuryPbrMaterial *FuryPbrMaterial::fromJson(const QJsonObject &_object)
     return result;
 }
 
-FuryPbrMaterial *FuryPbrMaterial::createFromMaterial(const FuryMaterial *_material)
+FuryPbrMaterial *FuryPbrMaterial::createFromMaterial(const FuryPhongMaterial *_material)
 {
     FuryPbrMaterial* result = new FuryPbrMaterial;
 
     result->setAlbedoColor(_material->diffuseColor());
     result->setMetallic(_material->specularColor().r * 0.8);
     result->setRoughness(1 - _material->specularColor().r * 0.8);
-    result->setTwoSided(_material->twoSided());
+    result->setTwoSided(_material->isTwoSided());
     result->setOpacity(_material->opacity());
 
     result->setAlbedoTexture(_material->diffuseTexture());
-    result->setSpecularTexture(_material->specularTexture());
+    result->setMetallicTexture(_material->specularTexture());
     result->setNormalTexture(_material->normalTexture());
 
     return result;
