@@ -158,6 +158,18 @@ void FuryMainWindow::selectObjectSlot(const QModelIndex &_current, const QModelI
                 connect(input, &FuryVectorInputWidget::vectorChangedSignal,
                         this, qOverload<const glm::vec3&>(&FuryMainWindow::propertyChangedSlot));
             }
+            else if (QString(prop.typeName()) == "glm::vec<2,float,0>")
+            {
+                glm::vec2 vec = prop.value<glm::vec2>();
+                qDebug() << vec.x << vec.y;
+
+                FuryVectorInputWidget* input = new FuryVectorInputWidget(vec, this);
+                input->setProperty("propName", QByteArray(propName));
+                m_ui->objectProperties->layout()->addWidget(input);
+
+                connect(input, &FuryVectorInputWidget::vector2dChangedSignal,
+                        this, qOverload<const glm::vec2&>(&FuryMainWindow::propertyChangedSlot));
+            }
             else
             {
                 QLineEdit* input = new QLineEdit(prop.toString(), this);
@@ -176,6 +188,26 @@ void FuryMainWindow::selectObjectSlot(const QModelIndex &_current, const QModelI
 }
 
 void FuryMainWindow::propertyChangedSlot(const glm::vec3 &_vector)
+{
+    if (m_currentObject == nullptr)
+    {
+        return;
+    }
+
+    FuryVectorInputWidget* input = dynamic_cast<FuryVectorInputWidget*>(sender());
+
+    if (input == nullptr)
+    {
+        return;
+    }
+
+    QVariant prop;
+    prop.setValue(_vector);
+    m_currentObject->setProperty(input->property("propName").toByteArray().constData(),
+                                 prop);
+}
+
+void FuryMainWindow::propertyChangedSlot(const glm::vec2 &_vector)
 {
     if (m_currentObject == nullptr)
     {

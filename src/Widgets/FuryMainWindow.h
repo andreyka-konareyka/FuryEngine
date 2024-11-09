@@ -95,6 +95,12 @@ private slots:
      */
     void propertyChangedSlot(const glm::vec3& _vector);
 
+    /*!
+     * \brief Слот изменения свойства
+     * \param[in] _vector - Новый вектор
+     */
+    void propertyChangedSlot(const glm::vec2& _vector);
+
     //! Слот изменения свойства
     void propertyChangedSlot();
 

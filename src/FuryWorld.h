@@ -116,8 +116,6 @@ public:
     inline reactphysics3d::PhysicsWorld* physicsWorld() const
     { return m_physicsWorld; }
 
-    //! Загрузка гоночной трассы из json-файла
-    void loadRaceMap();
     //! Создание материалов
     void createMaterials();
     //! Создание текстур
@@ -129,24 +127,60 @@ public:
     //! Создать карту теней
     void createDepthMap();
 
+    //! Сохранение мира в JSON
+    void save();
+    //! Загрузка мира из JSON
+    void load();
+
 signals:
+    /*!
+     * \brief Сигнал добавления объекта
+     * \param[in] _object - Объект
+     */
     void addObjectSignal(FuryObject* _object);
+
+    /*!
+     * \brief Сигнал изменения родителя у объекта
+     * \param[in] _object - Объект
+     */
     void parentChangedSignal(FuryObject* _object);
 
 private slots:
+    //! Слот изменения родителя
     void parentChangedSlot();
 
 private:
+    /*!
+     * \brief Отрисовка компоненты
+     * \param[in] _component - Пара <Объект, Меш> для отрисовки
+     * \param[in] _projection - Матрица проекции
+     * \param[in] _view - Матрица вида
+     * \param[in] _lightSpaceMatrix - Матрица пространства теней
+     */
     void drawComponent(const QPair<FuryObject*, FuryMesh*>& _component,
                        const glm::mat4& _projection,
                        const glm::mat4& _view,
                        const glm::mat4& _lightSpaceMatrix);
 
+    /*!
+     * \brief Заполнение компонент для отрисовки
+     * \param[out] _solidComponents - Непрозрачный компоненты
+     * \param[out] _transparentComponents - Прозрачные компоненты
+     */
     void fillDrawComponents(QVector<QPair<FuryObject*, FuryMesh*>>& _solidComponents,
                             QVector<QPair<FuryObject*, FuryMesh*>>& _transparentComponents);
 
+    /*!
+     * \brief Отрисовка выделенного объекта в редакторе
+     * \param[in] _projection - Матрица проекции
+     * \param[in] _view - Матрица вида
+     */
     void drawSelectedInEditor(const glm::mat4& _projection,
                               const glm::mat4& _view);
+
+private:
+    //! Инициализация соединений сигналов и слотов
+    void initConnections();
 
 private:
     //! Главный объект физики, к которому принадлежит мир

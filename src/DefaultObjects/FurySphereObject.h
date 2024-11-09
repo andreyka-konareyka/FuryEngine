@@ -10,54 +10,49 @@
 //! Класс сферы
 class FurySphereObject : public FuryObject
 {
+    Q_OBJECT
+
 public:
     /*!
      * \brief Конструктор
      * \param[in] _world - Мир, к которому принадлежит объект
+     * \param[in] _parent - Родительский объект
+     * \param[in] _withoutJoint - Без создания сустава
      */
-    FurySphereObject(FuryWorld* _world);
+    FurySphereObject(FuryWorld* _world, FuryObject* _parent = nullptr, bool _withoutJoint = false);
 
     /*!
      * \brief Конструктор
      * \param[in] _world - Мир, к которому принадлежит объект
      * \param[in] _position - Позиция
+     * \param[in] _parent - Родительский объект
+     * \param[in] _withoutJoint - Без создания сустава
      */
-    FurySphereObject(FuryWorld* _world, const glm::vec3& _position);
+    FurySphereObject(FuryWorld* _world, const glm::vec3& _position,
+                     FuryObject* _parent = nullptr, bool _withoutJoint = false);
 
     /*!
      * \brief Конструктор
      * \param[in] _world - Мир, к которому принадлежит объект
      * \param[in] _position - Позиция
      * \param[in] _scale - Масштаб
+     * \param[in] _parent - Родительский объект
+     * \param[in] _withoutJoint - Без создания сустава
      */
-    FurySphereObject(FuryWorld* _world, const glm::vec3& _position, double _scale);
+    FurySphereObject(FuryWorld* _world, const glm::vec3& _position, double _scale,
+                     FuryObject* _parent = nullptr, bool _withoutJoint = false);
 
     /*!
      * \brief Инициализация физического тела
      * \param[in] _type - Тип физического тела
      */
-    void Setup_physics(reactphysics3d::BodyType _type);
+    void initPhysics(reactphysics3d::BodyType _type) override;
 
     /*!
      * \brief Получение шейдера по умолчанию
      * \return Возвращает шейдер по умолчанию
      */
     static Shader* defaultShader();
-
-    /*!
-     * \brief Перевод в JSON объект
-     * \return Возвращает JSON объект
-     */
-    QJsonObject toJson();
-
-    /*!
-     * \brief Перевод из JSON объекта
-     * \param[in] _object - JSON объект
-     * \param[in] _world - Мир, к которому принадлежит объект
-     * \return Возвращает сферу
-     */
-    static FurySphereObject* fromJson(const QJsonObject& _object,
-                                      FuryWorld* _world);
 };
 
 

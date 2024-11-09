@@ -13,8 +13,11 @@
 int rayCount = 20;
 
 
-CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_shader) :
-    FuryObject(_world, _position),
+Shader* initCarShader();
+
+
+CarObject::CarObject(FuryWorld *_world) :
+    FuryObject(_world),
     m_springLenght(0.4f),
     m_springK(500),
     m_lastSuspentionLenght({ m_springLenght, m_springLenght, m_springLenght, m_springLenght }),
@@ -24,28 +27,25 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
     m_right(0),
     m_lastTriggerNumber(0),
     m_reward(0),
-    m_startPosition(_position),
     m_timeCounter(0),
     m_backTriggerCounter(0),
     m_hasContact(false)
 {
-    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, 1)));
-    m_objectWheels.last()->setShader(_shader);
+    setShader(initCarShader());
+
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, 1), this));
     m_objectWheels.last()->setObjectName("wheel_FR");
-    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, -1)));
-    m_objectWheels.last()->setShader(_shader);
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, -1), this));
     m_objectWheels.last()->setObjectName("wheel_FL");
-    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, 1)));
-    m_objectWheels.last()->setShader(_shader);
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, 1), this));
     m_objectWheels.last()->setObjectName("wheel_RR");
-    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, -1)));
-    m_objectWheels.last()->setShader(_shader);
+    m_objectWheels.push_back(new FuryObject(world(), glm::vec3(-2, -0.5, -1), this));
     m_objectWheels.last()->setObjectName("wheel_RL");
 
     for (int i = 0; i < rayCount; ++i)
     {
-        m_objectsDebugRays.push_back(new FurySphereObject(world(), glm::vec3(30, 0, 0), 0.25));
-        addChildObject(m_objectsDebugRays.last(), true);
+        m_objectsDebugRays.push_back(new FurySphereObject(world(), glm::vec3(30, 0, 0), 0.25, this, true));
+//        addChildObject(m_objectsDebugRays.last(), true);
 
         FuryMaterialManager* materialManager = FuryMaterialManager::instance();
 
@@ -60,12 +60,11 @@ CarObject::CarObject(FuryWorld *_world, const glm::vec3& _position, Shader *_sha
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
         m_objectsDebugRays.last()->setObjectName("rayCastBall");
-        m_objectsDebugRays.last()->setShader(_shader);
+        m_objectsDebugRays.last()->setShader(shader());
     }
 
     setObjectName("AI_car");
     setModelName("backpack2");
-    setShader(_shader);
     glm::mat4 testSubModel = glm::mat4(1.0f);
     testSubModel = glm::translate(testSubModel, glm::vec3(0, -0.88, 0));
     testSubModel = glm::rotate(testSubModel, 3.14f/2, glm::vec3(0, 1, 0));
@@ -439,9 +438,10 @@ bool CarObject::checkHasContact()
 //    return !m_hasContact;
 }
 
-void CarObject::Setup_physics(reactphysics3d::BodyType type)
+void CarObject::initPhysics(reactphysics3d::BodyType _type)
 {
-    physicsBody()->setType(type);
+    FuryObject::initPhysics(_type);
+
     const reactphysics3d::Vector3 halfExtents(6.5 / 2.0f, 1 / 2.0f, 3 / 2.0f);
     reactphysics3d::BoxShape* boxShape = world()->physicsCommon()->createBoxShape(halfExtents);
     reactphysics3d::Transform transform_boxShape = reactphysics3d::Transform::identity();
@@ -451,24 +451,7 @@ void CarObject::Setup_physics(reactphysics3d::BodyType type)
 
     for (int i = 0; i < m_objectWheels.size(); ++i)
     {
-        m_objectWheels[i]->physicsBody()->setType(type);
-    }
-
-    for (int i = 0; i < m_objectWheels.size(); ++i)
-    {
-        addChildObject(m_objectWheels[i]);
-//        // Anchor point in world-space
-//        float x = m_objectWheels[i]->getPosition().x;
-//        float y = m_objectWheels[i]->getPosition().y;
-//        float z = m_objectWheels[i]->getPosition().z;
-//        const reactphysics3d::Vector3 anchorPoint(x, y, z);
-
-//        // Create the joint info object
-//        reactphysics3d::FixedJointInfo jointInfo(physicsBody(), m_objectWheels[i]->physicsBody(), anchorPoint);
-//        jointInfo.isCollisionEnabled = false;
-
-//        // Create the hinge joint in the physics world
-//        world()->physicsWorld()->createJoint(jointInfo);
+        m_objectWheels[i]->physicsBody()->setType(_type);
     }
 }
 
@@ -490,4 +473,25 @@ void CarObject::setLocalCameraPosition(float _x, float _y)
 {
     m_cameraLocalPosition.x = -_x;
     m_cameraLocalPosition.y = _y;
+}
+
+Shader *CarObject::defaultShader()
+{
+    return initCarShader();
+}
+
+
+
+
+
+Shader* initCarShader()
+{
+    static Shader* default_shader = nullptr;
+
+    if (default_shader == nullptr)
+    {
+        default_shader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
+    }
+
+    return default_shader;
 }

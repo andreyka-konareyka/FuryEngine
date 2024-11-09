@@ -10,8 +10,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <reactphysics3d/reactphysics3d.h>
+
 #include <QObject>
 #include <QString>
+#include <QJsonObject>
 
 class Camera;
 class Shader;
@@ -34,20 +37,27 @@ class FuryObject : public QObject
     Q_PROPERTY(glm::vec3 scales READ scales WRITE setScales)
     Q_PROPERTY(QString modelName READ modelName WRITE setModelName)
     Q_PROPERTY(QString materialName READ materialName WRITE setMaterialName)
+    Q_PROPERTY(glm::vec2 textureScales READ textureScales WRITE setTextureScales)
     Q_PROPERTY(bool visible READ visible WRITE setVisible)
 
 public:
     /*!
      * \brief Конструктор
      * \param[in] _world - Мир, к которому принадлежит объект
+     * \param[in] _parent - Родительский объект
+     * \param[in] _withoutJoint - Без создания сустава
      */
-    FuryObject(FuryWorld* _world);
+    FuryObject(FuryWorld* _world, FuryObject* _parent = nullptr, bool _withoutJoint = false);
 
     /*!
      * \brief Конструктор
+     * \param[in] _world - Мир, к которому принадлежит объект
      * \param[in] _position - Позиция
+     * \param[in] _parent - Родительский объект
+     * \param[in] _withoutJoint - Без создания сустава
      */
-    FuryObject(FuryWorld* _world, const glm::vec3& _position);
+    FuryObject(FuryWorld* _world, const glm::vec3& _position,
+               FuryObject* _parent = nullptr, bool _withoutJoint = false);
 
     //! Деструктор
     virtual ~FuryObject();
@@ -285,6 +295,24 @@ public:
      */
     inline void setSelectedInEditor(bool _selected)
     { m_selectedInEditor = _selected; }
+
+    /*!
+     * \brief Перевод в JSON объект
+     * \return Возвращает JSON объект
+     */
+    virtual QJsonObject toJson() const;
+
+    /*!
+     * \brief Перевод из JSON объекта
+     * \param[in] _object - JSON объект
+     */
+    virtual void fromJson(const QJsonObject& _json);
+
+    /*!
+     * \brief Инициализация физики
+     * \param[in] _type - Тип тела: статическое, динамическое, кинематическое
+     */
+    virtual void initPhysics(reactphysics3d::BodyType _type);
 
 signals:
     //! Сигнал изменения родителя

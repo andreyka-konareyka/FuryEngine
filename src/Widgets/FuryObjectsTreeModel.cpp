@@ -120,8 +120,25 @@ void FuryObjectsTreeModel::addObjectSlot(FuryObject *_object)
 {
     beginResetModel();
 
-    ObjectItem* node = new ObjectItem(m_root, _object);
-    m_root->children.append(node);
+    ObjectItem* parentItem = m_root;
+
+    if (_object->parent() != nullptr)
+    {
+        FuryObject* parentObj = qobject_cast<FuryObject*>(_object->parent());
+
+        if (parentObj != nullptr)
+        {
+            ObjectItem* newParent = findObject(m_root, parentObj);
+
+            if (newParent != nullptr)
+            {
+                parentItem = newParent;
+            }
+        }
+    }
+
+    ObjectItem* node = new ObjectItem(parentItem, _object);
+    parentItem->children.append(node);
 
     endResetModel();
 }

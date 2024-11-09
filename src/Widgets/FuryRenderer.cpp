@@ -382,9 +382,17 @@ void FuryRenderer::init() {
     // МАШИНА
     //
 
-    m_carObject = new CarObject(m_testWorld, glm::vec3(0, -0.5, 30), m_pbrShader);
-    m_carObject->Setup_physics(reactphysics3d::BodyType::DYNAMIC);
-    m_testWorld->addRootObject(m_carObject);
+    m_testWorld->load();
+
+    foreach (FuryObject* obj, m_testWorld->getRootObjects())
+    {
+        if (obj->objectName() == "AI_car")
+        {
+            m_carObject = qobject_cast<CarObject*>(obj);
+            break;
+        }
+    }
+
     m_eventListener->setCarObject(m_carObject);
 
 
@@ -415,7 +423,8 @@ void FuryRenderer::init() {
         QList<Shader*> shaders({
                                    m_pbrShader,
                                    FuryBoxObject::defaultShader(),
-                                   FurySphereObject::defaultShader()
+                                   FurySphereObject::defaultShader(),
+                                   CarObject::defaultShader()
                                });
 
         for (Shader* shader : shaders)
@@ -1144,7 +1153,6 @@ void FuryRenderer::createDepthMap(GLuint* _depthMapFBO, GLuint* _depthMap)
 
 void FuryRenderer::loadRaceMapFromJson()
 {
-    m_testWorld->loadRaceMap();
     m_testWorld->createMaterials();
     m_testWorld->createTextures();
 }

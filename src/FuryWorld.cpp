@@ -12,6 +12,7 @@
 #include "Managers/FuryMaterialManager.h"
 #include "Managers/FuryModelManager.h"
 #include "Widgets/FuryRenderer.h"
+#include "FuryObjectsFactory.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 
@@ -19,6 +20,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QMetaProperty>
 
 
 glm::mat4 getLightSpaceMatrix(Camera* _camera, const glm::vec3 &_dirLightPosition);
@@ -42,6 +44,8 @@ FuryWorld::FuryWorld(reactphysics3d::PhysicsCommon *_physicsCommon) :
 {
     Debug(ru("Создание игрового мира"));
     m_physicsWorld = m_physicsCommon->createPhysicsWorld();
+
+    initConnections();
 }
 
 FuryWorld::~FuryWorld()
@@ -246,8 +250,6 @@ void FuryWorld::addObject(FuryObject *_object)
     m_allObjects.append(_object);
     connect(_object, &FuryObject::parentChangedSignal,
             this, &FuryWorld::parentChangedSlot);
-
-    emit addObjectSignal(_object);
 }
 
 void FuryWorld::setCamera(Camera* _camera)
@@ -268,65 +270,6 @@ const QVector<FuryObject*>& FuryWorld::getRootObjects()
 const QVector<FuryObject *> &FuryWorld::getAllObjects()
 {
     return m_allObjects;
-}
-
-void FuryWorld::loadRaceMap()
-{
-    FuryObject* triggers = new FuryObject(this);
-    triggers->setObjectName("Triggers");
-    FuryObject* raceMap = new FuryObject(this);
-    raceMap->setObjectName("RaceMap");
-
-    {
-        QFile file("scene/second.json");
-
-        if (file.open(QIODevice::ReadOnly))
-        {
-            QByteArray json = file.readAll();
-            file.close();
-
-            QJsonDocument doc = QJsonDocument::fromJson(json);
-            QJsonArray array = doc.array();
-
-            for (int i = 0; i < array.size(); ++i)
-            {
-                QJsonObject obj = array[i].toObject();
-
-                FuryBoxObject* object = FuryBoxObject::fromJson(obj, this);
-                addRootObject(object);
-
-                if (object->objectName().startsWith("race"))
-                {
-                    raceMap->addChildObject(object, true);
-                }
-                else if (object->objectName().startsWith("Trigger"))
-                {
-                    triggers->addChildObject(object, true);
-                }
-            }
-        }
-    }
-
-    {
-        QFile file("scene/spheres.json");
-
-        if (file.open(QIODevice::ReadOnly))
-        {
-            QByteArray json = file.readAll();
-            file.close();
-
-            QJsonDocument doc = QJsonDocument::fromJson(json);
-            QJsonArray array = doc.array();
-
-            for (int i = 0; i < array.size(); ++i)
-            {
-                QJsonObject obj = array[i].toObject();
-
-                FurySphereObject* object = FurySphereObject::fromJson(obj, this);
-                addRootObject(object);
-            }
-        }
-    }
 }
 
 void FuryWorld::createMaterials()
@@ -470,6 +413,56 @@ void FuryWorld::createDepthMap()
     FuryRenderer* renderer = FuryRenderer::instance();
     renderer->createDepthMap(&m_depthMapFBO, &m_depthMap);
     m_shadowMapEnabled = true;
+}
+
+void FuryWorld::save()
+{
+    QJsonObject world;
+    world["name"] = objectName();
+
+    QJsonArray objects;
+
+    foreach (const FuryObject* obj, m_objects)
+    {
+        objects.append(obj->toJson());
+    }
+
+    world["objects"] = objects;
+
+    QJsonDocument document(world);
+    QFile file("scene/testWorld.json");
+
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(document.toJson());
+        file.close();
+    }
+}
+
+void FuryWorld::load()
+{
+    QFile file("scene/testWorld_AE.json");
+
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray json = file.readAll();
+        file.close();
+
+        QJsonDocument doc = QJsonDocument::fromJson(json);
+        QJsonObject world = doc.object();
+
+        qDebug() << "load world" << world["name"].toString();
+
+        QJsonArray objects = world["objects"].toArray();
+        FuryObjectsFactory* factory = FuryObjectsFactory::instance();
+
+        for (int i = 0; i < objects.size(); ++i)
+        {
+            FuryObject* object = factory->fromJson(objects.at(i).toObject(), this,
+                                                   nullptr, true);
+            addRootObject(object);
+        }
+    }
 }
 
 void FuryWorld::parentChangedSlot()
@@ -723,6 +716,12 @@ void FuryWorld::drawSelectedInEditor(const glm::mat4 &_projection, const glm::ma
             return;
         }
     }
+}
+
+void FuryWorld::initConnections()
+{
+    connect(FuryObjectsFactory::instance(), &FuryObjectsFactory::createObjectSignal,
+            this, &FuryWorld::addObjectSignal);
 }
 
 

@@ -5,7 +5,9 @@
 #include <reactphysics3d/reactphysics3d.h>
 
 #include <QVector3D>
+#include <QJsonArray>
 #include <QQuaternion>
+#include <QMetaProperty>
 
 /*!
  * \brief Дополнительная функция. Потом надо вынести. Углы Эйлера по кватерниону
@@ -16,13 +18,14 @@ rp3d::Vector3 quaternionToEulerAngles(const rp3d::Quaternion& q);
 
 
 
-FuryObject::FuryObject(FuryWorld *_world) :
-    FuryObject(_world, glm::vec3(0, 0, 0))
+FuryObject::FuryObject(FuryWorld *_world, FuryObject *_parent, bool _withoutJoint) :
+    FuryObject(_world, glm::vec3(0, 0, 0), _parent, _withoutJoint)
 {
 
 }
 
-FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
+FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position, FuryObject *_parent, bool _withoutJoint) :
+    QObject(_parent),
     m_worldPosition(_position),
     m_initLocalPosition(_position),
     m_worldRotation(glm::vec3(0, 0, 0)),
@@ -45,6 +48,24 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position) :
     m_physicsBody = m_world->physicsWorld()->createRigidBody(objectTransform);
     m_physicsBody->setType(rp3d::BodyType::STATIC);
     m_physicsBody->setUserData(this);
+
+    resetTransformationToInit();
+
+    if (!_withoutJoint && _parent != nullptr)
+    {
+        // Anchor point in world-space
+        glm::vec3 worldPos = calculateWorldPositionByInit();
+        const reactphysics3d::Vector3 anchorPoint(worldPos.x,
+                                                  worldPos.y,
+                                                  worldPos.z);
+
+        // Create the joint info object
+        reactphysics3d::FixedJointInfo jointInfo(_parent->physicsBody(), physicsBody(), anchorPoint);
+        jointInfo.isCollisionEnabled = false;
+
+        // Create the hinge joint in the physics world
+        world()->physicsWorld()->createJoint(jointInfo);
+    }
 }
 
 FuryObject::~FuryObject()
@@ -160,6 +181,140 @@ glm::mat4 FuryObject::getOpenGLTransform() const
                      rawMatrix[4], rawMatrix[5], rawMatrix[6], rawMatrix[7],
                      rawMatrix[8], rawMatrix[9], rawMatrix[10], rawMatrix[11],
             rawMatrix[12], rawMatrix[13], rawMatrix[14], rawMatrix[15]);
+}
+
+QJsonObject FuryObject::toJson() const
+{
+    QJsonObject result;
+    QJsonObject props;
+    QJsonArray childrenJson;
+
+    for (int i = 0; i < metaObject()->propertyCount(); ++i)
+    {
+        const char* propName = metaObject()->property(i).name();
+        QVariant prop = property(propName);
+
+        if (QString(prop.typeName()) == "glm::vec<3,float,0>")
+        {
+            glm::vec3 vec = prop.value<glm::vec3>();
+            QString vecStr = "vec3(%1, %2, %3)";
+            vecStr = vecStr.arg(vec.x).arg(vec.y).arg(vec.z);
+            props[propName] = vecStr;
+        }
+        else if (QString(prop.typeName()) == "glm::vec<2,float,0>")
+        {
+            glm::vec2 vec = prop.value<glm::vec2>();
+            QString vecStr = "vec2(%1, %2)";
+            vecStr = vecStr.arg(vec.x).arg(vec.y);
+            props[propName] = vecStr;
+        }
+        else
+        {
+            props[propName] = prop.toString();
+        }
+    }
+
+    foreach (QObject* child, children())
+    {
+        if (FuryObject* obj = qobject_cast<FuryObject*>(child); child != nullptr)
+        {
+            childrenJson.append(obj->toJson());
+        }
+    }
+
+    result["className"] = metaObject()->className();
+    result["props"] = props;
+    result["children"] = childrenJson;
+
+
+    if (physicsBody()->getNbColliders() == 0)
+    {
+        result["physicsType"] = "NONE";
+        result["isTrigger"] = false;
+    }
+    else
+    {
+        if (physicsBody()->getType() == rp3d::BodyType::STATIC)
+        {
+            result["physicsType"] = "STATIC";
+        }
+        else if (physicsBody()->getType() == rp3d::BodyType::DYNAMIC)
+        {
+            result["physicsType"] = "DYNAMIC";
+        }
+        else if (physicsBody()->getType() == rp3d::BodyType::KINEMATIC)
+        {
+            result["physicsType"] = "KINEMATIC";
+        }
+
+        result["isTrigger"] = physicsBody()->getCollider(0)->getIsTrigger();
+    }
+
+    return result;
+}
+
+void FuryObject::fromJson(const QJsonObject &_json)
+{
+    QJsonObject props = _json["props"].toObject();
+
+    foreach (const QString& prop, props.keys())
+    {
+        QString value = props[prop].toString();
+        QVariant variant;
+
+        if (value.startsWith("vec3("))
+        {
+            value.remove("vec3(");
+            value.remove(")");
+            value.remove(" ");
+
+            glm::vec3 vec3Value(value.section(",", 0, 0).toFloat(),
+                                value.section(",", 1, 1).toFloat(),
+                                value.section(",", 2, 2).toFloat());
+            variant.setValue(vec3Value);
+        }
+        else if (value.startsWith("vec2("))
+        {
+            value.remove("vec2(");
+            value.remove(")");
+            value.remove(" ");
+
+            glm::vec2 vec2Value(value.section(",", 0, 0).toFloat(),
+                                value.section(",", 1, 1).toFloat());
+            variant.setValue(vec2Value);
+        }
+        else
+        {
+            variant.setValue(value);
+        }
+
+        setProperty(prop.toUtf8().constData(), variant);
+    }
+
+    QString physicsType = _json["physicsType"].toString();
+
+    if (physicsType != "NONE")
+    {
+        if (physicsType == "STATIC")
+        {
+            initPhysics(rp3d::BodyType::STATIC);
+        }
+        else if (physicsType == "DYNAMIC")
+        {
+            initPhysics(rp3d::BodyType::DYNAMIC);
+        }
+        else if (physicsType == "KINEMATIC")
+        {
+            initPhysics(rp3d::BodyType::KINEMATIC);
+        }
+
+        physicsBody()->getCollider(0)->setIsTrigger(_json["isTrigger"].toBool());
+    }
+}
+
+void FuryObject::initPhysics(reactphysics3d::BodyType _type)
+{
+    physicsBody()->setType(_type);
 }
 
 glm::vec3 FuryObject::calculateWorldPositionByInit() const

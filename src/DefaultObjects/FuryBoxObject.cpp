@@ -20,22 +20,22 @@ static GLuint cubeVAO = 0;
 static GLuint cubeVBO = 0;
 
 
-FuryBoxObject::FuryBoxObject(FuryWorld *_world) :
-    FuryBoxObject(_world, 1) { }
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, double _scale) :
-    FuryBoxObject(_world, _scale, _scale, _scale) {}
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, double _scaleX, double _scaleY, double _scaleZ) :
-    FuryBoxObject(_world, glm::vec3(0, 0, 0), _scaleX, _scaleY, _scaleZ) {}
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position) :
-    FuryBoxObject(_world, _position, 1) {}
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, double _scale) :
-    FuryBoxObject(_world, _position, _scale, _scale, _scale) {}
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, double _scaleX, double _scaleY, double _scaleZ) :
-    FuryBoxObject(_world, _position, glm::vec3(_scaleX, _scaleY, _scaleZ), glm::vec3(0, 0, 0)) {}
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, 1, _parent, _withoutJoint) { }
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, double _scale, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, _scale, _scale, _scale, _parent, _withoutJoint) {}
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, double _scaleX, double _scaleY, double _scaleZ, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, glm::vec3(0, 0, 0), _scaleX, _scaleY, _scaleZ, _parent, _withoutJoint) {}
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, _position, 1, _parent, _withoutJoint) {}
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, double _scale, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, _position, _scale, _scale, _scale, _parent, _withoutJoint) {}
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, double _scaleX, double _scaleY, double _scaleZ, FuryObject *_parent, bool _withoutJoint) :
+    FuryBoxObject(_world, _position, glm::vec3(_scaleX, _scaleY, _scaleZ), glm::vec3(0, 0, 0), _parent, _withoutJoint) {}
 
 
-FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, const glm::vec3& _scales, const glm::vec3& _rotate) :
-    FuryObject(_world, _position)
+FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, const glm::vec3& _scales, const glm::vec3& _rotate, FuryObject *_parent, bool _withoutJoint) :
+    FuryObject(_world, _position, _parent, _withoutJoint)
 {
     setShader(init_shader());
 
@@ -59,9 +59,10 @@ FuryBoxObject::~FuryBoxObject()
 
 }
 
-void FuryBoxObject::Setup_physics(reactphysics3d::BodyType _type)
+void FuryBoxObject::initPhysics(reactphysics3d::BodyType _type)
 {
-    physicsBody()->setType(_type);
+    FuryObject::initPhysics(_type);
+
     const reactphysics3d::Vector3 halfExtents(scales().x / 2.0f, scales().y / 2.0f, scales().z / 2.0f);
     reactphysics3d::BoxShape* boxShape = world()->physicsCommon()->createBoxShape(halfExtents);
     reactphysics3d::Transform transform_boxShape = reactphysics3d::Transform::identity();
@@ -73,132 +74,6 @@ void FuryBoxObject::Setup_physics(reactphysics3d::BodyType _type)
 Shader *FuryBoxObject::defaultShader()
 {
     return init_shader();
-}
-
-QJsonObject FuryBoxObject::toJson()
-{
-    QJsonObject result;
-
-    result["name"] = objectName();
-    result["position"] = QString("(%1; %2; %3)").arg(worldPosition().x)
-                                                .arg(worldPosition().y)
-                                                .arg(worldPosition().z);
-
-    result["scales"] = QString("(%1; %2; %3)").arg(scales().x)
-                                              .arg(scales().y)
-                                              .arg(scales().z);
-
-    result["rotate"] = QString("(%1; %2; %3)").arg(worldRotation().x)
-                                              .arg(worldRotation().y)
-                                              .arg(worldRotation().z);
-
-    result["textureScales"] = QString("(%1; %2)").arg(textureScales().x)
-                                                 .arg(textureScales().y);
-
-    if (physicsBody()->getNbColliders() == 0)
-    {
-        result["physicsType"] = "NONE";
-    }
-    else if (physicsBody()->getType() == rp3d::BodyType::STATIC)
-    {
-        result["physicsType"] = "STATIC";
-    }
-    else if (physicsBody()->getType() == rp3d::BodyType::DYNAMIC)
-    {
-        result["physicsType"] = "DYNAMIC";
-    }
-    else if (physicsBody()->getType() == rp3d::BodyType::KINEMATIC)
-    {
-        result["physicsType"] = "KINEMATIC";
-    }
-
-    result["isTrigger"] = physicsBody()->getCollider(0)->getIsTrigger();
-
-    result["materialName"] = materialName();
-
-    return result;
-}
-
-FuryBoxObject *FuryBoxObject::fromJson(const QJsonObject &_object, FuryWorld *_world)
-{
-    QString name = _object["name"].toString();
-    QString materialName = _object["materialName"].toString();
-
-    QString posStr = _object["position"].toString();
-    posStr.remove("(");
-    posStr.remove(")");
-    posStr.remove(" ");
-
-    glm::vec3 position(posStr.section(";", 0, 0).toFloat(),
-                       posStr.section(";", 1, 1).toFloat(),
-                       posStr.section(";", 2, 2).toFloat());
-
-    QString scalesStr = _object["scales"].toString();
-    scalesStr.remove("(");
-    scalesStr.remove(")");
-    scalesStr.remove(" ");
-
-    glm::vec3 scales(scalesStr.section(";", 0, 0).toFloat(),
-                     scalesStr.section(";", 1, 1).toFloat(),
-                     scalesStr.section(";", 2, 2).toFloat());
-
-    QString rotateStr = _object["rotate"].toString();
-    rotateStr.remove("(");
-    rotateStr.remove(")");
-    rotateStr.remove(" ");
-
-    glm::vec3 rotate(rotateStr.section(";", 0, 0).toFloat(),
-                     rotateStr.section(";", 1, 1).toFloat(),
-                     rotateStr.section(";", 2, 2).toFloat());
-
-
-    QString tsStr = _object["textureScales"].toString();
-    tsStr.remove("(");
-    tsStr.remove(")");
-    tsStr.remove(" ");
-
-    glm::vec2 textureScales(tsStr.section(";", 0, 0).toFloat(),
-                            tsStr.section(";", 1, 1).toFloat());
-
-    QString physTypeStr = _object["physicsType"].toString();
-    rp3d::BodyType physicsType = rp3d::BodyType::STATIC;
-    bool physicsEnabled = true;
-
-    if (physTypeStr == "NONE")
-    {
-        physicsEnabled = false;
-    }
-    else if (physTypeStr == "STATIC")
-    {
-        physicsType = rp3d::BodyType::STATIC;
-    }
-    else if (physTypeStr == "DYNAMIC")
-    {
-        physicsType = rp3d::BodyType::DYNAMIC;
-    }
-    else if (physTypeStr == "KINEMATIC")
-    {
-        physicsType = rp3d::BodyType::KINEMATIC;
-    }
-
-    bool isTrigger = _object["isTrigger"].toBool();
-
-    FuryBoxObject* result = new FuryBoxObject(_world, position, scales, rotate);
-    result->setObjectName(name);
-    result->setMaterialName(materialName);
-    result->setTextureScales(textureScales);
-
-    if (physicsEnabled)
-    {
-        result->Setup_physics(physicsType);
-    }
-
-    if (isTrigger)
-    {
-        result->physicsBody()->getCollider(0)->setIsTrigger(true);
-    }
-
-    return result;
 }
 
 

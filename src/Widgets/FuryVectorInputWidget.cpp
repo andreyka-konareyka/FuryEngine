@@ -6,7 +6,17 @@
 FuryVectorInputWidget::FuryVectorInputWidget(const glm::vec3 &_vector, QWidget *_parent) :
     QWidget(_parent),
     m_ui(new Ui::FuryVectorInputWidget),
-    m_currentVector(_vector)
+    m_currentVector(_vector),
+    m_isVec2(false)
+{
+    prepareUi();
+}
+
+FuryVectorInputWidget::FuryVectorInputWidget(const glm::vec2 &_vector, QWidget *_parent) :
+    QWidget(_parent),
+    m_ui(new Ui::FuryVectorInputWidget),
+    m_currentVector(glm::vec3(_vector.x, _vector.y, 0)),
+    m_isVec2(true)
 {
     prepareUi();
 }
@@ -22,7 +32,14 @@ void FuryVectorInputWidget::inputChangedSlot()
     m_currentVector.y = m_ui->leY->text().toFloat();
     m_currentVector.z = m_ui->leZ->text().toFloat();
 
-    emit vectorChangedSignal(m_currentVector);
+    if (m_isVec2)
+    {
+        emit vector2dChangedSignal(glm::vec2(m_currentVector.x, m_currentVector.y));
+    }
+    else
+    {
+        emit vectorChangedSignal(m_currentVector);
+    }
 }
 
 void FuryVectorInputWidget::prepareUi()
@@ -35,6 +52,12 @@ void FuryVectorInputWidget::prepareUi()
     m_ui->leX->setText(QString::number(m_currentVector.x));
     m_ui->leY->setText(QString::number(m_currentVector.y));
     m_ui->leZ->setText(QString::number(m_currentVector.z));
+
+    if (m_isVec2)
+    {
+        m_ui->label_3->hide();
+        m_ui->leZ->hide();
+    }
 
     initConnections();
 }

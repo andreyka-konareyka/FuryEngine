@@ -1,0 +1,2474 @@
+{
+    "name": "testWorld",
+    "objects": [
+        {
+            "children": [
+            ],
+            "className": "CarObject",
+            "isTrigger": false,
+            "physicsType": "DYNAMIC",
+            "props": {
+                "cameraLocalPosition": "vec3(-7, 2, 0)",
+                "cameraLocalViewPoint": "vec3(0, 2, 0)",
+                "materialName": "",
+                "modelName": "backpack2",
+                "objectName": "AI_car",
+                "position": "vec3(0, -0.5, 30)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "springK": "500",
+                "springLenght": "0.4000000059604645",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 0",
+                        "position": "vec3(0, -1.15, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 1",
+                        "position": "vec3(20, -1.15, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 2",
+                        "position": "vec3(30, -1.15, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 3",
+                        "position": "vec3(30, -1.15, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 4",
+                        "position": "vec3(40, -1.15, 70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 5",
+                        "position": "vec3(60, -1.15, 70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 6",
+                        "position": "vec3(70, -1.15, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 7",
+                        "position": "vec3(80, -1.15, 50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 8",
+                        "position": "vec3(100, -1.15, 50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 9",
+                        "position": "vec3(110, -1.15, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 10",
+                        "position": "vec3(110, -1.15, 20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 11",
+                        "position": "vec3(100, -1.15, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 12",
+                        "position": "vec3(80, -1.15, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 13",
+                        "position": "vec3(60, -1.15, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 14",
+                        "position": "vec3(50, -1.15, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 15",
+                        "position": "vec3(50, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 16",
+                        "position": "vec3(60, -1.15, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 17",
+                        "position": "vec3(80, -1.15, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 18",
+                        "position": "vec3(90, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 19",
+                        "position": "vec3(100, -1.15, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 20",
+                        "position": "vec3(120, -1.15, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 21",
+                        "position": "vec3(130, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 22",
+                        "position": "vec3(130, -1.15, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 23",
+                        "position": "vec3(120, -1.15, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 24",
+                        "position": "vec3(100, -1.15, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 25",
+                        "position": "vec3(90, -1.15, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 26",
+                        "position": "vec3(90, -1.15, -80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 27",
+                        "position": "vec3(80, -1.15, -90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 28",
+                        "position": "vec3(60, -1.15, -90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 29",
+                        "position": "vec3(50, -1.15, -80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 30",
+                        "position": "vec3(50, -1.15, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 31",
+                        "position": "vec3(40, -1.15, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 32",
+                        "position": "vec3(30, -1.15, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 33",
+                        "position": "vec3(30, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 34",
+                        "position": "vec3(30, -1.15, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 35",
+                        "position": "vec3(20, -1.15, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 36",
+                        "position": "vec3(0, -1.15, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 37",
+                        "position": "vec3(-10, -1.15, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 38",
+                        "position": "vec3(-10, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 39",
+                        "position": "vec3(0, -1.15, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 40",
+                        "position": "vec3(10, -1.15, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 41",
+                        "position": "vec3(10, -1.15, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 42",
+                        "position": "vec3(0, -1.15, -70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 43",
+                        "position": "vec3(-20, -1.15, -70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 44",
+                        "position": "vec3(-40, -1.15, -70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 45",
+                        "position": "vec3(-50, -1.15, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 46",
+                        "position": "vec3(-60, -1.15, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 47",
+                        "position": "vec3(-70, -1.15, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 48",
+                        "position": "vec3(-70, -1.15, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 49",
+                        "position": "vec3(-60, -1.15, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 50",
+                        "position": "vec3(-50, -1.15, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 51",
+                        "position": "vec3(-50, -1.15, 20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 52",
+                        "position": "vec3(-50, -1.15, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 53",
+                        "position": "vec3(-50, -1.15, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 54",
+                        "position": "vec3(-50, -1.15, 80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 55",
+                        "position": "vec3(-40, -1.15, 90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 56",
+                        "position": "vec3(-20, -1.15, 90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 57",
+                        "position": "vec3(-10, -1.15, 100)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 58",
+                        "position": "vec3(0, -1.15, 110)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 59",
+                        "position": "vec3(10, -1.15, 120)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 60",
+                        "position": "vec3(20, -1.15, 130)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 61",
+                        "position": "vec3(40, -1.15, 130)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 62",
+                        "position": "vec3(50, -1.15, 120)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 63",
+                        "position": "vec3(50, -1.15, 100)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 64",
+                        "position": "vec3(40, -1.15, 90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 65",
+                        "position": "vec3(20, -1.15, 90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 66",
+                        "position": "vec3(10, -1.15, 80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 67",
+                        "position": "vec3(0, -1.15, 70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 68",
+                        "position": "vec3(-20, -1.15, 70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 69",
+                        "position": "vec3(-30, -1.15, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 70",
+                        "position": "vec3(-30, -1.15, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": true,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "redRaceTriggerMaterial",
+                        "modelName": "cube",
+                        "objectName": "Trigger 71",
+                        "position": "vec3(-20, -1.15, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(18, 2.5, 0.5)",
+                        "textureScales": "vec2(1, 1)",
+                        "visible": "true"
+                    }
+                }
+            ],
+            "className": "FuryObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "",
+                "modelName": "",
+                "objectName": "Triggers",
+                "position": "vec3(0, 0, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, 20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(80, 2.5, 0.5)",
+                        "textureScales": "vec2(80, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(40, -1.25, 10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(100, 2.5, 0.5)",
+                        "textureScales": "vec2(100, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(20, -1.25, 60)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(50, -1.25, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(50, -1.25, 80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(60, -1.25, 50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(80, -1.25, 70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(80, -1.25, 40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(100, -1.25, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(100, -1.25, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(120, -1.25, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(100, -1.25, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(80, 2.5, 0.5)",
+                        "textureScales": "vec2(80, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(70, -1.25, 20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(60, -1.25, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(70, -1.25, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(80, -1.25, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(80, 2.5, 0.5)",
+                        "textureScales": "vec2(80, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(80, -1.25, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(100, -1.25, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(110, -1.25, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(120, -1.25, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(140, -1.25, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(120, -1.25, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(80, -1.25, -60)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(100, -1.25, -80)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(70, -1.25, -80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(70, -1.25, -100)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(60, -1.25, -60)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(40, -1.25, -80)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(30, -1.25, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(20, -1.25, -40)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(80, 2.5, 0.5)",
+                        "textureScales": "vec2(80, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(10, -1.25, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(10, -1.25, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, -10)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-10, -1.25, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, -80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(80, 2.5, 0.5)",
+                        "textureScales": "vec2(80, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-40, -1.25, -50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-60, -1.25, -70)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-50, -1.25, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-80, -1.25, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-60, -1.25, -30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-50, -1.25, -40)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-70, -1.25, -60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-50, -1.25, -20)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-70, -1.25, 0)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-40, -1.25, 30)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(100, 2.5, 0.5)",
+                        "textureScales": "vec2(100, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-60, -1.25, 50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(100, 2.5, 0.5)",
+                        "textureScales": "vec2(100, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, 80)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-40, -1.25, 100)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, 90)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, 110)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-10, -1.25, 120)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, 130)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(30, -1.25, 140)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(30, -1.25, 120)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(20, -1.25, 110)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(40, -1.25, 110)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(60, -1.25, 110)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(60, 2.5, 0.5)",
+                        "textureScales": "vec2(60, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(20, -1.25, 100)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(0, -1.25, 60)",
+                        "rotation": "vec3(0, 0, 0)",
+                        "scales": "vec3(40, 2.5, 0.5)",
+                        "textureScales": "vec2(40, 3)",
+                        "visible": "true"
+                    }
+                },
+                {
+                    "children": [
+                    ],
+                    "className": "FuryBoxObject",
+                    "isTrigger": false,
+                    "physicsType": "STATIC",
+                    "props": {
+                        "materialName": "firstPbrMaterial",
+                        "modelName": "cube",
+                        "objectName": "raceWall",
+                        "position": "vec3(-20, -1.25, 50)",
+                        "rotation": "vec3(0, 90, 0)",
+                        "scales": "vec3(20, 2.5, 0.5)",
+                        "textureScales": "vec2(20, 3)",
+                        "visible": "true"
+                    }
+                }
+            ],
+            "className": "FuryObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "",
+                "modelName": "",
+                "objectName": "RaceMap",
+                "position": "vec3(0, 0, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FuryBoxObject",
+            "isTrigger": false,
+            "physicsType": "STATIC",
+            "props": {
+                "materialName": "asphaltPbrMaterial",
+                "modelName": "cube",
+                "objectName": "bigFloor",
+                "position": "vec3(0, -3, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(500, 1, 500)",
+                "textureScales": "vec2(400, 300)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FurySphereObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "firstPbrMaterial",
+                "modelName": "sphere",
+                "objectName": "wall",
+                "position": "vec3(-3, 10, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FurySphereObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "plasticPbrMaterial",
+                "modelName": "sphere",
+                "objectName": "plastic",
+                "position": "vec3(-6, 10, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FurySphereObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "ironPbrMaterial",
+                "modelName": "sphere",
+                "objectName": "iron",
+                "position": "vec3(6, 10, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FurySphereObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "grassPbrMaterial",
+                "modelName": "sphere",
+                "objectName": "grass",
+                "position": "vec3(3, 10, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        },
+        {
+            "children": [
+            ],
+            "className": "FurySphereObject",
+            "isTrigger": false,
+            "physicsType": "NONE",
+            "props": {
+                "materialName": "goldPbrMaterial",
+                "modelName": "sphere",
+                "objectName": "gold",
+                "position": "vec3(0, 10, 0)",
+                "rotation": "vec3(0, 0, 0)",
+                "scales": "vec3(1, 1, 1)",
+                "textureScales": "vec2(1, 1)",
+                "visible": "true"
+            }
+        }
+    ]
+}

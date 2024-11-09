@@ -22,10 +22,8 @@ public:
     /*!
      * \brief Конструктор
      * \param[in] _world - Мир
-     * \param[in] _position - Позиция
-     * \param[in] _shader - Шейдер
      */
-    CarObject(FuryWorld* _world, const glm::vec3& _position, Shader* _shader);
+    CarObject(FuryWorld* _world);
     //! Деструктор
     ~CarObject();
 
@@ -126,9 +124,9 @@ public:
 
     /*!
      * \brief Инициализация физики
-     * \param[in] type - Тип тела: статическое, динамическое, кинематическое
+     * \param[in] _type - Тип тела: статическое, динамическое, кинематическое
      */
-    void Setup_physics(reactphysics3d::BodyType type);
+    void initPhysics(reactphysics3d::BodyType _type) override;
 
     /*!
     * \brief Получить позицию камеры (в глобальных координатах)
@@ -189,6 +187,13 @@ public:
     inline void setCameraLocalPosition(const glm::vec3& _pos)
     { m_cameraLocalPosition = _pos; }
 
+
+    /*!
+     * \brief Получение шейдера по умолчанию
+     * \return Возвращает шейдер по умолчанию
+     */
+    static Shader* defaultShader();
+
 private:
     //! Список объектов-колёс
     QVector<FuryObject*> m_objectWheels;
@@ -215,8 +220,6 @@ private:
     int m_lastTriggerNumber;
     //! Награда за текущий тик
     float m_reward;
-    //! Начальная позиция автомобиля. Нужна для возрождения.
-    glm::vec3 m_startPosition;
     //! Счётчик времени
     float m_timeCounter;
     //! Счётчик триггеров, проеханных по трассе в обратном направлении
