@@ -51,6 +51,19 @@ public:
     //! Остановка вспомогательного потока с вечным циклом
     void stopLoopAndWait();
 
+    /*!
+     * \brief Получение всех названий моделей
+     * \return Возвращает список названий
+     */
+    QStringList allModelNames() const;
+
+    /*!
+     * \brief Получить путь по названию
+     * \param[in] _name - Название
+     * \return Возвращает путь
+     */
+    QString pathByName(const QString& _name) const;
+
 private:
     //! Конструктор
     FuryModelManager();

@@ -189,6 +189,11 @@ void FuryTextureManager::stopLoopAndWait()
     }
 }
 
+QStringList FuryTextureManager::allTextureNames() const
+{
+    return m_nameToPath.keys();
+}
+
 
 
 void FuryTextureManager::infiniteLoop()

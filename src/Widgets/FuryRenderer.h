@@ -32,6 +32,7 @@
 #include "Managers/FuryModelManager.h"
 #include "Managers/FuryMaterialManager.h"
 #include "Managers/FuryWorldManager.h"
+#include "Managers/FuryShaderManager.h"
 #include "FuryScript.h"
 #include "LocalKeyboard/FuryBaseLocalKeyMapper.h"
 
@@ -219,6 +220,7 @@ private:
     FuryModelManager* m_modelManager;
     FuryMaterialManager* m_materialManager;
     FuryWorldManager* m_worldManager;
+    FuryShaderManager* m_shaderManager;
     CarObject* m_carObject = nullptr;
 
     float m_shadowNear = 0.1f;

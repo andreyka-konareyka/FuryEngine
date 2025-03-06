@@ -14,7 +14,6 @@
 
 void renderCube();
 void createBoxModel();
-Shader* init_shader();
 
 static GLuint cubeVAO = 0;
 static GLuint cubeVBO = 0;
@@ -37,7 +36,7 @@ FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, doub
 FuryBoxObject::FuryBoxObject(FuryWorld *_world, const glm::vec3& _position, const glm::vec3& _scales, const glm::vec3& _rotate, FuryObject *_parent, bool _withoutJoint) :
     FuryObject(_world, _position, _parent, _withoutJoint)
 {
-    setShader(init_shader());
+    setShaderName("pbrShader");
 
     setInitLocalRotation(_rotate);
     setScales(_scales);
@@ -69,11 +68,6 @@ void FuryBoxObject::initPhysics(reactphysics3d::BodyType _type)
     reactphysics3d::Collider* collider_box;
     collider_box = physicsBody()->addCollider(boxShape, transform_boxShape);
     collider_box->getMaterial().setFrictionCoefficient(0.4f);
-}
-
-Shader *FuryBoxObject::defaultShader()
-{
-    return init_shader();
 }
 
 
@@ -163,18 +157,4 @@ void renderCube()
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
-}
-
-
-static Shader* default_shader = nullptr;
-
-Shader* init_shader()
-{
-    if (default_shader == nullptr)
-    {
-//        default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
-        default_shader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
-    }
-
-    return default_shader;
 }

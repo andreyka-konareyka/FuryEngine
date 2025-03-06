@@ -143,6 +143,24 @@ void FuryModelManager::stopLoopAndWait()
     }
 }
 
+QStringList FuryModelManager::allModelNames() const
+{
+    return m_nameToPath.keys();
+}
+
+QString FuryModelManager::pathByName(const QString &_name) const
+{
+    QMutexLocker mutexLocker(&m_nameMutex);
+    QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
+
+    if (pathIter == m_nameToPath.constEnd())
+    {
+        return "";
+    }
+
+    return pathIter.value();
+}
+
 void FuryModelManager::infiniteLoop()
 {
     while (!m_needStop)

@@ -67,6 +67,12 @@ public:
     //! Завершение потока загрузки текстур и ожидание
     void stopLoopAndWait();
 
+    /*!
+     * \brief Получение всех наименований текстур
+     * \return Возвращает список имен текстур
+     */
+    QStringList allTextureNames() const;
+
 private:
     //! Конструктор
     FuryTextureManager();

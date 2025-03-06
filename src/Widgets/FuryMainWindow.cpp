@@ -5,6 +5,7 @@
 #include "FuryObjectsTreeModel.h"
 #include "FuryVectorInputWidget.h"
 #include "FuryMaterialEditDialog.h"
+#include "FuryManagersDataDialog.h"
 
 #include <QFile>
 #include <QLineEdit>
@@ -109,6 +110,12 @@ void FuryMainWindow::onNeedDebugRenderSlot()
 void FuryMainWindow::onMaterialEditSlot()
 {
     FuryMaterialEditDialog dialog(this);
+    dialog.exec();
+}
+
+void FuryMainWindow::onManagersSlot()
+{
+    FuryManagersDataDialog dialog(this);
     dialog.exec();
 }
 
@@ -331,6 +338,8 @@ void FuryMainWindow::initConnections()
 
     connect(m_ui->pbMaterialEdit, &QPushButton::clicked,
             this, &FuryMainWindow::onMaterialEditSlot);
+    connect(m_ui->pbManagers,     &QPushButton::clicked,
+            this,                 &FuryMainWindow::onManagersSlot);
 }
 
 void FuryMainWindow::loadStyle()

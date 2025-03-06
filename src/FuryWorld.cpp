@@ -6,11 +6,10 @@
 #include "FuryObject.h"
 #include "Logger/FuryLogger.h"
 #include "FuryPbrMaterial.h"
-#include "DefaultObjects/FuryBoxObject.h"
-#include "DefaultObjects/FurySphereObject.h"
+#include "Managers/FuryModelManager.h"
+#include "Managers/FuryShaderManager.h"
 #include "Managers/FuryTextureManager.h"
 #include "Managers/FuryMaterialManager.h"
-#include "Managers/FuryModelManager.h"
 #include "Widgets/FuryRenderer.h"
 #include "FuryObjectsFactory.h"
 
@@ -477,11 +476,24 @@ void FuryWorld::drawComponent(const QPair<FuryObject *, FuryMesh *> &_component,
                               const glm::mat4& _lightSpaceMatrix)
 {
     FuryMaterialManager* materialManager = FuryMaterialManager::instance();
-
+    FuryShaderManager* shaderManager = FuryShaderManager::instance();
 
     FuryObject* obj = _component.first;
     FuryMesh* mesh = _component.second;
-    Shader* shader = obj->shader();
+
+    if (!shaderManager->containsShader(obj->shaderName()))
+    {
+        qDebug() << ru("Менеджер шейдеров не содержит шейдер") << obj->shaderName();
+        return;
+    }
+
+    Shader* shader = shaderManager->shaderByName(obj->shaderName());
+
+    if (shader == nullptr)
+    {
+        qDebug() << ru("Не удалось получить шейдер") << obj->shaderName();
+        return;
+    }
 
     shader->use();
     shader->setVec3("viewPos", m_currentCamera->position());
@@ -623,6 +635,7 @@ void FuryWorld::drawSelectedInEditor(const glm::mat4 &_projection, const glm::ma
 {
     FuryMaterialManager* materialManager = FuryMaterialManager::instance();
     FuryModelManager* modelManager = FuryModelManager::instance();
+    FuryShaderManager* shaderManager = FuryShaderManager::instance();
 
 
     QVector<FuryObject*> testWorldObjects = getRootObjects();
@@ -649,7 +662,20 @@ void FuryWorld::drawSelectedInEditor(const glm::mat4 &_projection, const glm::ma
         if (obj->selectedInEditor() && (!model->meshes().isEmpty()))
         {
             FuryModel* debugModel = modelManager->modelByName("cube");
-            Shader* shader = obj->shader();
+
+            if (!shaderManager->containsShader(obj->shaderName()))
+            {
+                qDebug() << ru("Менеджер шейдеров не содержит шейдер") << obj->shaderName();
+                return;
+            }
+
+            Shader* shader = shaderManager->shaderByName(obj->shaderName());
+
+            if (shader == nullptr)
+            {
+                qDebug() << ru("Не удалось получить шейдер") << obj->shaderName();
+                return;
+            }
 
             shader->use();
             shader->setVec3("viewPos", m_currentCamera->position());

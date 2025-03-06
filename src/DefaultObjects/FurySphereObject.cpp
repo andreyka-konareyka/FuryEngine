@@ -6,9 +6,6 @@
 #include "FuryWorld.h"
 
 
-Shader* initSphereShader();
-
-
 FurySphereObject::FurySphereObject(FuryWorld *_world, FuryObject *_parent, bool _withoutJoint) :
     FurySphereObject(_world, glm::vec3(0, 0, 0), _parent, _withoutJoint) {}
 FurySphereObject::FurySphereObject(FuryWorld *_world, const glm::vec3& _position, FuryObject *_parent, bool _withoutJoint) :
@@ -17,7 +14,7 @@ FurySphereObject::FurySphereObject(FuryWorld *_world, const glm::vec3& _position
     FuryObject(_world, _position, _parent, _withoutJoint)
 {
     setScales(glm::vec3(_scale, _scale, _scale));
-    setShader(initSphereShader());
+    setShaderName("pbrShader");
 
     setModelName("sphere");
 
@@ -39,27 +36,4 @@ void FurySphereObject::initPhysics(reactphysics3d::BodyType _type)
     collider1 = physicsBody()->addCollider(sphereShape, transform_shape);
 
     collider1->getMaterial().setFrictionCoefficient(0.25);
-}
-
-Shader *FurySphereObject::defaultShader()
-{
-    return initSphereShader();
-}
-
-
-
-
-
-
-Shader* initSphereShader()
-{
-    static Shader* default_shader = nullptr;
-
-    if (default_shader == nullptr)
-    {
-//        default_shader = new Shader("shaders/testMaterialShader.vs", "shaders/testMaterialShader.frag");
-        default_shader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
-    }
-
-    return default_shader;
 }

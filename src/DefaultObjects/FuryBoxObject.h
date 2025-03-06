@@ -98,11 +98,5 @@ public:
      * \param[in] _type - Тип физического тела
      */
     void initPhysics(reactphysics3d::BodyType _type) override;
-
-    /*!
-     * \brief Получение шейдера по умолчанию
-     * \return Возвращает шейдер по умолчанию
-     */
-    static Shader* defaultShader();
 };
 #endif // FURYBOXOBJECT_H

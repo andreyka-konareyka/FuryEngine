@@ -37,6 +37,7 @@ class FuryObject : public QObject
     Q_PROPERTY(glm::vec3 scales READ scales WRITE setScales)
     Q_PROPERTY(QString modelName READ modelName WRITE setModelName)
     Q_PROPERTY(QString materialName READ materialName WRITE setMaterialName)
+    Q_PROPERTY(QString shaderName READ shaderName WRITE setShaderName)
     Q_PROPERTY(glm::vec2 textureScales READ textureScales WRITE setTextureScales)
     Q_PROPERTY(bool visible READ visible WRITE setVisible)
 
@@ -120,18 +121,18 @@ public:
     void setInitLocalPosition(const glm::vec3& _pos);
 
     /*!
-     * \brief Получение шейдера
-     * \return Возвращает шейдер
+     * \brief Получение названия шейдера
+     * \return Возвращает название шейдера
      */
-    inline Shader* shader() const
-    { return m_shader; }
+    inline const QString& shaderName() const
+    { return m_shaderName; }
 
     /*!
-     * \brief Установка шейдера
-     * \param[in] _shader - Шейдер
+     * \brief Установка названия шейдера
+     * \param[in] _shaderName - Название шейдера
      */
-    inline void setShader(Shader* _shader)
-    { m_shader = _shader; }
+    inline void setShaderName(const QString& _shaderName)
+    { m_shaderName = _shaderName; }
 
     /*!
      * \brief Получение физического тела
@@ -351,8 +352,8 @@ private:
     //! Масштабы по осям
     glm::vec3 m_scales;
 
-    //! Шейдер
-    Shader* m_shader;
+    //! Название шейдера
+    QString m_shaderName;
     //! Физическое тело
     reactphysics3d::RigidBody* m_physicsBody;
 

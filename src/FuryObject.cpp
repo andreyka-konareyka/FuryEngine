@@ -31,7 +31,6 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position, FuryObject
     m_worldRotation(glm::vec3(0, 0, 0)),
     m_initLocalRotation(glm::vec3(0, 0, 0)),
     m_scales(glm::vec3(1, 1, 1)),
-    m_shader(nullptr),
     m_physicsBody(nullptr),
     m_world(_world),
     m_modelTransform(1),

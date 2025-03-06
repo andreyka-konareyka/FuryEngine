@@ -49,6 +49,7 @@ SOURCES += \
     src/FuryPhongMaterial.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
+    src/Managers/FuryShaderManager.cpp \
     src/Managers/FuryWorldManager.cpp \
     src/Shader.cpp \
     src/Widgets/FuryDoubleValidator.cpp \
@@ -57,6 +58,7 @@ SOURCES += \
     src/Logger/FuryLogger.cpp \
     src/Widgets/FuryMainWindow.cpp \
     src/FuryMaterial.cpp \
+    src/Widgets/FuryManagersDataDialog.cpp \
     src/Widgets/FuryMaterialEditDialog.cpp \
     src/Managers/FuryMaterialManager.cpp \
     src/FuryMesh.cpp \
@@ -86,6 +88,7 @@ HEADERS += \
     src/FuryPhongMaterial.h \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
     src/DefaultObjects/FuryBoxObject.h \
+    src/Managers/FuryShaderManager.h \
     src/Managers/FuryWorldManager.h \
     src/Widgets/FuryDoubleValidator.h \
     src/Physics/FuryEventListener.h \
@@ -93,6 +96,7 @@ HEADERS += \
     src/Logger/FuryLogger.h \
     src/Widgets/FuryMainWindow.h \
     src/FuryMaterial.h \
+    src/Widgets/FuryManagersDataDialog.h \
     src/Widgets/FuryMaterialEditDialog.h \
     src/Managers/FuryMaterialManager.h \
     src/FuryMesh.h \
@@ -117,6 +121,7 @@ HEADERS += \
 
 FORMS += \
     src/Widgets/FuryMainWindow.ui \
+    src/Widgets/FuryManagersDataDialog.ui \
     src/Widgets/FuryMaterialEditDialog.ui \
     src/Widgets/FuryVectorInputWidget.ui
 

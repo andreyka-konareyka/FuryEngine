@@ -82,6 +82,9 @@ private slots:
     //! Слот открытия редактора материалов
     void onMaterialEditSlot();
 
+    //! Слот открытия окна просмотра данных менеджеров
+    void onManagersSlot();
+
     /*!
      * \brief Слот выделения объекта
      * \param[in] _current - Текущий индекс

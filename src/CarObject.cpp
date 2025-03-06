@@ -13,9 +13,6 @@
 int rayCount = 20;
 
 
-Shader* initCarShader();
-
-
 CarObject::CarObject(FuryWorld *_world) :
     FuryObject(_world),
     m_springLenght(0.4f),
@@ -31,7 +28,7 @@ CarObject::CarObject(FuryWorld *_world) :
     m_backTriggerCounter(0),
     m_hasContact(false)
 {
-    setShader(initCarShader());
+    setShaderName("pbrShader");
 
     m_objectWheels.push_back(new FuryObject(world(), glm::vec3(2, -0.5, 1), this));
     m_objectWheels.last()->setObjectName("wheel_FR");
@@ -60,7 +57,7 @@ CarObject::CarObject(FuryWorld *_world) :
 
         m_objectsDebugRays.last()->setMaterialName("rayCastBall");
         m_objectsDebugRays.last()->setObjectName("rayCastBall");
-        m_objectsDebugRays.last()->setShader(shader());
+        m_objectsDebugRays.last()->setShaderName(shaderName());
     }
 
     setObjectName("AI_car");
@@ -473,25 +470,4 @@ void CarObject::setLocalCameraPosition(float _x, float _y)
 {
     m_cameraLocalPosition.x = -_x;
     m_cameraLocalPosition.y = _y;
-}
-
-Shader *CarObject::defaultShader()
-{
-    return initCarShader();
-}
-
-
-
-
-
-Shader* initCarShader()
-{
-    static Shader* default_shader = nullptr;
-
-    if (default_shader == nullptr)
-    {
-        default_shader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
-    }
-
-    return default_shader;
 }

@@ -46,6 +46,7 @@ FuryRenderer::FuryRenderer(QWidget *_parent) :
     m_modelManager(FuryModelManager::createInstance()),
     m_materialManager(FuryMaterialManager::createInstance()),
     m_worldManager(FuryWorldManager::createInstance()),
+    m_shaderManager(FuryShaderManager::createInstance()),
     m_needDebugRender(false),
     m_updateAccumulator(0),
 
@@ -97,6 +98,9 @@ FuryRenderer::~FuryRenderer()
         delete m_eventListener;
         m_eventListener = nullptr;
     }
+
+    Debug(ru("Удаление менеджера шейдеров..."));
+    FuryShaderManager::deleteInstance();
 
     Debug(ru("Удаление менеджера миров..."));
     FuryWorldManager::deleteInstance();
@@ -358,11 +362,15 @@ void FuryRenderer::init() {
     m_modelManager->addModel("objects/cube/cube.obj", "cube");
     m_modelManager->addModel("objects/sphere/sphere.obj", "sphere");
 
-    m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
+    m_pbrShader = m_shaderManager->createShader("pbrShader",
+                                                "shaders/pbr/2.2.2.pbr.vs",
+                                                "shaders/pbr/2.2.2.pbr.fs");
+//    m_pbrShader = new Shader("shaders/pbr/2.2.2.pbr.vs", "shaders/pbr/2.2.2.pbr.fs");
 
     m_sunVisualBox = new FurySphereObject(m_testWorld, m_dirlight_position);
     m_sunVisualBox->setObjectName("sunVisualBox");
-    m_sunVisualBox->setShader(m_pbrShader);
+    m_sunVisualBox->setShaderName("pbrShader");
+
     m_testWorld->addRootObject(m_sunVisualBox);
     // Camera
     m_cameras.push_back(new Camera(glm::vec3(0.0f, 10.0f, 40.0f)));
@@ -421,10 +429,7 @@ void FuryRenderer::init() {
         // initShaderInform
 
         QList<Shader*> shaders({
-                                   m_pbrShader,
-                                   FuryBoxObject::defaultShader(),
-                                   FurySphereObject::defaultShader(),
-                                   CarObject::defaultShader()
+                                   m_pbrShader
                                });
 
         for (Shader* shader : shaders)
@@ -434,15 +439,15 @@ void FuryRenderer::init() {
             shader->setVec3("lightColors[1]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[2]", 300.0f, 300.0f, 300.0f);
             shader->setVec3("lightColors[3]", 300.0f, 300.0f, 300.0f);
-            m_pbrShader->setInt("irradianceMap", 0);
-            m_pbrShader->setInt("prefilterMap", 1);
-            m_pbrShader->setInt("brdfLUT", 2);
-            m_pbrShader->setInt("material.albedoMap", 3);
-            m_pbrShader->setInt("material.normalMap", 4);
-            m_pbrShader->setInt("material.metallicMap", 5);
-            m_pbrShader->setInt("material.roughnessMap", 6);
-            m_pbrShader->setInt("material.aoMap", 7);
-            m_pbrShader->setInt("shadowMap", 8);
+            shader->setInt("irradianceMap", 0);
+            shader->setInt("prefilterMap", 1);
+            shader->setInt("brdfLUT", 2);
+            shader->setInt("material.albedoMap", 3);
+            shader->setInt("material.normalMap", 4);
+            shader->setInt("material.metallicMap", 5);
+            shader->setInt("material.roughnessMap", 6);
+            shader->setInt("material.aoMap", 7);
+            shader->setInt("shadowMap", 8);
         }
     }
 }

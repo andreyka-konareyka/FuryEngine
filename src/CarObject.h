@@ -187,13 +187,6 @@ public:
     inline void setCameraLocalPosition(const glm::vec3& _pos)
     { m_cameraLocalPosition = _pos; }
 
-
-    /*!
-     * \brief Получение шейдера по умолчанию
-     * \return Возвращает шейдер по умолчанию
-     */
-    static Shader* defaultShader();
-
 private:
     //! Список объектов-колёс
     QVector<FuryObject*> m_objectWheels;
