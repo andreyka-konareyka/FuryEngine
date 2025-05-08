@@ -13,6 +13,7 @@ using namespace boost::python;
 
 FuryScript::FuryScript()
 {
+    qputenv("PYTHONHOME", "../libs/python");
     qputenv("PYTHONPATH", ".");
 
     Py_Initialize();

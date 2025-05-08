@@ -855,11 +855,11 @@ void FuryRenderer::updatePhysics()
         FuryObject* trigger = nullptr;
         int nextTriggerNumber = (m_carObject->getLastTriggerNumber() + 1) % 72;
 
-        for (int i = 0; i < m_testWorld->getObjects().size(); ++i)
+        for (int i = 0; i < m_testWorld->getAllObjects().size(); ++i)
         {
-            FuryObject* object = m_testWorld->getObjects()[i];
+            FuryObject* object = m_testWorld->getAllObjects()[i];
 
-            if (object->name() == QString("Trigger %1").arg(nextTriggerNumber))
+            if (object->objectName() == QString("Trigger %1").arg(nextTriggerNumber))
             {
                 trigger = object;
                 break;
@@ -868,7 +868,7 @@ void FuryRenderer::updatePhysics()
 
         if (trigger != nullptr)
         {
-            const glm::vec3& triggerPos = trigger->getPosition();
+            const glm::vec3& triggerPos = trigger->worldPosition();
             glm::vec3 direct = m_carObject->calcNextTriggerVector(triggerPos);
             observation.append(direct.x);
             observation.append(direct.y);
@@ -903,7 +903,7 @@ void FuryRenderer::updatePhysics()
         qDebug() << "timeout";
         carReward = -1;
         m_learnScript->learn(observation, carReward, true);
-        m_carObject->respawn();
+        m_carObject->reset();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
@@ -914,9 +914,9 @@ void FuryRenderer::updatePhysics()
     if (!m_carObject->checkBackTriggerCounter())
     {
         qDebug() << "back triggers error";
-        carReward -= 0.1;
+        carReward -= 0.1f;
         m_learnScript->learn(observation, carReward, true);
-        m_carObject->respawn();
+        m_carObject->reset();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
@@ -927,9 +927,9 @@ void FuryRenderer::updatePhysics()
     else if (!m_carObject->checkHasContact())
     {
         qDebug() << "contact error";
-        carReward -= 0.1;
+        carReward -= 0.1f;
         m_learnScript->learn(observation, carReward, true);
-        m_carObject->respawn();
+        m_carObject->reset();
 
         isFirst = true;
         qDebug() << "Game:" << gameCounter << "Score:" << score;
