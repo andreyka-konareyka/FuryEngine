@@ -33,7 +33,7 @@
 #include "Managers/FuryMaterialManager.h"
 #include "Managers/FuryWorldManager.h"
 #include "Managers/FuryShaderManager.h"
-#include "FuryScript.h"
+#include "FuryLearningScript.h"
 #include "LocalKeyboard/FuryBaseLocalKeyMapper.h"
 
 
@@ -244,7 +244,7 @@ private:
     //! Аккумулятор для обновления физики
     double m_updateAccumulator;
 
-    FuryScript* m_learnScript;
+    FuryLearningScript* m_learnScript;
     int m_learnSpeed;
     QList<float> m_scoreList;
 

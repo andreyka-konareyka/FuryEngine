@@ -1,8 +1,10 @@
+#include "Managers/FuryScriptManager.h"
+
 #include "FuryRenderer.h"
 
 
 #include "Logger/FuryLogger.h"
-#include "FuryScript.h"
+#include "FuryLearningScript.h"
 #include "DefaultObjects/FuryBoxObject.h"
 #include "DefaultObjects/FurySphereObject.h"
 #include "LocalKeyboard/FuryRussianLocalKeyMapper.h"
@@ -51,7 +53,7 @@ FuryRenderer::FuryRenderer(QWidget *_parent) :
     m_updateAccumulator(0),
 
     #if NEED_LEARN == 1
-    m_learnScript(new FuryScript),
+    m_learnScript(new FuryLearningScript),
     #else
     m_learnScript(nullptr),
     #endif
@@ -164,6 +166,8 @@ void FuryRenderer::paintGL()
 {
     static QDateTime lastTime = QDateTime::currentDateTime();
     static QDateTime lastFPSUpdate = QDateTime::currentDateTime();
+    static int accumulateDrawTime = 0;
+    static int accumulateAllTime = 0;
     QDateTime startTime = QDateTime::currentDateTime();
 
     {
@@ -186,6 +190,9 @@ void FuryRenderer::paintGL()
 
     QDateTime endTime = QDateTime::currentDateTime();
 
+    accumulateDrawTime += startTime.msecsTo(endTime);
+    accumulateAllTime += lastTime.msecsTo(endTime);
+
     if (lastFPSUpdate.msecsTo(endTime) >= 200)
     {
         QString test = ru("FPS: %1; Эквивалентный FPS: %2")
@@ -193,10 +200,13 @@ void FuryRenderer::paintGL()
                 .arg(1000.0 / lastTime.msecsTo(endTime) * m_learnSpeed);
         emit setWindowTitleSignal(test);
 
-        int computerLoad = 100 * startTime.msecsTo(endTime) / lastTime.msecsTo(endTime);
+        int computerLoad = 100 * accumulateDrawTime / accumulateAllTime;
         emit setComputerLoadSignal(computerLoad);
 
         lastFPSUpdate = endTime;
+
+        accumulateDrawTime = 0;
+        accumulateAllTime = 0;
     }
 
     lastTime = endTime;
@@ -402,6 +412,14 @@ void FuryRenderer::init() {
     }
 
     m_eventListener->setCarObject(m_carObject);
+
+
+    FuryScriptManager* manager = FuryScriptManager::createInstance();
+    manager->importScript("scripts.test");
+    manager->createObject(m_carObject, "scripts.test");
+    manager->processStart();
+    manager->processUpdate();
+    manager->processStop();
 
 
     m_particleShader = new Shader("particle.vs", "particle.fs");

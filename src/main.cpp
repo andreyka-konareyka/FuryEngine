@@ -5,7 +5,7 @@
 #include <QApplication>
 #include <QStyleFactory>
 
-#include <iostream>
+#include <locale.h>
 
 int main(int argc, char *argv[])
 {

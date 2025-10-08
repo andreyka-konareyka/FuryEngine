@@ -1,5 +1,5 @@
-#ifndef FURYSCRIPT_H
-#define FURYSCRIPT_H
+#ifndef FURYLEARNINGSCRIPT_H
+#define FURYLEARNINGSCRIPT_H
 
 #include <QVector>
 
@@ -14,12 +14,12 @@ namespace boost
     }
 };
 
-//! Класс скрипта python
-class FuryScript
+//! Класс скрипта python для обучения ИИ
+class FuryLearningScript
 {
 public:
     //! Конструктор
-    FuryScript();
+    FuryLearningScript();
 
     /*!
      * \brief Предсказание действия бота по наблюдению
@@ -45,4 +45,4 @@ private:
     boost::python::api::object* m_module;
 };
 
-#endif // FURYSCRIPT_H
+#endif // FURYLEARNINGSCRIPT_H

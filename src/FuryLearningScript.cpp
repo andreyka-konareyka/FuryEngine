@@ -1,6 +1,6 @@
 #include <boost/python.hpp>
 
-#include "FuryScript.h"
+#include "FuryLearningScript.h"
 
 #include <QDebug>
 #include <QDir>
@@ -11,7 +11,7 @@
 
 using namespace boost::python;
 
-FuryScript::FuryScript()
+FuryLearningScript::FuryLearningScript()
 {
     qputenv("PYTHONHOME", "../libs/python");
     qputenv("PYTHONPATH", ".");
@@ -26,7 +26,7 @@ FuryScript::FuryScript()
     }
 }
 
-int FuryScript::predict(const QVector<float> _observation)
+int FuryLearningScript::predict(const QVector<float> _observation)
 {
     try
     {
@@ -51,7 +51,7 @@ int FuryScript::predict(const QVector<float> _observation)
     return 0;
 }
 
-int FuryScript::learn(const QVector<float> _observation, float _reward, bool _stop)
+int FuryLearningScript::learn(const QVector<float> _observation, float _reward, bool _stop)
 {
     try
     {
@@ -87,7 +87,7 @@ int FuryScript::learn(const QVector<float> _observation, float _reward, bool _st
     return 0;
 }
 
-void FuryScript::saveModel()
+void FuryLearningScript::saveModel()
 {
     try
     {

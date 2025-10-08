@@ -45,12 +45,17 @@ LIBS        += \
 SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
+    src/FuryLearningScript.cpp \
     src/FuryObjectsFactory.cpp \
     src/FuryPhongMaterial.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
+    src/Managers/FuryScriptManager.cpp \
     src/Managers/FuryShaderManager.cpp \
     src/Managers/FuryWorldManager.cpp \
+    src/PythonAPI/CarObject_Python.cpp \
+    src/PythonAPI/FuryObject_Python.cpp \
+    src/PythonAPI/GLM_Python.cpp \
     src/Shader.cpp \
     src/Widgets/FuryDoubleValidator.cpp \
     src/Physics/FuryEventListener.cpp \
@@ -70,7 +75,6 @@ SOURCES += \
     src/FuryPbrMaterial.cpp \
     src/Physics/FuryRaycastCallback.cpp \
     src/LocalKeyboard/FuryRussianLocalKeyMapper.cpp \
-    src/FuryScript.cpp \
     src/DefaultObjects/FurySphereObject.cpp \
     src/FuryTexture.cpp \
     src/Managers/FuryTextureManager.cpp \
@@ -84,10 +88,12 @@ SOURCES += \
 HEADERS += \
     src/Camera.h \
     src/CarObject.h \
+    src/FuryLearningScript.h \
     src/FuryObjectsFactory.h \
     src/FuryPhongMaterial.h \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
     src/DefaultObjects/FuryBoxObject.h \
+    src/Managers/FuryScriptManager.h \
     src/Managers/FuryShaderManager.h \
     src/Managers/FuryWorldManager.h \
     src/Widgets/FuryDoubleValidator.h \
@@ -108,7 +114,6 @@ HEADERS += \
     src/FuryPbrMaterial.h \
     src/Physics/FuryRaycastCallback.h \
     src/LocalKeyboard/FuryRussianLocalKeyMapper.h \
-    src/FuryScript.h \
     src/DefaultObjects/FurySphereObject.h \
     src/FuryTexture.h \
     src/Managers/FuryTextureManager.h \
