@@ -56,5 +56,6 @@ BOOST_PYTHON_MODULE(FuryObject)
         .def("setModelName", setModelName)
         .def("materialName", materialName)
         .def("setMaterialName", setMaterialName)
+        .def("reset", &FuryObject::reset)
     ;
 };

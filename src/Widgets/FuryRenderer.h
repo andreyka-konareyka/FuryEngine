@@ -40,6 +40,9 @@
 #include <QOpenGLWidget>
 
 
+class FuryScriptManager;
+
+
 //! Основной класс рендера
 class FuryRenderer : public QOpenGLWidget
 {
@@ -221,6 +224,7 @@ private:
     FuryMaterialManager* m_materialManager;
     FuryWorldManager* m_worldManager;
     FuryShaderManager* m_shaderManager;
+    FuryScriptManager* m_scriptManager;
     CarObject* m_carObject = nullptr;
 
     float m_shadowNear = 0.1f;

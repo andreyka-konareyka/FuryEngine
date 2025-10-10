@@ -261,6 +261,64 @@ void CarObject::setBotAction(int _action)
     }
 }
 
+QVector<float> CarObject::getObservation()
+{
+    QVector<float> result = getRays();
+
+    glm::vec3 speed = getSpeed();
+    speed /= 23;
+    result.append(speed.x);
+    result.append(speed.y);
+    result.append(speed.z);
+
+    glm::vec3 angularSpeed = getAngularSpeed();
+    angularSpeed /= 2;
+    result.append(angularSpeed.x);
+    result.append(angularSpeed.y);
+    result.append(angularSpeed.z);
+
+    if (world() == nullptr)
+    {
+        result.append(0);
+        result.append(0);
+        result.append(0);
+        qDebug() << ru("Ошибка при поиске следующего триггера. Нет мира");
+        return result;
+    }
+
+    FuryObject* trigger = nullptr;
+    int nextTriggerNumber = (getLastTriggerNumber() + 1) % 72;
+
+    for (int i = 0; i < world()->getAllObjects().size(); ++i)
+    {
+        FuryObject* object = world()->getAllObjects()[i];
+
+        if (object->objectName() == QString("Trigger %1").arg(nextTriggerNumber))
+        {
+            trigger = object;
+            break;
+        }
+    }
+
+    if (trigger != nullptr)
+    {
+        const glm::vec3& triggerPos = trigger->worldPosition();
+        glm::vec3 direct = calcNextTriggerVector(triggerPos);
+        result.append(direct.x);
+        result.append(direct.y);
+        result.append(direct.z);
+    }
+    else
+    {
+        result.append(0);
+        result.append(0);
+        result.append(0);
+        qDebug() << ru("Ошибка при поиске следующего триггера. Нет триггера");
+    }
+
+    return result;
+}
+
 QVector<float> CarObject::getRays()
 {
     QVector<float> result;

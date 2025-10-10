@@ -55,6 +55,12 @@ public:
     void setBotAction(int _action);
 
     /*!
+     * \brief Получение наблюдения для ИИ
+     * \return Возвращает список наблюдаемых параметров
+     */
+    QVector<float> getObservation();
+
+    /*!
      * \brief Получить значения лучей
      * \return Возвращает значения лучей
      */

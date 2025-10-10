@@ -25,7 +25,7 @@
 #include <QJsonDocument>
 
 const bool NEED_DRAW_SHADOW = true;
-#define NEED_LEARN 0
+#define NEED_LEARN 1
 
 
 const unsigned int SHADOW_WIDTH = 1024 * 4;
@@ -49,11 +49,13 @@ FuryRenderer::FuryRenderer(QWidget *_parent) :
     m_materialManager(FuryMaterialManager::createInstance()),
     m_worldManager(FuryWorldManager::createInstance()),
     m_shaderManager(FuryShaderManager::createInstance()),
+    m_scriptManager(FuryScriptManager::createInstance()),
     m_needDebugRender(false),
     m_updateAccumulator(0),
 
     #if NEED_LEARN == 1
-    m_learnScript(new FuryLearningScript),
+    // m_learnScript(new FuryLearningScript),
+    m_learnScript(nullptr),
     #else
     m_learnScript(nullptr),
     #endif
@@ -100,6 +102,9 @@ FuryRenderer::~FuryRenderer()
         delete m_eventListener;
         m_eventListener = nullptr;
     }
+
+    Debug(ru("Удаление менеджера скриптов..."));
+    FuryScriptManager::deleteInstance();
 
     Debug(ru("Удаление менеджера шейдеров..."));
     FuryShaderManager::deleteInstance();
@@ -223,7 +228,8 @@ void FuryRenderer::setCameraZoomValue(int _value)
 void FuryRenderer::saveLearnModel()
 {
 #if NEED_LEARN == 1
-    m_learnScript->saveModel();
+    // m_learnScript->saveModel();
+    m_scriptManager->processStop();
 #endif
 }
 
@@ -414,12 +420,9 @@ void FuryRenderer::init() {
     m_eventListener->setCarObject(m_carObject);
 
 
-    FuryScriptManager* manager = FuryScriptManager::createInstance();
-    manager->importScript("scripts.test");
-    manager->createObject(m_carObject, "scripts.test");
-    manager->processStart();
-    manager->processUpdate();
-    manager->processStop();
+    m_scriptManager->importScript("scripts.test");
+    m_scriptManager->createObject(m_carObject, "scripts.test");
+    m_scriptManager->processStart();
 
 
     m_particleShader = new Shader("particle.vs", "particle.fs");
@@ -855,112 +858,7 @@ void FuryRenderer::updatePhysics()
 
 #if NEED_LEARN == 1
 
-    QVector<float> observation = m_carObject->getRays();
-
-    glm::vec3 speed = m_carObject->getSpeed();
-    speed /= 23;
-    observation.append(speed.x);
-    observation.append(speed.y);
-    observation.append(speed.z);
-
-    glm::vec3 angularSpeed = m_carObject->getAngularSpeed();
-    angularSpeed /= 2;
-    observation.append(angularSpeed.x);
-    observation.append(angularSpeed.y);
-    observation.append(angularSpeed.z);
-
-    {
-        FuryObject* trigger = nullptr;
-        int nextTriggerNumber = (m_carObject->getLastTriggerNumber() + 1) % 72;
-
-        for (int i = 0; i < m_testWorld->getAllObjects().size(); ++i)
-        {
-            FuryObject* object = m_testWorld->getAllObjects()[i];
-
-            if (object->objectName() == QString("Trigger %1").arg(nextTriggerNumber))
-            {
-                trigger = object;
-                break;
-            }
-        }
-
-        if (trigger != nullptr)
-        {
-            const glm::vec3& triggerPos = trigger->worldPosition();
-            glm::vec3 direct = m_carObject->calcNextTriggerVector(triggerPos);
-            observation.append(direct.x);
-            observation.append(direct.y);
-            observation.append(direct.z);
-        }
-        else
-        {
-            observation.append(0);
-            observation.append(0);
-            observation.append(0);
-            qDebug() << ru("Ошибка при поиске следующего триггера");
-        }
-    }
-
-    static bool isFirst = true;
-    static float score = 0;
-    static int gameCounter = 0;
-
-    if (isFirst)
-    {
-        int action = m_learnScript->predict(observation);
-        m_carObject->getReward(); // Обнуляем reward
-        m_carObject->setBotAction(action);
-        isFirst = false;
-        return;
-    }
-
-    float carReward = (m_carObject->getReward());
-
-    if (!m_carObject->checkTimeCounter())
-    {
-        qDebug() << "timeout";
-        carReward = -1;
-        m_learnScript->learn(observation, carReward, true);
-        m_carObject->reset();
-
-        isFirst = true;
-        qDebug() << "Game:" << gameCounter << "Score:" << score;
-        m_scoreList.append(score);
-        score = 0;
-        gameCounter++;
-    }
-    if (!m_carObject->checkBackTriggerCounter())
-    {
-        qDebug() << "back triggers error";
-        carReward -= 0.1f;
-        m_learnScript->learn(observation, carReward, true);
-        m_carObject->reset();
-
-        isFirst = true;
-        qDebug() << "Game:" << gameCounter << "Score:" << score;
-        m_scoreList.append(score);
-        score = 0;
-        gameCounter++;
-    }
-    else if (!m_carObject->checkHasContact())
-    {
-        qDebug() << "contact error";
-        carReward -= 0.1f;
-        m_learnScript->learn(observation, carReward, true);
-        m_carObject->reset();
-
-        isFirst = true;
-        qDebug() << "Game:" << gameCounter << "Score:" << score;
-        m_scoreList.append(score);
-        score = 0;
-        gameCounter++;
-    }
-    else
-    {
-        score += carReward;
-        int action = m_learnScript->learn(observation, carReward, false);
-        m_carObject->setBotAction(action);
-    }
+    m_scriptManager->processUpdate();
 
 #else
     m_carObject->getRays();
