@@ -14,6 +14,7 @@ FuryTextureManager* FuryTextureManager::s_instance = nullptr;
 
 
 FuryTextureManager::FuryTextureManager() :
+    QObject(),
     m_needStop(false),
     m_stopped(false)
 {
@@ -90,6 +91,8 @@ void FuryTextureManager::addTexture(const QString &_path, const QString &_name)
         QMutexLocker mutexLockex3(&m_nameMutex);
         m_nameToPath.insert(_name, texturePath);
     }
+
+    emit addTextureSignal(_name);
 }
 
 const FuryTexture& FuryTextureManager::textureByName(const QString& _name) const
@@ -137,10 +140,9 @@ void FuryTextureManager::loadTexturePart()
 {
     QMutexLocker mutexLocker(&m_bindMutex);
 
-    if (!m_textureBindQueue.isEmpty())
+    while (!m_textureBindQueue.isEmpty())
     {
         FuryTexture* texture = m_textureBindQueue.dequeue();
-        mutexLocker.unlock();
 
         GLuint textureID = 0;
         glGenTextures(1, &textureID);
@@ -172,6 +174,17 @@ void FuryTextureManager::loadTexturePart()
         glBindTexture(GL_TEXTURE_2D, 0);
 
         texture->setReady();
+
+        QMapIterator<QString, QString> nameToPathIter(m_nameToPath);
+        while (nameToPathIter.hasNext())
+        {
+            nameToPathIter.next();
+
+            if (nameToPathIter.value() == texture->path())
+            {
+                emit editTextureSignal(nameToPathIter.key());
+            }
+        }
 
         Debug(ru("Текстура загружена: (%1) (id %2)").arg(texture->path().section('/', -1, -1))
                                                     .arg(textureID));
@@ -222,6 +235,8 @@ void FuryTextureManager::infiniteLoop()
 
             QMutexLocker mutexLocker2(&m_bindMutex);
             m_textureBindQueue.enqueue(texture);
+
+            emit texturesReadyToBindSignal();
         }
 
         QThread::msleep(16); // (1000 / 60)

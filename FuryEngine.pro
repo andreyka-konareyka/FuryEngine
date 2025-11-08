@@ -48,6 +48,7 @@ SOURCES += \
     src/FuryLearningScript.cpp \
     src/FuryObjectsFactory.cpp \
     src/FuryPhongMaterial.cpp \
+    src/FuryTextureCache.cpp \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.cpp \
     src/DefaultObjects/FuryBoxObject.cpp \
     src/Managers/FuryScriptManager.cpp \
@@ -78,6 +79,7 @@ SOURCES += \
     src/DefaultObjects/FurySphereObject.cpp \
     src/FuryTexture.cpp \
     src/Managers/FuryTextureManager.cpp \
+    src/Widgets/FuryOpenGLWidget.cpp \
     src/Widgets/FuryRenderer.cpp \
     src/Widgets/FuryVectorInputWidget.cpp \
     src/FuryWorld.cpp \
@@ -91,6 +93,7 @@ HEADERS += \
     src/FuryLearningScript.h \
     src/FuryObjectsFactory.h \
     src/FuryPhongMaterial.h \
+    src/FuryTextureCache.h \
     src/LocalKeyboard/FuryBaseLocalKeyMapper.h \
     src/DefaultObjects/FuryBoxObject.h \
     src/Managers/FuryScriptManager.h \
@@ -117,6 +120,7 @@ HEADERS += \
     src/DefaultObjects/FurySphereObject.h \
     src/FuryTexture.h \
     src/Managers/FuryTextureManager.h \
+    src/Widgets/FuryOpenGLWidget.h \
     src/Widgets/FuryRenderer.h \
     src/Widgets/FuryVectorInputWidget.h \
     src/FuryWorld.h \

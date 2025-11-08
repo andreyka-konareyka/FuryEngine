@@ -27,7 +27,7 @@ ParticleSystem::ParticleSystem(glm::vec3& pos, const QString &_textureName, int 
 
         double particle_scale = default_particle_size;
 
-        Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+        Particle* new_particle = new Particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
         //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
         m_particles.push_back(new_particle);
     }
@@ -35,9 +35,9 @@ ParticleSystem::ParticleSystem(glm::vec3& pos, const QString &_textureName, int 
 
 void ParticleSystem::Tick(float deltaTime) {
     for (int i = 0; i < m_particles.size(); ++i) {
-        m_particles[i].Tick(deltaTime);
+        m_particles[i]->Tick(deltaTime);
 
-        if (m_particles[i].Is_Dead()) {
+        if (m_particles[i]->Is_Dead()) {
             glm::vec3 pos = position;
             pos += glm::vec3((((double)(rand() % 100) / 100.0) * 2 - 1) * 0.5,
                 (((double)(rand() % 100) / 100.0) * 2 - 1) * 0.5,
@@ -49,8 +49,9 @@ void ParticleSystem::Tick(float deltaTime) {
 
             double particle_scale = default_particle_size;
 
-            Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+            Particle* new_particle = new Particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
             //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
+            delete m_particles[i];
             m_particles[i] = new_particle;
             /*_particles[i].position = pos;
             _particles[i].speed = speed;
@@ -72,7 +73,7 @@ void ParticleSystem::Tick(float deltaTime) {
 
             double particle_scale = default_particle_size;
 
-            Particle new_particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
+            Particle* new_particle = new Particle(pos, particle_scale, speed, color, m_textureName, 2 + (rand() % 10) / 10.0f * 2 - 1.0f, &particle_shader);
             //new_particle.SetMeshBuffers(particleVBO, particleEBO, particleVAO);
             m_particles.push_back(new_particle);
         }
@@ -85,8 +86,8 @@ void ParticleSystem::Draw(Camera& camera, int& width, int& height) {
 
     QList<QPair<float, Particle*>> sorted;
     for (unsigned int i = 0; i < m_particles.size(); i++){
-        float distance = glm::length(camera.position() - m_particles[i].m_position);
-        sorted.append(qMakePair(distance, &(m_particles[i])));
+        float distance = glm::length(camera.position() - m_particles[i]->m_position);
+        sorted.append(qMakePair(distance, m_particles[i]));
     }
 
     std::sort(sorted.begin(), sorted.end(), [](auto& p1, auto& p2){return p1.first < p2.first;});

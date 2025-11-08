@@ -78,6 +78,16 @@ FuryPbrMaterial *FuryMaterialManager::createPbrMaterial(const QString &_name)
     return createUserMaterial<FuryPbrMaterial>(_name);
 }
 
+void FuryMaterialManager::insertPhongMaterial(const QString &_name, FuryPhongMaterial *_material)
+{
+    insertUserMaterial<FuryPhongMaterial>(_name, _material);
+}
+
+void FuryMaterialManager::insertPbrMaterial(const QString &_name, FuryPbrMaterial *_material)
+{
+    insertUserMaterial<FuryPbrMaterial>(_name, _material);
+}
+
 FuryMaterial *FuryMaterialManager::materialByName(const QString &_name)
 {
     if (m_materials.contains(_name))

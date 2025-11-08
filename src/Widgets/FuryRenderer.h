@@ -2,58 +2,57 @@
 #define FURYRENDERER_H
 
 // GLEW
-//#define GLEW_STATIC
 #include <GL/glew.h>
-
-#include <QTime>
-
-
 // GLM Mathematics
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/fwd.hpp>
+#include <glm/vec3.hpp>
 
-// Assimp
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-// Other includes
-#include "Shader.h"
-#include "Camera.h"
-#include "Particle.h"
-#include "ParticleSystem.h"
+#include <QPair>
+#include <QMap>
+#include <QObject>
 
 
-#include "FuryWorld.h"
-#include "CarObject.h"
-#include "Managers/FuryTextureManager.h"
-#include "Physics/FuryEventListener.h"
-#include "Managers/FuryModelManager.h"
-#include "Managers/FuryMaterialManager.h"
-#include "Managers/FuryWorldManager.h"
-#include "Managers/FuryShaderManager.h"
-#include "FuryLearningScript.h"
-#include "LocalKeyboard/FuryBaseLocalKeyMapper.h"
+class Shader;
+class Camera;
+class Particle;
+class ParticleSystem;
 
+class FuryMesh;
+class FuryWorld;
+class FuryObject;
+class FuryModelManager;
+class FuryWorldManager;
+class FuryTextureCache;
+class FuryScriptManager;
+class FuryShaderManager;
+class FuryEventListener;
+class FuryTextureManager;
+class FuryMaterialManager;
+class FuryBaseLocalKeyMapper;
+
+class CarObject;
+class FuryLearningScript;
+
+class QKeyEvent;
+class QMouseEvent;
+class QOpenGLContext;
+class QOffscreenSurface;
 
 #include <QOpenGLWidget>
 
 
-class FuryScriptManager;
-
-
 //! Основной класс рендера
-class FuryRenderer : public QOpenGLWidget
+class FuryRenderer : public QObject
 {
     Q_OBJECT
+
 public:
     /*!
      * \brief Конструктор
-     * \param[in] _parent - Родительский виджет
+     * \param[in] _parent - Родительский объект
      * \throw FuryException в случае повторного создания
      */
-    explicit FuryRenderer(QWidget* _parent = nullptr);
+    explicit FuryRenderer(QObject* _parent = nullptr);
     //! Деструктор
     ~FuryRenderer();
 
@@ -65,6 +64,8 @@ public:
      * \return Возвращает идентификатор текстуры рендер-буфера
      */
     GLuint renderTestScene(const QString& _materialName, int _width, int _height);
+
+    GLuint renderMainScene(int _width, int _height);
 
     /*!
      * \brief Создание текстур окружения для PBR
@@ -91,9 +92,8 @@ public:
      */
     static FuryRenderer* instance();
 
-    void initializeGL() override;
-    void resizeGL(int w, int h) override;
-    void paintGL() override;
+    void initializeGL();
+    // void paintGL();
 
     inline FuryWorld* getTestWorld() const
     { return m_testWorld; }
@@ -132,16 +132,20 @@ signals:
     void setWindowTitleSignal(const QString& _title);
     void setComputerLoadSignal(int _value);
 
-protected:
-    void mouseMoveEvent(QMouseEvent* _event) override;
-    void mousePressEvent(QMouseEvent* _event) override;
-    void keyPressEvent(QKeyEvent* _event) override;
-    void keyReleaseEvent(QKeyEvent* _event) override;
+public:
+    void mouseMoveEvent(QMouseEvent* _event);
+    void mousePressEvent(QMouseEvent* _event);
+    void keyPressEvent(QKeyEvent* _event);
+    void keyReleaseEvent(QKeyEvent* _event);
+
+private slots:
+    //! Слот, что текстуры готовы для подсоединения
+    void texturesReadyToBindSlot();
+    //! Слот, что модели готовы для подсоединения
+    void modelLoadedSlot();
 
 
 private:
-    int m_width;
-    int m_height;
     float m_deltaTime;
     float m_lastFrame;
     float lastX;
@@ -153,7 +157,44 @@ private:
 
     void init();
     void InitGL();
-    void render();
+    // void render();
+
+    /*!
+     * \brief Отрисовка мира
+     * \param[in] _world - Мир
+     * \param[in] _width - Ширина
+     * \param[in] _height - Высота
+     */
+    void drawWorld(FuryWorld* _world, int _width, int _height);
+
+    /*!
+     * \brief Отрисовка карты теней
+     * \param[in] _world - Мир
+     */
+    void drawWorldDepthMap(FuryWorld* _world);
+
+    /*!
+     * \brief Отрисовка выделенного объекта в редакторе
+     * \param[in] _world - Мир
+     * \param[in] _projection - Матрица проекции
+     * \param[in] _view - Матрица вида
+     */
+    void drawSelectedInEditor(FuryWorld* _world,
+                              const glm::mat4& _projection,
+                              const glm::mat4& _view);
+    /*!
+     * \brief Отрисовка компоненты
+     * \param[in] _world - Мир
+     * \param[in] _component - Пара <Объект, Меш> для отрисовки
+     * \param[in] _projection - Матрица проекции
+     * \param[in] _view - Матрица вида
+     * \param[in] _lightSpaceMatrix - Матрица пространства теней
+     */
+    void drawComponent(FuryWorld* _world,
+                       const QPair<FuryObject*, FuryMesh*>& _component,
+                       const glm::mat4& _projection,
+                       const glm::mat4& _view,
+                       const glm::mat4& _lightSpaceMatrix);
 
     void do_movement();
 
@@ -178,7 +219,7 @@ private:
     void updatePhysics();
 
     void displayBuffer(GLuint _bufferId);
-    void displayLogo();
+    // void displayLogo();
 
     //! Тестовая инициализация буферов рендеринга
     /*!
@@ -208,10 +249,6 @@ private:
     Particle* m_myFirstParticle;
     ParticleSystem* m_myFirstParticleSystem;
 
-
-    bool m_is_loading = true;
-    float m_loadingOvertime = 1.0f;
-
     glm::vec3 m_dirlight_position = glm::vec3(-8.0f, 6.0f, 3.0f);
 
 
@@ -225,6 +262,13 @@ private:
     FuryWorldManager* m_worldManager;
     FuryShaderManager* m_shaderManager;
     FuryScriptManager* m_scriptManager;
+
+
+    bool m_is_loading = true;
+    float m_loadingOvertime = 1.0f;
+    FuryTextureCache* m_loadingTextureCache;
+
+
     CarObject* m_carObject = nullptr;
 
     float m_shadowNear = 0.1f;
@@ -254,6 +298,9 @@ private:
 
     //! Отображатель кодов русских клавиш на латинские
     FuryBaseLocalKeyMapper* m_russianKeyMapper;
+
+    QOpenGLContext* m_context;
+    QOffscreenSurface* m_surface;
 };
 
 #endif // FURYRENDERER_H

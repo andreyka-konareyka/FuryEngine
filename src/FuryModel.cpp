@@ -267,13 +267,9 @@ FuryMesh *FuryModel::processMesh(aiMesh *_mesh, const aiScene *_scene, const aiN
         if (!materialManager->tryLoadMaterial(materialName))
         {
             FuryPhongMaterial* modelMaterial = FuryPhongMaterial::createFromAssimp(material, m_directory);
-//            FuryMaterial* material = materialManager->createMaterial(materialName);
-//            *material = *modelMaterial;
 
             FuryPbrMaterial* pbrMat = FuryPbrMaterial::createFromMaterial(modelMaterial);
-            FuryPbrMaterial* mat = materialManager->createPbrMaterial(materialName);
-            *mat = *pbrMat;
-            delete pbrMat;
+            materialManager->insertPbrMaterial(materialName, pbrMat);
             delete modelMaterial;
         }
     }

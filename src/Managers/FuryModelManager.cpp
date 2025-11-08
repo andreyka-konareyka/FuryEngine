@@ -12,6 +12,7 @@ FuryModelManager* FuryModelManager::s_instance = nullptr;
 
 
 FuryModelManager::FuryModelManager() :
+    QObject(),
     m_needStop(false),
     m_stopped(false)
 {
@@ -121,10 +122,9 @@ void FuryModelManager::loadModelPart()
 {
     QMutexLocker mutexLocker(&m_bindMutex);
 
-    if (!m_modelBindQueue.isEmpty())
+    while (!m_modelBindQueue.isEmpty())
     {
         FuryModel* model = m_modelBindQueue.dequeue();
-        mutexLocker.unlock();
 
         model->setupMesh();
 
@@ -179,6 +179,8 @@ void FuryModelManager::infiniteLoop()
 
             QMutexLocker mutexLocker2(&m_bindMutex);
             m_modelBindQueue.enqueue(model);
+
+            emit modelLoadedSignal();
         }
 
         QThread::msleep(16); // (1000 / 60)

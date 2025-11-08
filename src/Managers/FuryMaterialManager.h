@@ -1,12 +1,12 @@
 #ifndef FURYMATERIALMANAGER_H
 #define FURYMATERIALMANAGER_H
 
+#include "FuryMaterial.h"
 #include "Logger/FuryLogger.h"
 
 #include <QMap>
 #include <QString>
 
-class FuryMaterial;
 class FuryPbrMaterial;
 class FuryPhongMaterial;
 
@@ -55,6 +55,28 @@ public:
      */
     template <typename T>
     T* createUserMaterial(const QString& _name);
+
+    /*!
+     * \brief Вставка Phong материала
+     * \param[in] _name - Название
+     * \param[in] _material - Материал
+     */
+    void insertPhongMaterial(const QString& _name, FuryPhongMaterial* _material);
+
+    /*!
+     * \brief Вставка PBR материала
+     * \param[in] _name - Название
+     * \param[in] _material - Материал
+     */
+    void insertPbrMaterial(const QString& _name, FuryPbrMaterial* _material);
+
+    /*!
+     * \brief Шаблонное вставки любого материала, наследника FuryMaterial
+     * \param[in] _name - Название
+     * \param[in] _material - Материал
+     */
+    template <typename T>
+    void insertUserMaterial(const QString& _name, T* _material);
 
     /*!
      * \brief Получение материала по названию
@@ -129,6 +151,19 @@ T *FuryMaterialManager::createUserMaterial(const QString &_name)
     T* material = new T;
     m_materials.insert(_name, material);
     return material;
+}
+
+template<typename T>
+void FuryMaterialManager::insertUserMaterial(const QString &_name, T* _material)
+{
+    if (m_materials.contains(_name))
+    {
+        Debug(ru("[ ВНИМАНИЕ ] Материал (%1) уже существовал. Удаляем старый.").arg(_name));
+        delete m_materials.take(_name);
+    }
+
+    Debug(ru("Добавлен материал: (%1)").arg(_name));
+    m_materials.insert(_name, _material);
 }
 
 #endif // FURYMATERIALMANAGER_H

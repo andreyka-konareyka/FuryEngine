@@ -2,6 +2,7 @@
 #define FURYPBRMATERIAL_H
 
 #include "FuryMaterial.h"
+#include "FuryTextureCache.h"
 #include "FuryPhongMaterial.h"
 
 #include <QString>
@@ -23,8 +24,7 @@ public:
      * \brief Установка текстуры основного цвета
      * \param[in] _texture - Название текстуры
      */
-    inline void setAlbedoTexture(const QString& _texture)
-    { m_albedoTexture = _texture; }
+    void setAlbedoTexture(const QString& _texture);
 
     /*!
      * \brief Получение текстуры основного цвета
@@ -37,8 +37,7 @@ public:
      * \brief Установка текстуры нормалей
      * \param[in] _texture - Название текстуры
      */
-    inline void setNormalTexture(const QString& _texture)
-    { m_normalTexture = _texture; }
+    void setNormalTexture(const QString& _texture);
 
     /*!
      * \brief Получение текстуры нормалей
@@ -51,8 +50,7 @@ public:
      * \brief Установка текстуры металличности
      * \param[in] _texture - Название текстуры
      */
-    inline void setMetallicTexture(const QString& _texture)
-    { m_metallicTexture = _texture; }
+    void setMetallicTexture(const QString& _texture);
 
     /*!
      * \brief Получение текстуры металличности
@@ -65,8 +63,7 @@ public:
      * \brief Установка текстуры шероховатости
      * \param[in] _texture - Название текстуры
      */
-    inline void setRoughnessTexture(const QString& _texture)
-    { m_roughnessTexture = _texture; }
+    void setRoughnessTexture(const QString& _texture);
 
     /*!
      * \brief Получение текстуры шероховатости
@@ -79,8 +76,7 @@ public:
      * \brief Установка текстуры окружающего затенения
      * \param[in] _texture - Название текстуры
      */
-    inline void setAoTexture(const QString& _texture)
-    { m_aoTexture = _texture; }
+    void setAoTexture(const QString& _texture);
 
     /*!
      * \brief Получение текстуры окружающего затенения
@@ -205,14 +201,24 @@ private:
 
     //! Текстура основного цвета
     QString m_albedoTexture;
+    //! Кэш текстуры основного цвета
+    FuryTextureCache m_albedoCache;
     //! Текстура нормалей
     QString m_normalTexture;
+    //! Кэш текстуры нормалей
+    FuryTextureCache m_normalCache;
     //! Текстура металличности
     QString m_metallicTexture;
+    //! Кэш текстуры металличности
+    FuryTextureCache m_metallicCache;
     //! Текстура шероховатости
     QString m_roughnessTexture;
+    //! Кэш текстуры шероховатости
+    FuryTextureCache m_roughnessCache;
     //! Текстура окружающего затенения
     QString m_aoTexture;
+    //! Кэш текстуры окружающего затенения
+    FuryTextureCache m_aoCache;
 
     //! Указывает, должны ли сетки отображаться без отбраковки обратных сторон
     bool m_twoSided;

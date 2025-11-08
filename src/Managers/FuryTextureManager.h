@@ -12,11 +12,14 @@
 #include <QString>
 #include <QQueue>
 #include <QMutex>
+#include <QObject>
 
 
 //! Класс менеджера текстур
-class FuryTextureManager
+class FuryTextureManager : public QObject
 {
+    Q_OBJECT
+
 public:
     /*!
      * \brief Получить экземпляра класса
@@ -72,6 +75,35 @@ public:
      * \return Возвращает список имен текстур
      */
     QStringList allTextureNames() const;
+
+    /*!
+     * \brief Получение пустой текстуры
+     * \return Возвращает пустую текстуру
+     */
+    inline const FuryTexture& emptyTexture() const
+    { return m_emptyTexture; }
+
+signals:
+    /*!
+     * \brief Сигнал добавления текстуры
+     * \param[in] _texture - Текстура
+     */
+    void addTextureSignal(const QString& _textureName);
+
+    /*!
+     * \brief Сигнал изменения текстуры
+     * \param[in] _texture - Текстура
+     */
+    void editTextureSignal(const QString& _textureName);
+
+    /*!
+     * \brief Сигнал удаления текстуры
+     * \param[in] _texture - Текстура
+     */
+    void deleteTextureSignal(const QString& _textureName);
+
+    //! Сигнал, что какие-то текстуры готовы к подсоединению
+    void texturesReadyToBindSignal();
 
 private:
     //! Конструктор

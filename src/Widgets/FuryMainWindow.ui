@@ -39,7 +39,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="FuryRenderer" name="openGLWidget">
+      <widget class="FuryOpenGLWidget" name="openGLWidget">
        <property name="minimumSize">
         <size>
          <width>150</width>
@@ -66,7 +66,7 @@
              <x>0</x>
              <y>0</y>
              <width>1203</width>
-             <height>268</height>
+             <height>282</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3"/>
@@ -87,7 +87,7 @@
              <x>0</x>
              <y>0</y>
              <width>1203</width>
-             <height>262</height>
+             <height>227</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -256,7 +256,7 @@
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -311,9 +311,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FuryRenderer</class>
+   <class>FuryOpenGLWidget</class>
    <extends>QOpenGLWidget</extends>
-   <header>FuryRenderer.h</header>
+   <header>FuryOpenGLWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

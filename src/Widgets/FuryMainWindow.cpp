@@ -1,8 +1,11 @@
 #include "FuryMainWindow.h"
 #include "ui_FuryMainWindow.h"
 
+#include "FuryWorld.h"
+#include "FuryObject.h"
 #include "Logger/FuryLogger.h"
 #include "FuryObjectsTreeModel.h"
+#include "Widgets/FuryRenderer.h"
 #include "FuryVectorInputWidget.h"
 #include "FuryMaterialEditDialog.h"
 #include "FuryManagersDataDialog.h"
@@ -32,7 +35,7 @@ FuryMainWindow::~FuryMainWindow()
 
 void FuryMainWindow::closeEvent(QCloseEvent */*_event*/)
 {
-    m_ui->openGLWidget->saveScoreList();
+    // m_ui->openGLWidget->saveScoreList();
 }
 
 void FuryMainWindow::onAboutQtSlot()
@@ -42,7 +45,7 @@ void FuryMainWindow::onAboutQtSlot()
 
 void FuryMainWindow::onZoomSliderMoveSlot(int _value)
 {
-    m_ui->openGLWidget->setCameraZoomValue(_value);
+    FuryRenderer::instance()->setCameraZoomValue(_value);
     m_ui->lbCameraZoom->setText(ru("Увеличение камеры: %1").arg(_value));
 }
 
@@ -61,50 +64,50 @@ void FuryMainWindow::onShadowNearSliderSlot()
 {
     float value = m_ui->shadowNearSlider->value() / 100.0 * 5 + 0.1;
     m_ui->shadowNearLabel->setText(QString("ShadowNear: %1").arg(value));
-    m_ui->openGLWidget->setShadowNear(value);
+    FuryRenderer::instance()->setShadowNear(value);
 }
 
 void FuryMainWindow::onShadowPlaneSliderSlot()
 {
     float value = m_ui->shadowPlaneSlider->value() / 100.0 * 100 + 10;
     m_ui->shadowPlaneLabel->setText(QString("ShadowPlane: %1").arg(value));
-    m_ui->openGLWidget->setShadowPlane(value);
+    FuryRenderer::instance()->setShadowPlane(value);
 }
 
 void FuryMainWindow::onShadowViewSizeSliderSlot()
 {
     float value = m_ui->shadowViewSizeSlider->value() / 100.0 * 100 + 10;
     m_ui->shadowViewSizeLabel->setText(QString("ShadowViewSize: %1").arg(value));
-    m_ui->openGLWidget->setShadowViewSize(value);
+    FuryRenderer::instance()->setShadowViewSize(value);
 }
 
 void FuryMainWindow::onShadowCamDistanceSliderSlot()
 {
     float value = m_ui->shadowCamDistanceSlider->value() / 100.0 * 50 + 5;
     m_ui->shadowCamDistanceLabel->setText(QString("ShadowCamDistance: %1").arg(value));
-    m_ui->openGLWidget->setShadowCamDistance(value);
+    FuryRenderer::instance()->setShadowCamDistance(value);
 }
 
 void FuryMainWindow::onLearnSpeedCheckBoxSlot()
 {
     if (m_ui->learnSpeedCheckBox->isChecked())
     {
-        m_ui->openGLWidget->setLearnSpeed(20);
+        FuryRenderer::instance()->setLearnSpeed(20);
     }
     else
     {
-        m_ui->openGLWidget->setLearnSpeed(1);
+        FuryRenderer::instance()->setLearnSpeed(1);
     }
 }
 
 void FuryMainWindow::onSaveSlot()
 {
-    m_ui->openGLWidget->saveLearnModel();
+    FuryRenderer::instance()->saveLearnModel();
 }
 
 void FuryMainWindow::onNeedDebugRenderSlot()
 {
-    m_ui->openGLWidget->setNeedDebugRender(m_ui->debugRenderCheckBox->isChecked());
+    FuryRenderer::instance()->setNeedDebugRender(m_ui->debugRenderCheckBox->isChecked());
 }
 
 void FuryMainWindow::onMaterialEditSlot()
@@ -254,17 +257,17 @@ void FuryMainWindow::propertyChangedSlot()
 
 void FuryMainWindow::resetWorldSlot()
 {
-    m_ui->openGLWidget->getTestWorld()->resetWorld();
+    FuryRenderer::instance()->getTestWorld()->resetWorld();
 }
 
 void FuryMainWindow::pauseWorldSlot()
 {
-    m_ui->openGLWidget->getTestWorld()->pauseWorld();
+    FuryRenderer::instance()->getTestWorld()->pauseWorld();
 }
 
 void FuryMainWindow::resumeWorldSlot()
 {
-    m_ui->openGLWidget->getTestWorld()->resumeWorld();
+    FuryRenderer::instance()->getTestWorld()->resumeWorld();
 }
 
 void FuryMainWindow::prepareUi()
@@ -289,9 +292,9 @@ void FuryMainWindow::prepareUi()
 
     m_ui->tvSceneObjects->setModel(m_treeModel);
 
-    connect(m_ui->openGLWidget->getTestWorld(), &FuryWorld::addObjectSignal,
+    connect(FuryRenderer::instance()->getTestWorld(), &FuryWorld::addObjectSignal,
             m_treeModel, &FuryObjectsTreeModel::addObjectSlot);
-    connect(m_ui->openGLWidget->getTestWorld(), &FuryWorld::parentChangedSignal,
+    connect(FuryRenderer::instance()->getTestWorld(), &FuryWorld::parentChangedSignal,
             m_treeModel, &FuryObjectsTreeModel::parentChangedSlot);
 
     connect(m_ui->tvSceneObjects->selectionModel(), &QItemSelectionModel::currentChanged,
@@ -314,9 +317,9 @@ void FuryMainWindow::initConnections()
     connect(m_ui->cameraZoomSlider, &QSlider::valueChanged,
             this, &FuryMainWindow::onZoomSliderMoveSlot);
 
-    connect(m_ui->openGLWidget, &FuryRenderer::setWindowTitleSignal,
+    connect(FuryRenderer::instance(), &FuryRenderer::setWindowTitleSignal,
             this, &FuryMainWindow::onSetWindowTitleSlot);
-    connect(m_ui->openGLWidget, &FuryRenderer::setComputerLoadSignal,
+    connect(FuryRenderer::instance(), &FuryRenderer::setComputerLoadSignal,
             this, &FuryMainWindow::onSetComputerLoadSlot);
 
     connect(m_ui->shadowNearSlider, &QSlider::valueChanged,

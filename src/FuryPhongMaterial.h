@@ -2,6 +2,7 @@
 #define FURYPHONGMATERIAL_H
 
 #include "FuryMaterial.h"
+#include "FuryTextureCache.h"
 
 #include <QJsonObject>
 #include <QString>
@@ -35,22 +36,19 @@ public:
      * \brief Установка диффузной текстуры
      * \param[in] _diffuseTexture - Название диффузной текстуры
      */
-    inline void setDiffuseTexture(const QString& _diffuseTexture)
-    { m_diffuseTexture = _diffuseTexture; }
+    void setDiffuseTexture(const QString& _diffuseTexture);
 
     /*!
      * \brief Установка текстуры отражений
      * \param[in] _specularTexture - Название текстуры отражений
      */
-    inline void setSpecularTexture(const QString& _specularTexture)
-    { m_specularTexture = _specularTexture; }
+    void setSpecularTexture(const QString& _specularTexture);
 
     /*!
      * \brief Установка текстуры нормалей
      * \param[in] _normalTexture - Название текстуры нормалей
      */
-    inline void setNormalTexture(const QString& _normalTexture)
-    { m_normalTexture = _normalTexture; }
+    void setNormalTexture(const QString& _normalTexture);
 
     /*!
      * \brief Получение диффузной текстуры
@@ -162,10 +160,16 @@ private:
 
     //! Текстура рассеянного цвета
     QString m_diffuseTexture;
+    //! Кэш текстуры рассеянного цвета
+    FuryTextureCache m_diffuseCache;
     //! Текстура зеркального цвета
     QString m_specularTexture;
+    //! Кэш текстуры зеркального цвета
+    FuryTextureCache m_specularCache;
     //! Текстура нормалей
     QString m_normalTexture;
+    //! Кэш текстуры нормалей
+    FuryTextureCache m_normalCache;
 };
 
 #endif // FURYPHONGMATERIAL_H

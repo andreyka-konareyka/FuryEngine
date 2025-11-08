@@ -16,6 +16,9 @@
 #include "Camera.h"
 
 
+class FuryTextureCache;
+
+
 //! Инициализация меша частицы в OpenGL
 void InitParticleMesh();
 
@@ -41,6 +44,7 @@ private:
     Shader* m_particleShader;
     GLuint m_textureId;
     QString m_textureName;
+    FuryTextureCache* m_textureCache;
 };
 
 #endif // PARTICLE_H

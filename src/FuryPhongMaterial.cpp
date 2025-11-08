@@ -28,6 +28,24 @@ FuryPhongMaterial::~FuryPhongMaterial()
 
 }
 
+void FuryPhongMaterial::setDiffuseTexture(const QString &_diffuseTexture)
+{
+    m_diffuseTexture = _diffuseTexture;
+    m_diffuseCache.setTextureName(_diffuseTexture);
+}
+
+void FuryPhongMaterial::setSpecularTexture(const QString &_specularTexture)
+{
+    m_specularTexture = _specularTexture;
+    m_specularCache.setTextureName(_specularTexture);
+}
+
+void FuryPhongMaterial::setNormalTexture(const QString &_normalTexture)
+{
+    m_normalTexture = _normalTexture;
+    m_normalCache.setTextureName(_normalTexture);
+}
+
 void FuryPhongMaterial::setShaderMaterial(Shader *_shader)
 {
     _shader->use();
@@ -48,7 +66,7 @@ void FuryPhongMaterial::setShaderMaterial(Shader *_shader)
     {
         diffuseTextureEnabled = true;
 
-        GLuint textureId = FuryTextureManager::instance()->textureByName(m_diffuseTexture).idOpenGL();
+        GLuint textureId = m_diffuseCache.texture().idOpenGL();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
@@ -57,7 +75,7 @@ void FuryPhongMaterial::setShaderMaterial(Shader *_shader)
     {
         specularTextureEnabled = true;
 
-        GLuint textureId = FuryTextureManager::instance()->textureByName(m_specularTexture).idOpenGL();
+        GLuint textureId = m_specularCache.texture().idOpenGL();
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textureId);
     }
@@ -66,7 +84,7 @@ void FuryPhongMaterial::setShaderMaterial(Shader *_shader)
     {
         normalTextureEnabled = true;
 
-        GLuint textureId = FuryTextureManager::instance()->textureByName(m_normalTexture).idOpenGL();
+        GLuint textureId = m_normalCache.texture().idOpenGL();
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, textureId);
     }

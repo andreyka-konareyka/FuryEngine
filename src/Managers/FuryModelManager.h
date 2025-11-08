@@ -5,13 +5,16 @@
 
 #include <QMap>
 #include <QQueue>
-#include <QString>
 #include <QMutex>
+#include <QObject>
+#include <QString>
 
 
 //! Класс менеджера моделей
-class FuryModelManager
+class FuryModelManager : public QObject
 {
+    Q_OBJECT
+
 public:
     /*!
      * \brief Получение экземпляра класса
@@ -63,6 +66,10 @@ public:
      * \return Возвращает путь
      */
     QString pathByName(const QString& _name) const;
+
+signals:
+    //! Сигнал, что какие-то модели готовы к подсоединению
+    void modelLoadedSignal();
 
 private:
     //! Конструктор

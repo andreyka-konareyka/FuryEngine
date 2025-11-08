@@ -53,16 +53,6 @@ public:
     { m_started = true; }
 
     /*!
-     * \brief Отрисовка мира
-     * \param[in] _width - Ширина экрана
-     * \param[in] _height - Высота экрана
-     */
-    void draw(int _width, int _height);
-
-    //! Отрисовка карты теней
-    void drawDepthMap();
-
-    /*!
      * \brief Добавление корневого объекта мира
      * \param[in] _object - Корневой объект
      */
@@ -132,6 +122,42 @@ public:
     //! Загрузка мира из JSON
     void load();
 
+    /*!
+     * \brief Заполнение компонент для отрисовки
+     * \param[out] _solidComponents - Непрозрачный компоненты
+     * \param[out] _transparentComponents - Прозрачные компоненты
+     */
+    void fillDrawComponents(QVector<QPair<FuryObject*, FuryMesh*>>& _solidComponents,
+                            QVector<QPair<FuryObject*, FuryMesh*>>& _transparentComponents);
+
+    /*!
+     * \brief Позиция направленного света
+     * \return Возвращает позицию направленного света
+     */
+    inline const glm::vec3& dirLightPosition() const
+    { return m_dirLightPosition; }
+
+    inline GLuint envCubemap() const
+    { return m_envCubemap; }
+
+    inline GLuint irradianceMap() const
+    { return m_irradianceMap; }
+
+    inline GLuint prefilterMap() const
+    { return m_prefilterMap; }
+
+    inline GLuint brdfLUTTexture() const
+    { return m_brdfLUTTexture; }
+
+    inline bool shadowMapEnabled() const
+    { return m_shadowMapEnabled; }
+
+    inline GLuint depthMapFBO() const
+    { return m_depthMapFBO; }
+
+    inline GLuint depthMap() const
+    { return m_depthMap; }
+
 signals:
     /*!
      * \brief Сигнал добавления объекта
@@ -148,35 +174,6 @@ signals:
 private slots:
     //! Слот изменения родителя
     void parentChangedSlot();
-
-private:
-    /*!
-     * \brief Отрисовка компоненты
-     * \param[in] _component - Пара <Объект, Меш> для отрисовки
-     * \param[in] _projection - Матрица проекции
-     * \param[in] _view - Матрица вида
-     * \param[in] _lightSpaceMatrix - Матрица пространства теней
-     */
-    void drawComponent(const QPair<FuryObject*, FuryMesh*>& _component,
-                       const glm::mat4& _projection,
-                       const glm::mat4& _view,
-                       const glm::mat4& _lightSpaceMatrix);
-
-    /*!
-     * \brief Заполнение компонент для отрисовки
-     * \param[out] _solidComponents - Непрозрачный компоненты
-     * \param[out] _transparentComponents - Прозрачные компоненты
-     */
-    void fillDrawComponents(QVector<QPair<FuryObject*, FuryMesh*>>& _solidComponents,
-                            QVector<QPair<FuryObject*, FuryMesh*>>& _transparentComponents);
-
-    /*!
-     * \brief Отрисовка выделенного объекта в редакторе
-     * \param[in] _projection - Матрица проекции
-     * \param[in] _view - Матрица вида
-     */
-    void drawSelectedInEditor(const glm::mat4& _projection,
-                              const glm::mat4& _view);
 
 private:
     //! Инициализация соединений сигналов и слотов

@@ -1,6 +1,8 @@
 #include "Particle.h"
 
-#include "Managers/FuryTextureManager.h"
+#include "FuryTexture.h"
+#include "FuryTextureCache.h"
+
 
 static unsigned int defaultVBO, defaultEBO, defaultVAO;
 
@@ -42,6 +44,7 @@ Particle::Particle(const glm::vec3 &_position, double _scale,
     this->m_speed = _speed;
     this->m_color = _color;
     this->m_textureName = _textureName;
+    m_textureCache = new FuryTextureCache(m_textureName);
     this->m_lifeTime = _lifeTime;
     this->m_isLiving = true;
 
@@ -96,8 +99,7 @@ void Particle::Draw(Camera& _camera, int& _width, int& _height)
 
     m_particleShader->setVec4("objectColor", m_color);
 
-    FuryTextureManager* manager = FuryTextureManager::instance();
-    glBindTexture(GL_TEXTURE_2D, manager->textureByName(m_textureName).idOpenGL());
+    glBindTexture(GL_TEXTURE_2D, m_textureCache->texture().idOpenGL());
 
     //Draw(particleShader);
     glBindVertexArray(m_VAO);

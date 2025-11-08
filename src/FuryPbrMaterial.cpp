@@ -18,8 +18,6 @@ FuryPbrMaterial::FuryPbrMaterial() :
 
 void FuryPbrMaterial::setShaderMaterial(Shader *_shader)
 {
-    FuryTextureManager* textureManager = FuryTextureManager::instance();
-
     _shader->use();
     _shader->setVec3("material.albedoColor", m_albedoColor);
     _shader->setFloat("material.metallic", m_metallic);
@@ -37,35 +35,35 @@ void FuryPbrMaterial::setShaderMaterial(Shader *_shader)
     {
         albedoEnabled = true;
         glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, textureManager->textureByName(m_albedoTexture).idOpenGL());
+        glBindTexture(GL_TEXTURE_2D, m_albedoCache.texture().idOpenGL());
     }
 
     if (!m_normalTexture.isEmpty())
     {
         normalEnabled = true;
         glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, textureManager->textureByName(m_normalTexture).idOpenGL());
+        glBindTexture(GL_TEXTURE_2D, m_normalCache.texture().idOpenGL());
     }
 
     if (!m_metallicTexture.isEmpty())
     {
         metallicEnabled = true;
         glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, textureManager->textureByName(m_metallicTexture).idOpenGL());
+        glBindTexture(GL_TEXTURE_2D, m_metallicCache.texture().idOpenGL());
     }
 
     if (!m_roughnessTexture.isEmpty())
     {
         roughnessEnabled = true;
         glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, textureManager->textureByName(m_roughnessTexture).idOpenGL());
+        glBindTexture(GL_TEXTURE_2D, m_roughnessCache.texture().idOpenGL());
     }
 
     if (!m_aoTexture.isEmpty())
     {
         aoEnabled = true;
         glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_2D, textureManager->textureByName(m_aoTexture).idOpenGL());
+        glBindTexture(GL_TEXTURE_2D, m_aoCache.texture().idOpenGL());
     }
 
     // Сбрасываем к стандартным настройкам
@@ -86,6 +84,36 @@ void FuryPbrMaterial::setShaderMaterial(Shader *_shader)
     {
         glEnable(GL_CULL_FACE);
     }
+}
+
+void FuryPbrMaterial::setAlbedoTexture(const QString &_texture)
+{
+    m_albedoTexture = _texture;
+    m_albedoCache.setTextureName(_texture);
+}
+
+void FuryPbrMaterial::setNormalTexture(const QString &_texture)
+{
+    m_normalTexture = _texture;
+    m_normalCache.setTextureName(_texture);
+}
+
+void FuryPbrMaterial::setMetallicTexture(const QString &_texture)
+{
+    m_metallicTexture = _texture;
+    m_metallicCache.setTextureName(_texture);
+}
+
+void FuryPbrMaterial::setRoughnessTexture(const QString &_texture)
+{
+    m_roughnessTexture = _texture;
+    m_roughnessCache.setTextureName(_texture);
+}
+
+void FuryPbrMaterial::setAoTexture(const QString &_texture)
+{
+    m_aoTexture = _texture;
+    m_aoCache.setTextureName(_texture);
 }
 
 QJsonObject FuryPbrMaterial::toJson() const
