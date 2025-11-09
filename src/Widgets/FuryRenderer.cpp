@@ -195,6 +195,18 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
     m_lastFrame = currentFrame;
 
 
+    if (m_is_loading)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
+        glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderLoading();
+        displayLogo(_width, _height);
+        m_context->doneCurrent();
+        return m_mainRenderTexture;
+    }
+
+
     m_dirlight_position.x = sin(currentFrame / 1000 / 4) * 10;
     m_dirlight_position.z = cos(currentFrame / 1000 / 4) * 10;
 
@@ -1287,9 +1299,8 @@ void FuryRenderer::createPBRTextures(const QString& _cubemapHdrPath,
     glEnable(GL_CULL_FACE);
 }
 
-void FuryRenderer::renderLoading(float _currentFrame)
+void FuryRenderer::renderLoading()
 {
-    Q_UNUSED(_currentFrame);
     static QTime startTime = QTime::currentTime();
 
     if (startTime.msecsTo(QTime::currentTime()) > m_loadingOvertime * 1000)
@@ -1384,60 +1395,60 @@ void FuryRenderer::displayBuffer(GLuint _bufferId)
     glUseProgram(0);
 }
 
-// void FuryRenderer::displayLogo()
-// {
-//     static Shader* shader = nullptr;
-//     static GLuint vaoDebugTexturedRect = 0;
+void FuryRenderer::displayLogo(int _width, int _height)
+{
+    static Shader* shader = nullptr;
+    static GLuint vaoDebugTexturedRect = 0;
 
-//     if (shader == nullptr)
-//     {
-//         shader = new Shader("shaders/logoShader.vs", "shaders/logoShader.fs");
+    if (shader == nullptr)
+    {
+        shader = new Shader("shaders/logoShader.vs", "shaders/logoShader.fs");
 
-//         GLfloat buffer_vertices[] = {
-//         -1, -1, 0.0f, 1.0f,
-//         1, -1, 1.0f, 1.0f,
-//         1, 1, 1.0f, 0.01f,
+        GLfloat buffer_vertices[] = {
+        -1, -1, 0.0f, 1.0f,
+        1, -1, 1.0f, 1.0f,
+        1, 1, 1.0f, 0.01f,
 
-//         -1, -1, 0.0f, 1.0f,
-//         1, 1, 1.0f, 0.01f,
-//         -1, 1, 0.0f, 0.01f,
-//         };
+        -1, -1, 0.0f, 1.0f,
+        1, 1, 1.0f, 0.01f,
+        -1, 1, 0.0f, 0.01f,
+        };
 
-//         GLuint vboDebugTexturedRect;
-//         glGenVertexArrays(1, &vaoDebugTexturedRect);
-//         glGenBuffers(1, &vboDebugTexturedRect);
-//         glBindBuffer(GL_ARRAY_BUFFER, vboDebugTexturedRect);
-//         glBindVertexArray(vaoDebugTexturedRect);
+        GLuint vboDebugTexturedRect;
+        glGenVertexArrays(1, &vaoDebugTexturedRect);
+        glGenBuffers(1, &vboDebugTexturedRect);
+        glBindBuffer(GL_ARRAY_BUFFER, vboDebugTexturedRect);
+        glBindVertexArray(vaoDebugTexturedRect);
 
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_vertices), buffer_vertices, GL_STATIC_DRAW);
-//         glEnableVertexAttribArray(0);
-//         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-//         //normals
-//         glEnableVertexAttribArray(1);
-//         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
-//         glBindVertexArray(0);
-//     }
+        glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_vertices), buffer_vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+        //normals
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+        glBindVertexArray(0);
+    }
 
-//     float needWidth = 300;
-//     float needHeight = 300;
+    float needWidth = 300;
+    float needHeight = 300;
 
-//     float logoWidth = needWidth / m_width;
-//     float logoHeight = needHeight / m_height;
+    float logoWidth = needWidth / _width;
+    float logoHeight = needHeight / _height;
 
-//     static QTime alphaTimer = QTime::currentTime();
-//     float deltaTime = alphaTimer.msecsTo(QTime::currentTime()) / 1000.0f;
-//     float logoAlpha = std::max(std::sin(deltaTime / m_loadingOvertime * 3.14), 0.0);
+    static QTime alphaTimer = QTime::currentTime();
+    float deltaTime = alphaTimer.msecsTo(QTime::currentTime()) / 1000.0f;
+    float logoAlpha = std::max(std::sin(deltaTime / m_loadingOvertime * 3.14), 0.0);
 
-//     glActiveTexture(GL_TEXTURE0);
-//     shader->use();
-//     shader->setVec2("logoScale", glm::vec2(logoWidth, logoHeight));
-//     shader->setFloat("logoAlpha", logoAlpha);
-//     glBindTexture(GL_TEXTURE_2D, m_loadingTextureCache->texture().idOpenGL());
-//     glBindVertexArray(vaoDebugTexturedRect);
-//     glDrawArrays(GL_TRIANGLES, 0, 6);
-//     glBindVertexArray(0);
-//     glUseProgram(0);
-// }
+    glActiveTexture(GL_TEXTURE0);
+    shader->use();
+    shader->setVec2("logoScale", glm::vec2(logoWidth, logoHeight));
+    shader->setFloat("logoAlpha", logoAlpha);
+    glBindTexture(GL_TEXTURE_2D, m_loadingTextureCache->texture().idOpenGL());
+    glBindVertexArray(vaoDebugTexturedRect);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
 
 void FuryRenderer::createRenderBuffer(GLuint* _frameBuffer,
                                       GLuint* _renderBuffer,

@@ -214,12 +214,12 @@ private:
 
     void loadRaceMapFromJson();
 
-    void renderLoading(float _currentFrame);
+    void renderLoading();
 
     void updatePhysics();
 
     void displayBuffer(GLuint _bufferId);
-    // void displayLogo();
+    void displayLogo(int _width, int _height);
 
     //! Тестовая инициализация буферов рендеринга
     /*!
