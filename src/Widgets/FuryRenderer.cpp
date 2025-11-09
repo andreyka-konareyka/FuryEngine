@@ -39,6 +39,7 @@
 #include <QJsonDocument>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
+#include <QOpenGLFramebufferObject>
 
 
 const bool NEED_DRAW_SHADOW = true;
@@ -103,9 +104,6 @@ FuryRenderer::FuryRenderer(QObject *_parent) :
             this, &FuryRenderer::texturesReadyToBindSlot, Qt::QueuedConnection);
     connect(m_modelManager, &FuryModelManager::modelLoadedSignal,
             this, &FuryRenderer::modelLoadedSlot, Qt::QueuedConnection);
-
-    // connect(this, &QOpenGLWidget::frameSwapped,
-    //         this, qOverload<>(&FuryRenderer::update), Qt::QueuedConnection);
 //    setFocusPolicy(Qt::StrongFocus);
 
 
@@ -159,7 +157,6 @@ FuryRenderer::~FuryRenderer()
 
 GLuint FuryRenderer::renderTestScene(const QString &_materialName, int _width, int _height)
 {
-    // makeCurrent();
     m_context->makeCurrent(m_surface);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_testFrameBuffer);
@@ -177,14 +174,19 @@ GLuint FuryRenderer::renderTestScene(const QString &_materialName, int _width, i
 
     drawWorld(&m_worldManager->worldByName("materialPreview"), _width, _height);
 
-    // doneCurrent();
     m_context->doneCurrent();
 
     return m_testRenderTexture;
 }
 
-GLuint FuryRenderer::renderMainScene(int _width, int _height)
+void FuryRenderer::renderMainScene(QOpenGLFramebufferObject* _framebuffer)
 {
+    if (_framebuffer == nullptr)
+    {
+        Debug(ru("Невозможно выполнить отрисовку, нет фреймбуфера"));
+        return;
+    }
+
     m_context->makeCurrent(m_surface);
 
 
@@ -197,13 +199,14 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
 
     if (m_is_loading)
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
-        glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+        _framebuffer->bind();
+        glViewport(0, 0, _framebuffer->width(), _framebuffer->height());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderLoading();
-        displayLogo(_width, _height);
+        displayLogo(_framebuffer->width(), _framebuffer->height());
         m_context->doneCurrent();
-        return m_mainRenderTexture;
+        _framebuffer->release();
+        return;
     }
 
 
@@ -237,8 +240,8 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
     }
 
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
-    glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
+    _framebuffer->bind();
+    glViewport(0, 0, _framebuffer->width(), _framebuffer->height());
 
 
 
@@ -251,7 +254,7 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
 
 
     glm::vec4 planes[6];
-    const glm::mat4& projection = m_testWorld->camera()->getPerspectiveMatrix(_width, _height, m_perspective_near, m_perspective_far);
+    const glm::mat4& projection = m_testWorld->camera()->getPerspectiveMatrix(_framebuffer->width(), _framebuffer->height(), m_perspective_near, m_perspective_far);
     const glm::mat4& view =  m_testWorld->camera()->getViewMatrix();
 
     {
@@ -266,7 +269,7 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
 
 
 
-    drawWorld(m_testWorld, _width, _height);
+    drawWorld(m_testWorld, _framebuffer->width(), _framebuffer->height());
 
 
     // ##################################
@@ -278,14 +281,23 @@ GLuint FuryRenderer::renderMainScene(int _width, int _height)
     */
     {
         glDepthMask(GL_FALSE);
-        m_myFirstParticle->Draw(*m_testWorld->camera(), _width, _height);
-        m_myFirstParticleSystem->Draw(*m_testWorld->camera(), _width, _height);
+        m_myFirstParticle->Draw(*m_testWorld->camera(), _framebuffer->width(), _framebuffer->height());
+        m_myFirstParticleSystem->Draw(*m_testWorld->camera(), _framebuffer->width(), _framebuffer->height());
         glDepthMask(GL_TRUE);
     }
 
     m_context->doneCurrent();
 
-    return m_mainRenderTexture;
+    _framebuffer->release();
+}
+
+QOpenGLFramebufferObject* FuryRenderer::createFramebuffer(int _width, int _height)
+{
+    m_context->makeCurrent(m_surface);
+    QOpenGLFramebufferObject* framebuffer =
+        new QOpenGLFramebufferObject(_width, _height, QOpenGLFramebufferObject::Depth);
+    m_context->doneCurrent();
+    return framebuffer;
 }
 
 FuryRenderer *FuryRenderer::instance()
@@ -484,8 +496,6 @@ void FuryRenderer::InitGL()
     InitParticleMesh();
 
 
-    createRenderBuffer(&m_mainFrameBuffer, &m_mainRenderBuffer, &m_mainRenderTexture,
-                       MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
     createRenderBuffer(&m_testFrameBuffer, &m_testRenderBuffer, &m_testRenderTexture,
                        MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
 
@@ -959,126 +969,6 @@ void FuryRenderer::init() {
     }
 }
 
-// void FuryRenderer::render()
-// {
-//     // Calculate deltatime of current frame
-//     static QTime startTime = QTime::currentTime();
-//     float currentFrame = startTime.msecsTo(QTime::currentTime());
-//     m_deltaTime = (currentFrame - m_lastFrame)/1000.0;
-//     m_lastFrame = currentFrame;
-
-//     /*
-//     =======================================================
-//     =================  Загрузка текстур  ==================
-//     =======================================================
-//     */
-//     if (m_is_loading)
-//     {
-//         renderLoading(currentFrame);
-//         displayLogo();
-//         return;
-//     }
-
-//     /*
-//     =======================================================
-//     ===================  Обычный режим  ===================
-//     =======================================================
-//     */
-
-//     m_dirlight_position.x = sin(currentFrame / 1000 / 4) * 10;
-//     m_dirlight_position.z = cos(currentFrame / 1000 / 4) * 10;
-
-
-
-//     // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
-//     do_movement();
-
-//     for (int i = 0; i < m_learnSpeed; ++i)
-//     {
-//         updatePhysics();
-//     }
-
-
-//     m_cameras[1]->setPosition(m_carObject->cameraPosition());
-//     m_cameras[1]->setFront(m_carObject->cameraViewPoint() - m_carObject->cameraPosition());
-
-//     glm::vec3 tempPosition = m_dirlight_position;
-//     tempPosition *= 3;
-//     tempPosition += m_testWorld->camera()->position();
-//     m_sunVisualBox->setWorldPosition(tempPosition);
-
-
-//     // 1. сначала рисуем карту глубины
-//     if (NEED_DRAW_SHADOW)
-//     {
-//         m_testWorld->drawDepthMap();
-//         // drawWorldDepthMap(m_testWorld);
-//     }
-
-
-//     glBindFramebuffer(GL_FRAMEBUFFER, m_mainFrameBuffer);
-//     glViewport(0, 0, MAIN_BUFFER_WIDTH, MAIN_BUFFER_HEIGHT);
-
-
-
-//     // 2. рисуем сцену как обычно с тенями (используя карту глубины)
-
-//     // Clear the colorbuffer
-//     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-
-//     glm::vec4 planes[6];
-//     const glm::mat4& projection = m_testWorld->camera()->getPerspectiveMatrix(m_width, m_height, m_perspective_near, m_perspective_far);
-//     const glm::mat4& view =  m_testWorld->camera()->getViewMatrix();
-
-//     {
-//         glm::mat4 m = glm::transpose(projection * view);
-//         planes[0] = m[3] + m[0];
-//         planes[1] = m[3] - m[0];
-//         planes[2] = m[3] + m[1];
-//         planes[3] = m[3] - m[1];
-//         planes[4] = m[3] + m[2];
-//         planes[5] = m[3] - m[2];
-//     }
-
-
-
-//     // drawWorld(m_testWorld);
-//     m_testWorld->draw(m_width, m_height);
-
-
-//     // ##################################
-//     // ##########   Particle   ##########
-//     // ##################################
-
-//     /*
-//         Start Draw particle
-//     */
-//     {
-//         glDepthMask(GL_FALSE);
-//         m_myFirstParticle->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
-//         m_myFirstParticleSystem->Draw(*m_testWorld->camera(), this->m_width, this->m_height);
-//         glDepthMask(GL_TRUE);
-//     }
-
-//     /*
-//        End Draw particle
-//     */
-
-//     // ##################################
-//     // ########   End Particle   ########
-//     // ##################################
-
-
-
-
-//     // glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
-//     // glViewport(0, 0, this->m_width, this->m_height);
-//     // renderMainBuffer();
-// }
-
 void FuryRenderer::createPBRTextures(const QString& _cubemapHdrPath,
                                      GLuint* _envCubemap,
                                      GLuint* _irradianceMap,
@@ -1471,49 +1361,6 @@ void FuryRenderer::createRenderBuffer(GLuint* _frameBuffer,
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_renderTexture, 0);
-}
-
-void FuryRenderer::renderMainBuffer()
-{
-    static Shader* shader = nullptr;
-    static GLuint vaoDebugTexturedRect = 0;
-
-    if (shader == nullptr)
-    {
-        shader = new Shader("bufferShader.vs", "bufferShader.fs");
-
-        GLfloat buffer_vertices[] = {
-        -1.0f, -1.0f, 0.0f, 0.0f,
-         1.0f, -1.0f, 1.0f, 0.0f,
-         1.0f,  1.0f, 1.0f, 1.0f,
-
-        -1.0f, -1.0f, 0.0f, 0.0f,
-         1.0f,  1.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, 0.0f, 1.0f,
-        };
-
-        GLuint vboDebugTexturedRect;
-        glGenVertexArrays(1, &vaoDebugTexturedRect);
-        glGenBuffers(1, &vboDebugTexturedRect);
-        glBindBuffer(GL_ARRAY_BUFFER, vboDebugTexturedRect);
-        glBindVertexArray(vaoDebugTexturedRect);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_vertices), buffer_vertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-        //normals
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
-        glBindVertexArray(0);
-    }
-
-    glActiveTexture(GL_TEXTURE0);
-    shader->use();
-    glBindTexture(GL_TEXTURE_2D, m_mainRenderTexture);
-    glBindVertexArray(vaoDebugTexturedRect);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 

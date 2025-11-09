@@ -34,7 +34,7 @@ public:
     Particle(const glm::vec3& _position, double _scale, const glm::vec3& _speed,
              const glm::vec4& _color, const QString& _textureName, float _lifeTime, Shader *_shader);
     void Tick(float _dt);
-    void Draw(Camera& _camera, int& _width, int& _height);
+    void Draw(Camera& _camera, int _width, int _height);
     void Draw(Shader& _shader);
     bool Is_Dead();
 

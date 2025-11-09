@@ -1,17 +1,16 @@
 #include "FuryOpenGLWidget.h"
 
 #include "Shader.h"
-#include "FuryTexture.h"
-#include "FuryTextureCache.h"
 #include "Logger/FuryLogger.h"
 #include "Widgets/FuryRenderer.h"
 
 #include <QTime>
+#include <QOpenGLFramebufferObject>
 
 
 FuryOpenGLWidget::FuryOpenGLWidget(QWidget *_parent) :
     QOpenGLWidget(_parent),
-    m_loadingTextureCache(nullptr)
+    m_framebuffer(nullptr)
 {
     setFocusPolicy(Qt::StrongFocus);
     initConnections();
@@ -19,6 +18,12 @@ FuryOpenGLWidget::FuryOpenGLWidget(QWidget *_parent) :
 
 FuryOpenGLWidget::~FuryOpenGLWidget()
 {
+    if (m_framebuffer != nullptr)
+    {
+        delete m_framebuffer;
+        m_framebuffer = nullptr;
+    }
+
     delete FuryRenderer::instance();
 }
 
@@ -31,11 +36,18 @@ void FuryOpenGLWidget::initializeGL()
 void FuryOpenGLWidget::resizeGL(int _width, int _height)
 {
     glViewport(0, 0, _width, _height);
+
+    if (m_framebuffer != nullptr)
+    {
+        delete m_framebuffer;
+    }
+
+    m_framebuffer = FuryRenderer::instance()->createFramebuffer(_width, _height);
 }
 
 void FuryOpenGLWidget::paintGL()
 {
-    GLuint t = FuryRenderer::instance()->renderMainScene(width(), height());
+    FuryRenderer::instance()->renderMainScene(m_framebuffer);
 
     makeCurrent();
 
@@ -78,7 +90,7 @@ void FuryOpenGLWidget::paintGL()
 
     m_shader->use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, t);
+    glBindTexture(GL_TEXTURE_2D, m_framebuffer->texture());
     glBindVertexArray(m_vaoDebugTexturedRect);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

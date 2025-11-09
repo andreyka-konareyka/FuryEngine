@@ -37,8 +37,7 @@ class QKeyEvent;
 class QMouseEvent;
 class QOpenGLContext;
 class QOffscreenSurface;
-
-#include <QOpenGLWidget>
+class QOpenGLFramebufferObject;
 
 
 //! Основной класс рендера
@@ -65,7 +64,19 @@ public:
      */
     GLuint renderTestScene(const QString& _materialName, int _width, int _height);
 
-    GLuint renderMainScene(int _width, int _height);
+    /*!
+     * \brief Отрисовка главной сцены
+     * \param[in] _framebuffer - Фреймбуфер
+     */
+    void renderMainScene(QOpenGLFramebufferObject* _framebuffer);
+
+    /*!
+     * \brief Создание фреймбуфера
+     * \param[in] _width - Ширина
+     * \param[in] _height - Высота
+     * \return Возвращает созданный фреймбуфер
+     */
+    QOpenGLFramebufferObject* createFramebuffer(int _width, int _height);
 
     /*!
      * \brief Создание текстур окружения для PBR
@@ -152,12 +163,8 @@ private:
     float lastY;
     QMap<int, bool> m_keys;
 
-    // Mouse enable
-    //bool mouse_enable = true;
-
     void init();
     void InitGL();
-    // void render();
 
     /*!
      * \brief Отрисовка мира
@@ -234,8 +241,6 @@ private:
                             GLuint* _renderBuffer,
                             GLuint* _renderTexture,
                             int _width, int _height);
-    //! Рендер отрисованной сцены на экран из буфера
-    void renderMainBuffer();
 
 
     FuryObject* m_sunVisualBox;
@@ -277,10 +282,6 @@ private:
     float m_shadowCamDistance = 37;
 
     bool m_needDebugRender;
-
-    GLuint m_mainFrameBuffer = 0;
-    GLuint m_mainRenderBuffer = 0;
-    GLuint m_mainRenderTexture = 0;
 
     GLuint m_testFrameBuffer = 0;
     GLuint m_testRenderBuffer = 0;

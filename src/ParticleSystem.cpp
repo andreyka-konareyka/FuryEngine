@@ -81,7 +81,7 @@ void ParticleSystem::Tick(float deltaTime) {
 
 }
 
-void ParticleSystem::Draw(Camera& camera, int& width, int& height) {
+void ParticleSystem::Draw(Camera& camera, int width, int height) {
     // так как объекты полупрозрачные, мы их сортируем по отдалению от камеры и рисуем
 
     QList<QPair<float, Particle*>> sorted;
