@@ -280,8 +280,8 @@ void FuryRenderer::renderMainScene(QOpenGLFramebufferObject* _framebuffer)
         Start Draw particle
     */
     {
-        glDepthMask(GL_FALSE);
         m_myFirstParticle->Draw(*m_testWorld->camera(), _framebuffer->width(), _framebuffer->height());
+        glDepthMask(GL_FALSE);
         m_myFirstParticleSystem->Draw(*m_testWorld->camera(), _framebuffer->width(), _framebuffer->height());
         glDepthMask(GL_TRUE);
     }
