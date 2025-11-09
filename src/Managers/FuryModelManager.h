@@ -6,12 +6,12 @@
 #include <QMap>
 #include <QQueue>
 #include <QMutex>
-#include <QObject>
+#include <QThread>
 #include <QString>
 
 
 //! Класс менеджера моделей
-class FuryModelManager : public QObject
+class FuryModelManager : public QThread
 {
     Q_OBJECT
 
@@ -85,7 +85,7 @@ private:
     FuryModelManager& operator=(const FuryModelManager&) = delete;
 
     //! Бесконечный цикл
-    void infiniteLoop();
+    void run() override;
 
     //! Нужно ли останавливать работу вспомогательного потока с вечным циклом
     bool m_needStop;

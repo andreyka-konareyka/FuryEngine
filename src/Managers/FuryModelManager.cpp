@@ -7,18 +7,19 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QFileInfo>
+#include <QEventLoop>
+
 
 FuryModelManager* FuryModelManager::s_instance = nullptr;
 
 
 FuryModelManager::FuryModelManager() :
-    QObject(),
+    QThread(),
     m_needStop(false),
     m_stopped(false)
 {
     Debug(ru("Создание менеджера моделей"));
-
-    std::thread(&FuryModelManager::infiniteLoop, this).detach();
+    start();
 }
 
 FuryModelManager::~FuryModelManager()
@@ -161,8 +162,10 @@ QString FuryModelManager::pathByName(const QString &_name) const
     return pathIter.value();
 }
 
-void FuryModelManager::infiniteLoop()
+void FuryModelManager::run()
 {
+    QEventLoop eventLoop;
+
     while (!m_needStop)
     {
         while (!m_modelLoadQueue.isEmpty())
@@ -183,6 +186,7 @@ void FuryModelManager::infiniteLoop()
             emit modelLoadedSignal();
         }
 
+        eventLoop.processEvents();
         QThread::msleep(16); // (1000 / 60)
     }
 

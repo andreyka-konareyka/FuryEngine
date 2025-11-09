@@ -1,11 +1,8 @@
 #include "FuryLogger.h"
 
-#include <thread>
-#include <iomanip>
-
-#include <QDateTime>
 #include <QThread>
 #include <QString>
+#include <QDateTime>
 
 
 FuryLogger* FuryLogger::s_instance = nullptr;

@@ -9,19 +9,20 @@
 #include <QFileInfo>
 #include <QString>
 #include <QThread>
+#include <QEventLoop>
+
 
 FuryTextureManager* FuryTextureManager::s_instance = nullptr;
 
 
 FuryTextureManager::FuryTextureManager() :
-    QObject(),
+    QThread(),
     m_needStop(false),
     m_stopped(false)
 {
     Debug(ru("Создание текстурного менеджера"));
-
-    std::thread(&FuryTextureManager::infiniteLoop, this).detach();
     m_emptyTexture.setReady();
+    start();
 }
 
 FuryTextureManager::~FuryTextureManager()
@@ -209,8 +210,10 @@ QStringList FuryTextureManager::allTextureNames() const
 
 
 
-void FuryTextureManager::infiniteLoop()
+void FuryTextureManager::run()
 {
+    QEventLoop eventLoop;
+
     while (!m_needStop)
     {
         while (!m_textureLoadQueue.isEmpty())
@@ -239,6 +242,7 @@ void FuryTextureManager::infiniteLoop()
             emit texturesReadyToBindSignal();
         }
 
+        eventLoop.processEvents();
         QThread::msleep(16); // (1000 / 60)
     }
 

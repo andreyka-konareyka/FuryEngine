@@ -2,7 +2,6 @@
 
 #include "FuryLearningScript.h"
 
-#include <QDebug>
 #include <QDir>
 
 #include <string>

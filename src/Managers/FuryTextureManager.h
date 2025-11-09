@@ -12,11 +12,11 @@
 #include <QString>
 #include <QQueue>
 #include <QMutex>
-#include <QObject>
+#include <QThread>
 
 
 //! Класс менеджера текстур
-class FuryTextureManager : public QObject
+class FuryTextureManager : public QThread
 {
     Q_OBJECT
 
@@ -123,7 +123,7 @@ private:
     * \brief Бесконечный цикл подгрузки текстур с диска.
     * Используется в отдельном потоке
     */
-    void infiniteLoop();
+    void run() override;
 
     //! Признак, надо ли завершить поток загрузки текстур
     bool m_needStop;
