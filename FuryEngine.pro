@@ -46,6 +46,7 @@ SOURCES += \
     src/Camera.cpp \
     src/CarObject.cpp \
     src/FuryLearningScript.cpp \
+    src/FuryModelCache.cpp \
     src/FuryObjectsFactory.cpp \
     src/FuryPhongMaterial.cpp \
     src/FuryTextureCache.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     src/Camera.h \
     src/CarObject.h \
     src/FuryLearningScript.h \
+    src/FuryModelCache.h \
     src/FuryObjectsFactory.h \
     src/FuryPhongMaterial.h \
     src/FuryTextureCache.h \

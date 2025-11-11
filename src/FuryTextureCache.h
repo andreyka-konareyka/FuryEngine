@@ -32,9 +32,14 @@ public:
     const FuryTexture& texture() const;
 
 private slots:
+    /*!
+     * \brief Слот перезапроса текстуры у менеджера
+     * \param[in] _textureName - Название текстуры
+     */
     void requestTextureSlot(const QString& _textureName);
 
 private:
+    //! Инициализация соединений сигналов и слотов
     void initConnections();
 
 private:

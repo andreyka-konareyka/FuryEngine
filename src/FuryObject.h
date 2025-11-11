@@ -20,6 +20,7 @@ class Camera;
 class Shader;
 class FuryWorld;
 class FuryModel;
+class FuryModelCache;
 
 namespace reactphysics3d
 {
@@ -217,8 +218,7 @@ public:
      * \brief Установка названия модели для ототбражения
      * \param[in] _modelName - Название модели для отображения
      */
-    inline void setModelName(const QString& _modelName)
-    { m_modelName = _modelName; }
+    void setModelName(const QString& _modelName);
 
     /*!
      * \brief Получить название модели для отображения
@@ -226,6 +226,13 @@ public:
      */
     inline const QString& modelName() const
     { return m_modelName; }
+
+    /*!
+     * \brief Кэш модели
+     * \return Возвращает кэш модели
+     */
+    inline FuryModelCache* modelCache() const
+    { return m_modelCache; }
 
     /*!
      * \brief Установка трансформации для модели
@@ -362,6 +369,8 @@ private:
     FuryWorld* m_world;
     //! Название модели для отображения
     QString m_modelName;
+    //! Кэш модели
+    FuryModelCache* m_modelCache;
     //! Трансформация для модели
     glm::mat4 m_modelTransform;
     //! Название материала объекта

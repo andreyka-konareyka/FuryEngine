@@ -89,23 +89,25 @@ void FuryModelManager::addModel(const QString &_path, const QString &_name)
         QMutexLocker mutexLocker3(&m_nameMutex);
         m_nameToPath.insert(_name, modelPath);
     }
+
+    emit addModelSignal(_name);
 }
 
-FuryModel *FuryModelManager::modelByName(const QString &_name)
+const FuryModel &FuryModelManager::modelByName(const QString &_name)
 {
     QMutexLocker mutexLocker(&m_nameMutex);
     QMap<QString, QString>::ConstIterator pathIter = m_nameToPath.find(_name);
 
     if (pathIter == m_nameToPath.constEnd() || pathIter.value().isEmpty())
     {
-        return &m_emptyModel;
+        return m_emptyModel;
     }
 
     mutexLocker.unlock();
     return modelByPath(pathIter.value());
 }
 
-FuryModel *FuryModelManager::modelByPath(const QString &_path)
+const FuryModel &FuryModelManager::modelByPath(const QString &_path)
 {
     QMutexLocker mutexLocker(&m_nameMutex);
     QString modelPath = QFileInfo(_path).absoluteFilePath();
@@ -113,10 +115,10 @@ FuryModel *FuryModelManager::modelByPath(const QString &_path)
 
     if (modelIter == m_models.constEnd())
     {
-        return &m_emptyModel;
+        return m_emptyModel;
     }
 
-    return modelIter.value();
+    return *modelIter.value();
 }
 
 void FuryModelManager::loadModelPart()
@@ -128,6 +130,17 @@ void FuryModelManager::loadModelPart()
         FuryModel* model = m_modelBindQueue.dequeue();
 
         model->setupMesh();
+
+        QMapIterator<QString, QString> nameToPathIter(m_nameToPath);
+        while (nameToPathIter.hasNext())
+        {
+            nameToPathIter.next();
+
+            if (nameToPathIter.value() == model->path())
+            {
+                emit editModelSignal(nameToPathIter.key());
+            }
+        }
 
         Debug(ru("Загружена модель: (%1)").arg(model->path().section('/', -1, -1)));
     }

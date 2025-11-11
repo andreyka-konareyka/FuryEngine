@@ -23,7 +23,5 @@ private:
     Shader particle_shader;
 
     unsigned int particleVBO, particleEBO, particleVAO;
-
-    void SetupParticleMesh();
 };
 #endif // PARTICLESYSTEM_H

@@ -48,7 +48,7 @@ bool Camera::sphereInFrustum(FuryObject *_object)
     const glm::vec3& minp = _object->worldPosition();
     const glm::vec3& scales = _object->scales();
     float maxScale = std::max(std::max(scales.x, scales.y), scales.z);
-    float radius = modelManager->modelByName(_object->modelName())->modelRadius();
+    float radius = modelManager->modelByName(_object->modelName()).modelRadius();
     radius *= maxScale;
 
     for (int i = 0; i < 6; i++)

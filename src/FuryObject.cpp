@@ -1,6 +1,7 @@
 #include "FuryObject.h"
 
 #include "FuryWorld.h"
+#include "FuryModelCache.h"
 
 #include <reactphysics3d/reactphysics3d.h>
 
@@ -33,6 +34,7 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position, FuryObject
     m_scales(glm::vec3(1, 1, 1)),
     m_physicsBody(nullptr),
     m_world(_world),
+    m_modelCache(new FuryModelCache()),
     m_modelTransform(1),
     m_textureScales(1, 1),
     m_visible(true),
@@ -69,6 +71,12 @@ FuryObject::FuryObject(FuryWorld *_world, const glm::vec3& _position, FuryObject
 
 FuryObject::~FuryObject()
 {
+    if (m_modelCache != nullptr)
+    {
+        delete m_modelCache;
+        m_modelCache = nullptr;
+    }
+
     m_world->physicsWorld()->destroyRigidBody(m_physicsBody);
 }
 
@@ -180,6 +188,12 @@ glm::mat4 FuryObject::getOpenGLTransform() const
                      rawMatrix[4], rawMatrix[5], rawMatrix[6], rawMatrix[7],
                      rawMatrix[8], rawMatrix[9], rawMatrix[10], rawMatrix[11],
             rawMatrix[12], rawMatrix[13], rawMatrix[14], rawMatrix[15]);
+}
+
+void FuryObject::setModelName(const QString &_modelName)
+{
+    m_modelName = _modelName;
+    m_modelCache->setModelName(m_modelName);
 }
 
 QJsonObject FuryObject::toJson() const

@@ -2,10 +2,11 @@
 
 #include "Camera.h"
 #include "FuryMesh.h"
+#include "FuryModel.h"
 #include "FuryObject.h"
+#include "FuryModelCache.h"
 #include "Logger/FuryLogger.h"
 #include "FuryPbrMaterial.h"
-#include "Managers/FuryModelManager.h"
 #include "Managers/FuryTextureManager.h"
 #include "Managers/FuryMaterialManager.h"
 #include "Widgets/FuryRenderer.h"
@@ -316,7 +317,6 @@ void FuryWorld::fillDrawComponents(QVector<QPair<FuryObject *, FuryMesh *> > &_s
                                    QVector<QPair<FuryObject *, FuryMesh *> > &_transparentComponents)
 {
     FuryMaterialManager* materialManager = FuryMaterialManager::instance();
-    FuryModelManager* modelManager = FuryModelManager::instance();
 
 
     QVector<FuryObject*> testWorldObjects = getRootObjects();
@@ -338,14 +338,14 @@ void FuryWorld::fillDrawComponents(QVector<QPair<FuryObject *, FuryMesh *> > &_s
             continue;
         }
 
-        FuryModel* model = modelManager->modelByName(obj->modelName());
+        const FuryModel& model = obj->modelCache()->model();
         FuryPbrMaterial* objMat = nullptr;
         if (materialManager->materialExist(obj->materialName()))
         {
             objMat = dynamic_cast<FuryPbrMaterial*>(materialManager->materialByName(obj->materialName()));
         }
 
-        foreach (FuryMesh* mesh, model->meshes())
+        foreach (FuryMesh* mesh, model.meshes())
         {
             float opacity = 1;
 

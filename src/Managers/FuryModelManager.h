@@ -40,13 +40,13 @@ public:
      * \param[in] _name - Название модели
      * \return Возвращает модель
      */
-    FuryModel* modelByName(const QString& _name);
+    const FuryModel& modelByName(const QString& _name);
     /*!
      * \brief Получение модели по пути
      * \param[in] _path - Путь к файлу модели
      * \return Возвращает модель
      */
-    FuryModel* modelByPath(const QString& _path);
+    const FuryModel& modelByPath(const QString& _path);
 
     //! Загрузить часть моделей в OpenGL
     void loadModelPart();
@@ -68,6 +68,24 @@ public:
     QString pathByName(const QString& _name) const;
 
 signals:
+    /*!
+     * \brief Сигнал добавления модели
+     * \param[in] _name - Модель
+     */
+    void addModelSignal(const QString& _name);
+
+    /*!
+     * \brief Сигнал изменения модели
+     * \param[in] _name - Модель
+     */
+    void editModelSignal(const QString& _name);
+
+    /*!
+     * \brief Сигнал удаления модели
+     * \param[in] _name - Модель
+     */
+    void deleteModelSignal(const QString& _name);
+
     //! Сигнал, что какие-то модели готовы к подсоединению
     void modelLoadedSignal();
 

@@ -20,6 +20,7 @@ class ParticleSystem;
 class FuryMesh;
 class FuryWorld;
 class FuryObject;
+class FuryModelCache;
 class FuryModelManager;
 class FuryWorldManager;
 class FuryTextureCache;
@@ -275,6 +276,7 @@ private:
 
 
     CarObject* m_carObject = nullptr;
+    FuryModelCache* m_cubeModelCache;
 
     float m_shadowNear = 0.1f;
     float m_shadowPlane = 70.f;

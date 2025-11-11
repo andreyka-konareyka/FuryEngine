@@ -63,7 +63,7 @@ public:
      * \brief Получение радиуса сферы, в которую вписана модель
      * \return Возвращает радиус сферы
      */
-    inline float modelRadius()
+    inline float modelRadius() const
     {  return m_modelRadius; }
 
     /*!

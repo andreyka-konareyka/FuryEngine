@@ -8,6 +8,7 @@
 #include "Particle.h"
 #include "ParticleSystem.h"
 #include "FuryWorld.h"
+#include "FuryModelCache.h"
 #include "FuryTextureCache.h"
 #include "Logger/FuryLogger.h"
 #include "FuryLearningScript.h"
@@ -70,6 +71,7 @@ FuryRenderer::FuryRenderer(QObject *_parent) :
     m_shaderManager(FuryShaderManager::createInstance()),
     m_scriptManager(FuryScriptManager::createInstance()),
     m_loadingTextureCache(new FuryTextureCache("Logo")),
+    m_cubeModelCache(new FuryModelCache("cube")),
     m_needDebugRender(false),
     m_updateAccumulator(0),
 
@@ -116,6 +118,9 @@ FuryRenderer::~FuryRenderer()
 {
     Debug(ru("Удаление рендера"));
     s_instance = nullptr;
+
+    delete m_cubeModelCache;
+    m_cubeModelCache = nullptr;
 
     delete m_loadingTextureCache;
     m_loadingTextureCache = nullptr;
@@ -508,9 +513,6 @@ void FuryRenderer::drawWorld(FuryWorld *_world, int _width, int _height)
     static Shader* skyboxShader = new Shader("shaders/pbr/2.2.2.background.vs",
                                              "shaders/pbr/2.2.2.background.fs");
 
-    FuryModelManager* modelManager = FuryModelManager::instance();
-
-
     float perspective_near = 0.1f;
     float perspective_far = 300.f;
 
@@ -545,11 +547,11 @@ void FuryRenderer::drawWorld(FuryWorld *_world, int _width, int _height)
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, _world->envCubemap());
         // skybox cube
-        FuryModel* modelTest = modelManager->modelByName("cube");
-        if (!modelTest->meshes().isEmpty())
+        const FuryModel& modelTest = m_cubeModelCache->model();
+        if (!modelTest.meshes().isEmpty())
         {
             glDisable(GL_CULL_FACE);
-            modelTest->meshes()[0]->draw();
+            modelTest.meshes()[0]->draw();
             glEnable(GL_CULL_FACE);
         }
         glDepthFunc(GL_LESS); // set depth function back to default
@@ -578,8 +580,6 @@ void FuryRenderer::drawWorldDepthMap(FuryWorld *_world)
 {
     const unsigned int SHADOW_WIDTH = 1024 * 4;
     const unsigned int SHADOW_HEIGHT = 1024 * 4;
-
-    FuryModelManager* modelManager = FuryModelManager::instance();
 
     static Shader* simpleDepthShader = new Shader("simpleDepthShader.vs", "simpleDepthShader.fs");
     glm::mat4 lightSpaceMatrix = getLightSpaceMatrix(_world->camera(), _world->dirLightPosition());
@@ -612,14 +612,8 @@ void FuryRenderer::drawWorldDepthMap(FuryWorld *_world)
             continue;
         }
 
-        FuryModel* model = modelManager->modelByName(obj->modelName());
-
-        if (model == nullptr)
-        {
-            continue;
-        }
-
-        foreach (FuryMesh* mesh, model->meshes())
+        const FuryModel& model = obj->modelCache()->model();
+        foreach (FuryMesh* mesh, model.meshes())
         {
             meshesForRender.append(qMakePair(obj, mesh));
         }
@@ -658,11 +652,6 @@ void FuryRenderer::drawSelectedInEditor(FuryWorld *_world,
                                         const glm::mat4 &_projection,
                                         const glm::mat4 &_view)
 {
-    FuryMaterialManager* materialManager = FuryMaterialManager::instance();
-    FuryModelManager* modelManager = FuryModelManager::instance();
-    FuryShaderManager* shaderManager = FuryShaderManager::instance();
-
-
     QVector<FuryObject*> testWorldObjects = _world->getRootObjects();
 
     for (int i = 0; i < testWorldObjects.size(); ++i)
@@ -682,19 +671,17 @@ void FuryRenderer::drawSelectedInEditor(FuryWorld *_world,
             continue;
         }
 
-        FuryModel* model = modelManager->modelByName(obj->modelName());
-
-        if (obj->selectedInEditor() && (!model->meshes().isEmpty()))
+        const FuryModel& model = obj->modelCache()->model();
+        if (obj->selectedInEditor() && (!model.meshes().isEmpty()))
         {
-            FuryModel* debugModel = modelManager->modelByName("cube");
-
-            if (!shaderManager->containsShader(obj->shaderName()))
+            const FuryModel& debugModel = m_cubeModelCache->model();
+            if (!m_shaderManager->containsShader(obj->shaderName()))
             {
                 qDebug() << ru("Менеджер шейдеров не содержит шейдер") << obj->shaderName();
                 return;
             }
 
-            Shader* shader = shaderManager->shaderByName(obj->shaderName());
+            Shader* shader = m_shaderManager->shaderByName(obj->shaderName());
 
             if (shader == nullptr)
             {
@@ -741,8 +728,8 @@ void FuryRenderer::drawSelectedInEditor(FuryWorld *_world,
             modelMatrix = glm::scale(modelMatrix, glm::vec3(obj->scales().x,
                                                             obj->scales().y,
                                                             obj->scales().z));
-            glm::vec3 modelSizes = model->maxVertex() - model->minVertex();
-            glm::vec3 modelOffset = (model->maxVertex() + model->minVertex()) / 2.0f;
+            glm::vec3 modelSizes = model.maxVertex() - model.minVertex();
+            glm::vec3 modelOffset = (model.maxVertex() + model.minVertex()) / 2.0f;
             modelMatrix *= obj->modelTransform();
             modelMatrix = glm::scale(modelMatrix, glm::vec3(modelSizes.x,
                                                             modelSizes.y,
@@ -752,12 +739,12 @@ void FuryRenderer::drawSelectedInEditor(FuryWorld *_world,
             shader->setMat4("model", modelMatrix);
             shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
-            FuryMaterial* mat = materialManager->materialByName("debugMat");
+            FuryMaterial* mat = m_materialManager->materialByName("debugMat");
             mat->setShaderMaterial(shader);
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glLineWidth(5);
-            debugModel->meshes()[0]->draw();
+            debugModel.meshes()[0]->draw();
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             glLineWidth(1);
 
@@ -775,19 +762,16 @@ void FuryRenderer::drawComponent(FuryWorld *_world,
                                  const glm::mat4 &_view,
                                  const glm::mat4 &_lightSpaceMatrix)
 {
-    FuryMaterialManager* materialManager = FuryMaterialManager::instance();
-    FuryShaderManager* shaderManager = FuryShaderManager::instance();
-
     FuryObject* obj = _component.first;
     FuryMesh* mesh = _component.second;
 
-    if (!shaderManager->containsShader(obj->shaderName()))
+    if (!m_shaderManager->containsShader(obj->shaderName()))
     {
         qDebug() << ru("Менеджер шейдеров не содержит шейдер") << obj->shaderName();
         return;
     }
 
-    Shader* shader = shaderManager->shaderByName(obj->shaderName());
+    Shader* shader = m_shaderManager->shaderByName(obj->shaderName());
 
     if (shader == nullptr)
     {
@@ -847,13 +831,13 @@ void FuryRenderer::drawComponent(FuryWorld *_world,
     shader->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
 
     FuryMaterial* material = nullptr;
-    if (materialManager->materialExist(obj->materialName()))
+    if (m_materialManager->materialExist(obj->materialName()))
     {
-        material = materialManager->materialByName(obj->materialName());
+        material = m_materialManager->materialByName(obj->materialName());
     }
     else
     {
-        material = materialManager->materialByName(mesh->materialName());
+        material = m_materialManager->materialByName(mesh->materialName());
     }
 
     material->setShaderMaterial(shader);
